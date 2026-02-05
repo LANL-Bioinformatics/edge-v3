@@ -67,7 +67,7 @@ require('./edge-api/utils/passport')(passport)
 // APIs
 app.use('/api', indexRouter)
 // workflow APIs
-app.use('/workflow', indexWorkflowRouter)
+app.use('/api/workflow', indexWorkflowRouter)
 // API docs
 app.use(
   '/api-docs',

@@ -9,7 +9,10 @@ const path = require('path')
 const appServerDir = process.env.APP_SERVER_DIR
   ? process.env.APP_SERVER_DIR
   : __dirname
-const WORKFLOW_DATA_BASE_DIR = path.join(appServerDir, '../../workflows/data')
+const WORKFLOW_DATA_BASE_DIR = path.join(
+  appServerDir,
+  '../../../workflows/data',
+)
 
 const workflowConfig = {
   DATA_DIR: WORKFLOW_DATA_BASE_DIR,
