@@ -9,7 +9,12 @@ const path = require('path')
 const appServerDir = process.env.APP_SERVER_DIR
   ? process.env.APP_SERVER_DIR
   : __dirname
-const WORKFLOW_DATA_BASE_DIR = path.join(appServerDir, '../../workflows/data')
+const WORKFLOW_DATA_BASE_DIR = path.join(
+  appServerDir,
+  '../../../workflows/data',
+)
+const IO_BASE_DIR =
+  process.env.IO_BASE_DIR || path.join(appServerDir, ' ../../../io')
 
 const workflowConfig = {
   DATA_DIR: WORKFLOW_DATA_BASE_DIR,
@@ -28,6 +33,9 @@ const workflowConfig = {
     BIOAI_EXEC: process.env.BIOAI_EXEC || '/opt/bioai/pipeline/bioai_runner.py',
   },
   // Add more workflow-specific configuration settings here
+  // Directory to store KEGG viewer data.
+  KEGG_VIEWER_DIR:
+    process.env.KEGG_VIEWER_DIR || path.join(IO_BASE_DIR, 'opaver_web/data'),
 }
 
 module.exports = workflowConfig

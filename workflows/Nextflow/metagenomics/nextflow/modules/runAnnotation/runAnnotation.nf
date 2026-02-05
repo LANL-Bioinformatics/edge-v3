@@ -58,7 +58,7 @@ process prokkaAnnotate {
     def kingdom = kingdom.trim()
     def protein = protein.name == "NO_FILE" ? "" : "--protein ${settings["customProtein"]}"
     def hmmPrep = hmm.name == "NO_FILE2" ? "" : "hmmpress $hmm"
-    def hmm = hmm.name == "NO_FILE2" ? "" : "--hmms $hmm"
+    hmm = hmm.name == "NO_FILE2" ? "" : "--hmms $hmm"
     def evalue = settings["evalue"] == null ? "" : "--evalue ${settings["evalue"]}"
     def gcode = settings["gcode"] == null ? "" : "--gcode ${settings["gcode"]}"
     def locustag = settings["projName"] == null ? "" : "--locustag ${settings["projName"]}"
@@ -160,8 +160,8 @@ process keggPlots {
         mode: 'copy'
     )
     publishDir(
-        path: "${settings["keggViewerDir"]}"
-        mode: 'copy'
+        path: "${settings["keggViewerDir"]}",
+        mode: 'copy',
         pattern: "kegg_map/*"
     )
 

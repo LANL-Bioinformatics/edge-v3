@@ -116,7 +116,6 @@ const Main = (props) => {
 
     //add selected assembler inputs to main inputs
     if (workflow === 'assembly') {
-      // eslint-disable-next-line prettier/prettier
       selectedWorkflows[workflow].inputs = {
         ...selectedWorkflows[workflow].inputs,
         // eslint-disable-next-line prettier/prettier
@@ -125,7 +124,6 @@ const Main = (props) => {
     }
     //add selected annotateProgram inputs to main inputs
     if (workflow === 'annotation') {
-      // eslint-disable-next-line prettier/prettier
       selectedWorkflows[workflow].inputs = {
         ...selectedWorkflows[workflow].inputs,
         // eslint-disable-next-line prettier/prettier
@@ -134,7 +132,6 @@ const Main = (props) => {
     }
     //add readInputs to main inputs
     if (rawDataParams.inputs.source.value !== 'fasta' && workflow === 'taxonomy') {
-      // eslint-disable-next-line prettier/prettier
       selectedWorkflows[workflow].inputs = {
         ...selectedWorkflows[workflow].inputs,
         // eslint-disable-next-line prettier/prettier
@@ -143,7 +140,6 @@ const Main = (props) => {
     }
     //add genome inputs to main inputs
     if (workflow === 'phylogeny' && !selectedWorkflows[workflow].inputs['snpDBname'].value) {
-      // eslint-disable-next-line prettier/prettier
       selectedWorkflows[workflow].inputs = {
         ...selectedWorkflows[workflow].inputs,
         // eslint-disable-next-line prettier/prettier
@@ -152,7 +148,6 @@ const Main = (props) => {
     }
     //add optional inputs to main inputs
     if (workflow === 'refBased') {
-      // eslint-disable-next-line prettier/prettier
       selectedWorkflows[workflow].inputs = {
         ...selectedWorkflows[workflow].inputs,
         // eslint-disable-next-line prettier/prettier
@@ -164,16 +159,13 @@ const Main = (props) => {
     }
     //add optional inputs to main inputs
     if (workflow === 'geneFamily') {
-      // eslint-disable-next-line prettier/prettier
       if (selectedWorkflows[workflow].inputs['readsGeneFamily'].value) {
-        // eslint-disable-next-line prettier/prettier
         selectedWorkflows[workflow].inputs = {
           ...selectedWorkflows[workflow].inputs,
           // eslint-disable-next-line prettier/prettier
           ...selectedWorkflows[workflow].readsInputs
         }
       } else {
-        // eslint-disable-next-line prettier/prettier
         selectedWorkflows[workflow].inputs = {
           ...selectedWorkflows[workflow].inputs,
           // eslint-disable-next-line prettier/prettier
@@ -238,7 +230,7 @@ const Main = (props) => {
 
   useEffect(() => {
     function loadRefList() {
-      getData('/api/workflow/metag/reflist')
+      getData('/api/workflow/data/reflist')
         .then((data) => {
           return data.reflist.reduce(function (options, ref) {
             options.push({ value: ref, label: ref.replaceAll('_', ' ') })

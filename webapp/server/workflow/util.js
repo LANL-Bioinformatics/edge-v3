@@ -89,6 +89,29 @@ const generateNextflowWorkflowParams = async (projHome, projectConf, proj) => {
   if (projectConf.workflow.name === 'sra2fastq') {
     // download sra data to shared directory
     params.sraOutdir = config.IO.SRA_BASE_DIR
+  } else {
+    params.sraOutdir = config.IO.SRA_BASE_DIR
+    params.keggViewerDir = workflowConfig.KEGG_VIEWER_DIR
+    params.executorConfig =
+      nextflowConfigs.executor_config[config.NEXTFLOW.EXECUTOR]
+    params.moduleParams = nextflowConfigs.module_params
+    params.containerConfig = nextflowConfigs.container_config
+
+    if (projectConf.rawReads) {
+      if (projectConf.rawReads.paired) {
+        // if fastq input is paired-end
+        const inputFastq = []
+        const inputFastq2 = []
+        projectConf.rawReads.inputFiles.forEach(item => {
+          inputFastq.push(item.R1)
+          inputFastq2.push(item.R2)
+        })
+        params.inputFastq = inputFastq
+        params.inputFastq2 = inputFastq2
+      } else {
+        params.inputFastq = projectConf.rawReads.inputFiles
+      }
+    }
   }
   return params
 }

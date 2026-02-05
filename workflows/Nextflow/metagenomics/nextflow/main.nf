@@ -211,15 +211,15 @@ workflow {
     REPORT(
         baseSettings, 
         platform,
-        counts.ifEmpty{file("DNE")},
-        qcStats.ifEmpty{file("DNE1")},
-        qcReport.ifEmpty{file("DNE2")},
-        hostRemovalReport.ifEmpty{file("DNE3")},
-        rtaReports.ifEmpty{file("DNE4")}, 
-        ctaReport.ifEmpty{file("DNE5")},
-        contigStatsReport.ifEmpty{file("DNE6")},
-        contigPlots.ifEmpty{file("DNE7")},
-        annStats.ifEmpty{file("DNE8")},
-        alnStats.ifEmpty{file("DNE9")}
+        counts.ifEmpty{file("${projectDir}/nf_assets/NO_FILE")},
+        qcStats.ifEmpty{file("${projectDir}/nf_assets/NO_FILE2")},
+        qcReport.ifEmpty{file("${projectDir}/nf_assets/NO_FILE3")},
+        hostRemovalReport.ifEmpty{file("${projectDir}/nf_assets/NO_FILE4")},
+        rtaReports.ifEmpty{file("${projectDir}/nf_assets/NO_FILE5")}, 
+        ctaReport.ifEmpty{file("${projectDir}/nf_assets/NO_FILE6")},
+        contigStatsReport.ifEmpty{file("${projectDir}/nf_assets/NO_FILE7")},
+        contigPlots.ifEmpty{file("${projectDir}/nf_assets/NO_FILE8")},
+        annStats.ifEmpty{file("${projectDir}/nf_assets/NO_FILE9")},
+        alnStats.ifEmpty{file("${projectDir}/nf_assets/NO_FILEa")}
     )
 }
