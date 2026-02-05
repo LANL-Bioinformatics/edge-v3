@@ -1,0 +1,145 @@
+nextflow_workflow {
+
+    name "Test Workflow HOSTREMOVAL"
+    script "modules/hostRemoval/hostRemoval.nf"
+    workflow "HOSTREMOVAL"
+
+    test("PE Reads, Single Host") {
+
+        when {
+            params {
+                shared {
+                    outDir = "./testing_output"
+                    projName = "testHR"
+                }
+                hostRemoval {
+                    host = ["${projectDir}/test_data/HostRemoval/Homo_sapiens.GRCh38.dna.chromosome.1.fa.gz"]
+                    cpus = 4
+                }
+                
+            }
+            workflow {
+                """
+                input[0] = params.hostRemoval.plus(params.shared)
+                input[1] = "ILLUMINA"
+                input[2] = [file("${projectDir}/test_data/Illumina/Ecoli_10x.1.fastq"),file("${projectDir}/test_data/Illumina/Ecoli_10x.2.fastq")]
+                input[3] = file("${projectDir}/nf_assets/NO_FILE2")
+                """
+            }
+        }
+
+        then {
+            
+            assertAll(
+                {assert workflow.success},
+                {assert file(workflow.out.paired[0].find { file(it).name == "hostclean.1.fastq" }).exists()},
+                {assert file(workflow.out.paired[0].find { file(it).name == "hostclean.2.fastq" }).exists()},
+                {assert file(workflow.out.unpaired.find { file(it).name == "hostclean.unpaired.fastq" }).exists()}
+            )
+        }
+
+    }
+
+    test("SE Reads, Single Host") {
+
+        when {
+            params {
+                shared {
+                    outDir = "./testing_output"
+                    projName = "testHR"
+                }
+                hostRemoval {
+                    host = "${projectDir}/test_data/HostRemoval/Homo_sapiens.GRCh38.dna.chromosome.1.fa.gz"
+                    cpus = 4
+                }
+                
+            }
+            workflow {
+                """
+                input[0] = params.hostRemoval.plus(params.shared)
+                input[1] = "ILLUMINA"
+                input[2] = [file("${projectDir}/nf_assets/NO_FILE")]
+                input[3] = file("${projectDir}/test_data/Illumina/Ecoli_10x.1.fastq")
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                {assert workflow.success},
+                {assert file(workflow.out.unpaired.find { file(it).name == "hostclean.unpaired.fastq" }).exists()},
+            )
+        }
+
+    }
+
+    test("SE Reads, Multi Host") {
+
+        when {
+            params {
+                shared {
+                    outDir = "./testing_output"
+                    projName = "testHR"
+                }
+                hostRemoval {
+                    host = ["${projectDir}/test_data/HostRemoval/Homo_sapiens.GRCh38.dna.chromosome.1.fa.gz", "${projectDir}/test_data/HostRemoval/Homo_sapiens.GRCh38.dna.chromosome.2.fa.gz"]
+                    cpus = 4
+                }
+            }
+            workflow {
+                """
+                input[0] = params.hostRemoval.plus(params.shared)
+                input[1] = "ILLUMINA"
+                input[2] = [file("${projectDir}/nf_assets/NO_FILE")]
+                input[3] = file("${projectDir}/test_data/Illumina/Ecoli_10x.1.fastq")
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                {assert workflow.success},
+                {assert file(workflow.out.unpaired.find { file(it).name == "hostclean.unpaired.fastq" }).exists()},
+            )
+
+        }
+
+    }
+
+    test("PE Reads, Multi Host") {
+
+        when {
+            params {
+                shared {
+                    outDir = "./testing_output"
+                    projName = "testHR"
+                }
+                hostRemoval {
+                    host = ["${projectDir}/test_data/HostRemoval/Homo_sapiens.GRCh38.dna.chromosome.1.fa.gz","${projectDir}/test_data/HostRemoval/Homo_sapiens.GRCh38.dna.chromosome.2.fa.gz"]
+                    cpus = 4
+                }
+            }
+            workflow {
+                """
+                input[0] = params.hostRemoval.plus(params.shared)
+                input[1] = "ILLUMINA"
+                input[2] = [file("${projectDir}/test_data/Illumina/Ecoli_10x.1.fastq"),file("${projectDir}/test_data/Illumina/Ecoli_10x.2.fastq")]
+                input[3] = file("${projectDir}/nf_assets/NO_FILE2")
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                {assert workflow.success},
+                {assert file(workflow.out.paired[0].find { file(it).name == "hostclean.1.fastq" }).exists()},
+                {assert file(workflow.out.paired[0].find { file(it).name == "hostclean.2.fastq" }).exists()},
+                {assert file(workflow.out.unpaired.find { file(it).name == "hostclean.unpaired.fastq" }).exists()},
+            )
+              
+        }
+
+    }
+
+
+}

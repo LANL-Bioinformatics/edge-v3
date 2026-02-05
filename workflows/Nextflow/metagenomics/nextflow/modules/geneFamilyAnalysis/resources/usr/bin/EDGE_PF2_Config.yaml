@@ -1,0 +1,76 @@
+# Input and Output
+work_dir: /abs/path/to/PathoFact2  # Absolute path to the working directory
+samples_info: /abs/path/to/PathoFact2/list_of_samples.csv # Absolute path to list_of_samples.csv
+output_dir: <name> # Enter the name or full path of the output directory
+
+output_gene_fastas: True # Set to True if you want to output separated fasta files of proteins sequences with and without hits (VF, AMR, TOX).   
+
+# Workflows: Set to True or False depending on the analyses you want to run
+workflows:
+  Virulence_Factor: True  # Set to True to detect virulence factors
+  AMR_genes: False  # Set to True to detect antimicrobial resistance genes
+  Toxins: False # Set to True to detect toxins
+  BGC: False # Set to True to detect biosynthetic gene clusters
+
+# Clustering: Parameters for mmseqs2 clustering
+mmseqs_params: --remove-tmp-files 1 -c 1 --min-seq-id 1 --cov-mode 0 --cluster-mode 2  # Customize clustering parameters if needed
+
+#BGC
+pyrodigal: 
+  extra_params: "-m --no-stop-codon" # Set parameters for Pyrodigal-gv gene prediction (others than -p meta -f gbk). With parameters "-m --no-stop-codon" predicted proteins are the same as in GenoMad, where -m Treat runs of N as masked sequence; don't build genes across them; and --no-stop-codon disables translation of stop codons into star characters (*) for complete genes.
+ 
+antismash:
+  by_chunks: False # Set to True for chunking large datasets to reduce memory usage
+  chunks: 10000 # Number of sequences per chunk (adjust based on your dataset size)
+  params:  --cb-general --minlength 1000 --skip-zip-file -t bacteria --genefinding-tool none #Taxonomic classification of input sequence, options bacteria or fungi.
+  database: /abs/path/to/miniforge3/envs/antismash_env/lib/python3.9/site-packages/antismash/databases
+
+# Mobile Genetic Elements (MGE): Contigs as input
+genomad:
+  params: --cleanup --conservative --disable-nn-classification # Parameters for Genomad, adjust as needed (e.g., --disable-nn-classification)
+  db: /bin/genomad/genomad_db  # Path to Genomad database
+
+# Antimicrobial Resistance (AMR)
+DeepARG:
+  params: --min-prob 0.7  # Minimum probability threshold for DeepARG predictions
+  database: /abs/path/to/deeparg_db # Path to DeepARG database
+
+amrfinder:
+  params: ""  # Add additional parameters for AMRFinder if needed (e.g., "--plus")
+
+rgi:
+  params: --clean -a DIAMOND  # Parameters for RGI, adjust according to your system
+
+# Toxins and Virulence Factors
+hmmer:
+  tox_params: 40  # Bitscore threshold for toxin annotation
+  tox_hmm: /bin/PathoFact2/DATABASES/HMM/TOX_CDD.hmm  
+  VF_params: 40  # Bitscore threshold for virulence factor annotation
+  VF_hmm: /bin/PathoFact2/DATABASES/HMM/virulence_factors_CDD.hmm 
+  
+#Information about Protein domains
+CDD_file: /bin/PathoFact2/DATABASES/cddid_all.tbl  #to be included into PathoFact v2 databases
+
+# Machine Learning Models
+Machine_learning:
+  model_vf: /bin/PathoFact2/DATABASES/Models/VF  # Path to the latest virulence factor model
+  threshold_vf: 0.9  # Probability threshold for virulence factor predictions
+  model_tox: /bin/PathoFact2/DATABASES/Models/TOX # Path to the latest toxin model
+  threshold_tox: 0.8  # Probability threshold for toxin predictions
+
+# Optional: SignalP for protein signal peptide prediction
+SignalP:
+  status: False # Set to True to enable SignalP prediction
+  by_chunks: False  # Set to True for chunking large datasets to reduce memory usage
+  chunks: 100000  # Number of sequences per chunk (adjust based on your dataset size)
+  params: --organism other --format none --mode fast  # SignalP parameters, adjust as needed
+  model_dir: /abs/path/to/signalp6_fast/signalp-6-package/models/  # Path to SignalP6 models
+
+# HPC Performance Settings
+performance:  
+  Small_jobs:
+    memory_per_cpu: 1750  # Memory per CPU (MB) for smaller jobs
+    threads: 10 # Number of threads for small jobs
+  Big_jobs:
+    memory_per_cpu: 1750  # Memory per CPU (MB) for larger jobs
+    threads: 22  # Number of threads for big jobs

@@ -1,0 +1,68 @@
+{
+    "Only Download Unique Accessions": {
+        "content": [
+            {
+                "0": [
+                    
+                ],
+                "1": [
+                    [
+                        "SRR29462562.fastq.gz:md5,31506ee0f339cb6398dd326d5cb23b77"
+                    ]
+                ],
+                "2": [
+                    "ILLUMINA"
+                ],
+                "paired": [
+                    
+                ],
+                "platform": [
+                    "ILLUMINA"
+                ],
+                "unpaired": [
+                    [
+                        "SRR29462562.fastq.gz:md5,31506ee0f339cb6398dd326d5cb23b77"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.4"
+        },
+        "timestamp": "2025-06-30T19:48:46.485591"
+    },
+    "Basic workflow": {
+        "content": [
+            {
+                "0": [
+                    
+                ],
+                "1": [
+                    [
+                        "SRR29462562.fastq.gz:md5,31506ee0f339cb6398dd326d5cb23b77"
+                    ]
+                ],
+                "2": [
+                    "ILLUMINA"
+                ],
+                "paired": [
+                    
+                ],
+                "platform": [
+                    "ILLUMINA"
+                ],
+                "unpaired": [
+                    [
+                        "SRR29462562.fastq.gz:md5,31506ee0f339cb6398dd326d5cb23b77"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.4"
+        },
+        "timestamp": "2025-06-30T19:48:06.775801"
+    }
+}

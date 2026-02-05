@@ -1,0 +1,213 @@
+    //module parameters -- passed directly into subworkflows according to best practices
+    //these are the default values
+    shared {
+        inputFastq = <% if(typeof inputFastq !== 'undefined') { %><%- JSON.stringify(inputFastq) %><% } else { %>[]<%} %>
+        inputFastq2 = <% if(typeof inputFastq2 !== 'undefined') { %><%- JSON.stringify(inputFastq2) %><% } else { %>[]<%} %>
+        pairedFile = <% if(typeof paired !== 'undefined') { %><%= paired %><% } else { %>false<%} %>
+        inputContigs = <% if(typeof inputFasta !== 'undefined') { %>"<%= inputFasta %>"<% } else { %>"${projectDir}/nf_assets/NO_FILE3"<%} %>
+        assembledContigs = "${projectDir}/nf_assets/NO_FILE3" //contigs provided to bypass assembly
+        projName = "<%= project %>"
+        fastqSource = <% if(typeof seqPlatform !== 'undefined') { %>"<%= seqPlatform %>"<% } else { %>null<%} %>
+    }
+
+    sra2fastq {
+        accessions =  <% if(typeof accessions !== 'undefined') { %><%- JSON.stringify(accessions) %><% } else { %>[]<%} %>
+    }
+    
+    faqcs {
+        trimQual = <% if(typeof trimQual !== 'undefined') { %><%= trimQual %><% } else { %>20<%} %>
+        trim5end = <% if(typeof trim5end !== 'undefined') { %><%= trim5end %><% } else { %>0<%} %>
+        trim3end = <% if(typeof trim3end !== 'undefined') { %><%= trim3end %><% } else { %>0<%} %>
+        trimAdapter = <% if(typeof trimAdapter !== 'undefined') { %><%= trimAdapter %><% } else { %>false<%} %>
+        trimPolyA = <% if(typeof trimPolyA !== 'undefined') { %><%= trimPolyA %><% } else { %>false<%} %>
+        artifactFile = <% if(typeof artifactFile !== 'undefined' && artifactFile) { %>"<%= artifactFile %>"<% } else { %>"${projectDir}/nf_assets/NO_FILE3"<%} %>
+        minLen = <% if(typeof minLen !== 'undefined') { %><%= minLen %><% } else { %>50<%} %>
+        avgQual = <% if(typeof avgQual !== 'undefined') { %><%= avgQual %><% } else { %>0<%} %>
+        numN = <% if(typeof numN !== 'undefined') { %><%= numN %><% } else { %>2<%} %>
+        filtLC = <% if(typeof filtLC !== 'undefined') { %><%= filtLC %><% } else { %>0.85<%} %>
+        filtPhiX = <% if(typeof filtPhiX !== 'undefined') { %><%= filtPhiX %><% } else { %>false<%} %>
+        htmlreport = true
+    }
+
+    hostRemoval {
+        host = ["${projectDir}/nf_assets/NO_FILE3"]
+        similarity = 90
+        bwaMemOptions = null
+    }
+    
+    assembly {
+        //assemblers: IDBA_UD, SPAdes, Unicycler, Megahit, LRASM
+        assembler = <% if(typeof assembler !== 'undefined') { %>"<%= assembler %>"<% } else { %>"IDBA_UD"<%} %>
+        minContigSize = <% if(typeof minContigSize !== 'undefined') { %><%= minContigSize %><% } else { %>200<%} %>
+        
+        idba{
+            maxK = <% if(typeof idba_maxK !== 'undefined') { %><%= idba_maxK %><% } else { %>null<%} %>
+            minK = <% if(typeof idba_minK !== 'undefined') { %><%= idba_minK %><% } else { %>31<%} %>
+            step = <% if(typeof idba_step !== 'undefined') { %><%= idba_step %><% } else { %>20<%} %>
+        }
+        spades {
+            pacbio = <% if(typeof spades_pacbio !== 'undefined' && spades_pacbio) { %>"<%= spades_pacbio %>"<% } else { %>"${projectDir}/nf_assets/NO_FILE3"<%} %>
+            nanopore = <% if(typeof spades_nanopore !== 'undefined' && spades_nanopore) { %>"<%= spades_nanopore %>"<% } else { %>"${projectDir}/nf_assets/NO_FILE4"<%} %>
+            algorithm = <% if(typeof spades_algorithm !== 'undefined') { %>"<%= spades_algorithm %>"<% } else { %>null<%} %>
+        }
+        megahit {
+            preset = <% if(typeof megahit_preset !== 'undefined') { %>"<%= megahit_preset %>"<% } else { %>null<%} %>
+        }
+        unicycler {
+            longreads = <% if(typeof Unicycler_longreads !== 'undefined' && Unicycler_longreads) { %>"<%= Unicycler_longreads %>"<% } else { %>"${projectDir}/nf_assets/NO_FILE3"<%} %>
+            minLongReads = <% if(typeof Unicycler_minLongReads !== 'undefined') { %><%= Unicycler_minLongReads %><% } else { %>2000<%} %>
+            bridgingMode = <% if(typeof Unicycler_bridgingMode !== 'undefined') { %>"<%= Unicycler_bridgingMode %>"<% } else { %>"normal"<%} %>
+        }
+        lrasm {
+            preset = <% if(typeof Lrasm_preset !== 'undefined') { %>"<%= Lrasm_preset %>"<% } else { %>null<%} %>
+            algorithm = <% if(typeof Lrasm_algorithm !== 'undefined') { %>"<%= Lrasm_algorithm %>"<% } else { %>null<%} %>
+            ec = <% if(typeof Lrasm_ec !== 'undefined') { %><%= Lrasm_ec %><% } else { %>false<%} %>
+            numConsensus = <% if(typeof Lrasm_numConsensus !== 'undefined') { %><%= Lrasm_numConsensus %><% } else { %>null<%} %>
+        }
+    }
+    
+    r2c {
+        r2c_aligner = <% if(typeof aligner !== 'undefined') { %>"<%= aligner %>"<% } else { %>"bwa"<%} %>
+        r2c_aligner_options = <% if(typeof aligner_options !== 'undefined') { %>"<%= aligner_options %>"<% } else { %>""<%} %>
+        r2g_max_clip = null
+        extractUnmapped = <% if(typeof extractUnmapped !== 'undefined') { %><%= extractUnmapped %><% } else { %>false<%} %>
+        rowLimit = null
+    }
+    
+    annotation {
+        contigSizeForAnnotation = <% if(typeof minContigSize !== 'undefined') { %><%= minContigSize %><% } else { %>700<%} %>
+        taxKingdom = <% if(typeof taxKingdom !== 'undefined') { %>"<%= taxKingdom %>"<% } else { %>"bacteria"<%} %>
+        //annotaters: prokka, ratt
+        annotateProgram = <% if(typeof annotateProgram !== 'undefined') { %>"<%= annotateProgram %>"<% } else { %>"prokka"<%} %> //default
+        customProtein = <% if(typeof customProtein !== 'undefined' && customProtein) { %>"<%= customProtein %>"<% } else { %>"${projectDir}/nf_assets/NO_FILE"<%} %> //setup for optional file pattern
+        customHMM = <% if(typeof customHMM !== 'undefined' && customHMM) { %>"<%= customHMM %>"<% } else { %>"${projectDir}/nf_assets/NO_FILE2"<%} %>
+        sourceGBK =  <% if(typeof sourceGBK !== 'undefined') { %>"<%= sourceGBK %>"<% } else { %>null<%} %>
+        evalue = <% if(typeof evalue !== 'undefined') { %><%= evalue %><% } else { %>0.000000001<%} %>
+        gcode = <% if(typeof gcode !== 'undefined') { %><%= gcode %><% } else { %>11<%} %>
+        keggView =  <% if(typeof keggView !== 'undefined') { %><%= keggView %><% } else { %>false<%} %>
+        keggViewerDir = <% if(typeof keggViewerDir !== 'undefined') { %>"<%= keggViewerDir %>"<% } else { %>"undefined"<%} %>
+    }
+
+    binning {
+        binningMinLength = <% if(typeof binningMinLength !== 'undefined') { %><%= binningMinLength %><% } else { %>1000<%} %>
+        binningMaxItr = <% if(typeof binningMaxItr !== 'undefined') { %><%= binningMaxItr %><% } else { %>50<%} %>
+        binningProb = <% if(typeof binningProb !== 'undefined') { %><%= binningProb %><% } else { %>0.9<%} %>
+        //107 or 40
+        binningMarkerSet = <% if(typeof binningMarkerSet !== 'undefined') { %><%= binningMarkerSet %><% } else { %>107<%} %>
+        binningAbundFile = <% if(typeof binningAbundFile !== 'undefined' && binningAbundFile) { %>"<%= binningAbundFile %>"<% } else { %>"${projectDir}/nf_assets/NO_FILE3"<%} %>
+        doCheckM = <% if(typeof doCheckM !== 'undefined') { %><%= doCheckM %><% } else { %>false<%} %>
+    }
+
+    readsTaxonomy {
+        splitTrimMinQ =  <% if(typeof splitTrimMinQ !== 'undefined') { %><%= splitTrimMinQ %><% } else { %>20<%} %>
+        //RTA tools: gottcha-genDB-b,gottcha-speDB-b,gottcha-strDB-b,gottcha-genDB-v,gottcha-speDB-v,gottcha-strDB-v,gottcha2-speDB-b,pangia,bwa,metaphlan4,kraken2,centrifuge,diamond
+        enabledTools = <% if(typeof enabledTools !== 'undefined') { %>"<%= enabledTools %>"<% } else { %>"gottcha-genDB-b,gottcha-speDB-b,gottcha-strDB-b,gottcha-genDB-v,gottcha-speDB-v,gottcha-strDB-v,gottcha2-speDB-b,pangia,bwa,metaphlan4,kraken2,centrifuge,diamond"<%} %>
+        baseDB = "/project/refdata/nextflow/database"
+        custom_gottcha_genDB_b =  <% if(typeof custom_gottcha_genDB_b !== 'undefined' && custom_gottcha_genDB_b) { %>"<%= custom_gottcha_genDB_b %>"<% } else { %>null<%} %>
+        custom_gottcha_speDB_b =  <% if(typeof custom_gottcha_speDB_b !== 'undefined' && custom_gottcha_speDB_b) { %>"<%= custom_gottcha_speDB_b %>"<% } else { %>null<%} %>
+        custom_gottcha_strDB_b =  <% if(typeof custom_gottcha_strDB_b !== 'undefined' && custom_gottcha_strDB_b) { %>"<%= custom_gottcha_strDB_b %>"<% } else { %>null<%} %>
+        custom_gottcha_genDB_v =  <% if(typeof custom_gottcha_genDB_v !== 'undefined' && custom_gottcha_genDB_v) { %>"<%= custom_gottcha_genDB_v %>"<% } else { %>null<%} %>
+        custom_gottcha_speDB_v =  <% if(typeof custom_gottcha_speDB_v !== 'undefined' && custom_gottcha_speDB_v) { %>"<%= custom_gottcha_speDB_v %>"<% } else { %>null<%} %>
+        custom_gottcha_strDB_v =  <% if(typeof  custom_gottcha_strDB_v !== 'undefined' &&  custom_gottcha_strDB_v) { %>"<%= custom_gottcha_strDB_v %>"<% } else { %>null<%} %>
+        custom_gottcha2_speDB_b = <% if(typeof  custom_gottcha2_speDB_b !== 'undefined' &&  custom_gottcha2_speDB_b) { %>"<%= custom_gottcha2_speDB_b %>"<% } else { %>"/project/refdata/nextflow/database/GOTTCHA2/RefSeq-r220_BAVxH-cg/gottcha_db.species.fna"<%} %>
+        custom_gottcha2_speDB_v =  <% if(typeof custom_gottcha2_speDB_v !== 'undefined' && custom_gottcha2_speDB_v) { %>"<%= custom_gottcha2_speDB_v %>"<% } else { %>null<%} %>
+        custom_gottcha2_genDB_v=  <% if(typeof custom_gottcha2_genDB_v !== 'undefined' && custom_gottcha2_genDB_v) { %>"<%= custom_gottcha2_genDB_v %>"<% } else { %>null<%} %>
+        custom_bwa_db= <% if(typeof custom_bwa_db !== 'undefined' && custom_bwa_db) { %>"<%= custom_bwa_db %>"<% } else { %>null<%} %>
+        custom_metaphlan_db= <% if(typeof custom_metaphlan_db !== 'undefined' && custom_metaphlan_db) { %>"<%= custom_metaphlan_db %>"<% } else { %>null<%} %>
+        custom_kraken_db= <% if(typeof custom_kraken_db !== 'undefined' && custom_kraken_db) { %>"<%= custom_kraken_db %>"<% } else { %>null<%} %>
+        custom_pangia_db= <% if(typeof custom_pangia_db !== 'undefined' && custom_pangia_db) { %>"<%= custom_pangia_db %>"<% } else { %>null<%} %>
+        custom_diamond_db= <% if(typeof custom_diamond_db !== 'undefined' && custom_diamond_db) { %>"<%= custom_diamond_db %>"<% } else { %>null<%} %>
+        custom_centrifuge_db = <% if(typeof custom_centrifuge_db !== 'undefined' && custom_centrifuge_db) { %>"<%= custom_centrifuge_db %>"<% } else { %>null<%} %>
+    }
+
+    contigsTaxonomy {
+        miccrDB = "/project/refdata/nextflow/database/miccrDB"
+        rowLimit = 3000
+    }
+
+    SMA {
+        database = "/project/refdata/nextflow/database/antiSMASH" //path to downloaded database location (download-antismash-databases --database-dir <DBPATH>)
+        smaTaxon = <% if(typeof smaTaxon !== 'undefined') { %>"<%= smaTaxon %>"<% } else { %>"bacteria"<%} %>
+        clusterblast = <% if(typeof clusterblast !== 'undefined') { %><%= clusterblast %><% } else { %>false<%} %>
+        subclusterblast = <% if(typeof subclusterblast !== 'undefined') { %><%= subclusterblast %><% } else { %>true<%} %>
+        knownclusterblast = <% if(typeof  knownclusterblast !== 'undefined') { %><%=  knownclusterblast %><% } else { %>true<%} %>
+        mibig = <% if(typeof mibig !== 'undefined') { %><%= mibig %><% } else { %>false<%} %> 
+        smcogs = false 
+        pfam2go = <% if(typeof pfam2go !== 'undefined') { %><%= pfam2go %><% } else { %>false<%} %>
+        asf = <% if(typeof asf !== 'undefined') { %><%= asf %><% } else { %>true<%} %> 
+        rre = <% if(typeof rre !== 'undefined') { %><%= rre %><% } else { %>true<%} %>
+        fullhmm = <% if(typeof fullhmm !== 'undefined') { %><%= fullhmm %><% } else { %>false<%} %>
+        tigrfam = <% if(typeof tigrfam !== 'undefined') { %><%= tigrfam %><% } else { %>false<%} %>
+        cassis = <% if(typeof cassis !== 'undefined') { %><%= cassis %><% } else { %>false<%} %> //only with fungi
+    }
+
+    refBased {
+        selectGenomes = <% if(typeof selectGenomes !== 'undefined') { %><%- JSON.stringify(selectGenomes) %><% } else { %>[]<%} %>
+        referenceGenomes = <% if(typeof referenceGenomes !== 'undefined') { %><%- JSON.stringify(referenceGenomes) %><% } else { %>[]<%} %>
+        //expects id_mapping.txt in the same directory as refDB
+        refDB = "/project/refdata/nextflow/database/bwa_index/NCBI-Bacteria-Virus.fna"
+        genomeLocation = "/project/refdata/nextflow/database/NCBI_genomes"
+        r2gAligner = <% if(typeof r2gAligner !== 'undefined') { %>"<%= r2gAligner %>"<% } else { %>"bwa"<%} %> //bowtie2, bwa, minimap2
+        r2gAlignerOptions = <% if(typeof r2gAlignerOptions !== 'undefined') { %>"<%= r2gAlignerOptions %>"<% } else { %>""<%} %>
+        r2gMinMapQual = <% if(typeof r2gMinMapQual !== 'undefined') { %><%= r2gMinMapQual %><% } else { %>60<%} %>
+        r2gMaxClip = <% if(typeof r2gMaxClip !== 'undefined') { %><%= r2gMaxClip %><% } else { %>50<%} %>
+        r2gVariantCall = <% if(typeof r2gVariantCall !== 'undefined') { %><%= r2gVariantCall %><% } else { %>false<%} %> //needs genbank file
+        r2gVariantCallMinQual = <% if(typeof r2gVariantCallMinQual !== 'undefined') { %><%= r2gVariantCallMinQual %><% } else { %>60<%} %>
+        r2gVariantCallPloidy = <% if(typeof r2gVariantCallPloidy !== 'undefined') { %>"<%= r2gVariantCallPloidy %>"<% } else { %>"diploid"<%} %> 
+
+        //read extraction
+        r2gMapUnmapped = <% if(typeof r2gMapUnmapped !== 'undefined') { %><%= r2gMapUnmapped %><% } else { %>false<%} %>
+        r2gExtractMapped = <% if(typeof r2gExtractMapped !== 'undefined') { %><%= r2gExtractMapped %><% } else { %>false<%} %>
+        r2gExtractUnmapped = <% if(typeof r2gExtractUnmapped !== 'undefined') { %><%= r2gExtractUnmapped %><% } else { %>false<%} %>
+
+        //consensus options
+        r2gGetConsensus = <% if(typeof r2gGetConsensus !== 'undefined') { %><%= r2gGetConsensus %><% } else { %>false<%} %>
+        r2gConsensusMinMapQual = <% if(typeof r2gConsensusMinMapQual !== 'undefined') { %><%= r2gConsensusMinMapQual %><% } else { %>60<%} %>
+        r2gConsensusMinCov = <% if(typeof r2gConsensusMinCov !== 'undefined') { %><%= r2gConsensusMinCov %><% } else { %>5<%} %>
+        r2gConsensusMaxCov = <% if(typeof r2gConsensusMaxCov !== 'undefined') { %><%= r2gConsensusMaxCov %><% } else { %>8000<%} %>
+        r2gConsensusMinBaseQual = <% if(typeof r2gConsensusMinBaseQual !== 'undefined') { %><%= r2gConsensusMinBaseQual %><% } else { %>20<%} %>
+        r2gConsensusAltProp = <% if(typeof r2gConsensusAltProp !== 'undefined') { %><%= r2gConsensusAltProp %><% } else { %>0.5<%} %>
+        r2gConsensusAltIndelProp = <% if(typeof r2gConsensusAltIndelProp !== 'undefined') { %><%= r2gConsensusAltIndelProp %><% } else { %>0.5<%} %>
+        r2gConsensusDisableBAQ = <% if(typeof r2gConsensusDisableBAQ !== 'undefined') { %><%= r2gConsensusDisableBAQ %><% } else { %>true<%} %>
+        r2gConsensusPCRdedup = <% if(typeof r2gConsensusPCRdedup !== 'undefined') { %><%= r2gConsensusPCRdedup %><% } else { %>true<%} %>
+        r2gConsensusHomopolymerFilt = <% if(typeof r2gConsensusHomopolymerFilt !== 'undefined') { %><%= r2gConsensusHomopolymerFilt %><% } else { %>false<%} %>
+        r2gConsensusStrandBiasFilt = <% if(typeof r2gConsensusStrandBiasFilt !== 'undefined') { %><%= r2gConsensusStrandBiasFilt %><% } else { %>false<%} %>
+        r2gConsensusVarlogOpt = <% if(typeof r2gConsensusVarlogOpt !== 'undefined') { %><%= r2gConsensusVarlogOpt %><% } else { %>false<%} %>
+        r2gConsensusCompOpt = <% if(typeof r2gConsensusCompOpt !== 'undefined') { %><%= r2gConsensusCompOpt %><% } else { %>false<%} %>
+    } 
+
+    contigsToRef {
+        identity = 85
+        contigRefDB = "/project/refdata/nextflow/database/miccrDB"
+        mapUnmappedContigs =  <% if(typeof mapUnmappedContigs !== 'undefined') { %><%= mapUnmappedContigs %><% } else { %>false<%} %>
+    }
+
+
+    snpTree {
+        //SNP DB path. Should contain SNPdb, bwa_index, NCBI genomes
+        snpDBbase = "/project/refdata/nextflow/database"
+        //SNP databases: Ecoli, Yersinia, Francisella, Brucella, Bacillus
+        snpDBname = <% if(typeof snpDBname !== 'undefined' && snpDBname) { %>"<%= snpDBname %>"<% } else { %>null<%} %>
+        //List of genome name from NCBI genomes see $EDGE/edge_ui/data/Ref_list.json
+        snpGenomes = <% if(typeof snpGenomes !== 'undefined') { %><%- JSON.stringify(snpGenomes) %><% } else { %>[]<%} %>
+        //User-provided reference genomes
+        snpGenomesFiles = <% if(typeof snpGenomesFiles !== 'undefined') { %><%- JSON.stringify(snpGenomesFiles) %><% } else { %>[]<%} %>
+        //A reference genome from above two options for reads/contigs mapping
+        snpRefGenome = <% if(typeof snpRefGenome !== 'undefined') { %>"<%= snpRefGenome %>"<% } else { %>null<%} %>
+        // SRA accessions ByrRun, ByExp, BySample, ByStudy
+        phylAccessions = <% if(typeof phylAccessions !== 'undefined') { %><%- JSON.stringify(phylAccessions) %><% } else { %>[]<%} %>
+        //FastTree or RAxML
+        treeMaker = <% if(typeof treeMaker !== 'undefined') { %>"<%= treeMaker %>"<% } else { %>"FastTree"<%} %>
+        phameBootstrap = <% if(typeof phameBootstrap !== 'undefined') { %><%= phameBootstrap %><% } else { %>false<%} %>
+        phameBootstrapNum = <% if(typeof phameBootstrapNum !== 'undefined') { %><%= phameBootstrapNum %><% } else { %>100<%} %>
+    }
+
+    geneFamily{
+        inputFAA = <% if(typeof inputFAA !== 'undefined' && inputFAA) { %>"<%= inputFAA %>"<% } else { %>"${projectDir}/nf_assets/NO_FILE3"<%} %> //input for contig-based single-workflow version--needs annotation output
+        inputGFF = <% if(typeof inputGFF !== 'undefined' && inputGFF) { %>"<%= inputGFF %>"<% } else { %>"${projectDir}/nf_assets/NO_FILE4"<%} %> //input for contig-based single-workflow version--needs annotation output
+        virulenceFactorTool = <% if(typeof virulenceFactorTool !== 'undefined') { %>"<%= virulenceFactorTool %>"<% } else { %>"MetaVF Toolkit"<%} %> //"MetaVF Toolkit" or "PathoFact2" 
+        rgiDB = "/project/refdata/nextflow/database/RGI"
+        pf2DB = "/project/refdata/nextflow/database/PathoFact2"
+        genomadDB = "/project/refdata/nextflow/database/genomad"
+        pf2Config = "${projectDir}/modules/geneFamilyAnalysis/resources/usr/bin/EDGE_PF2_Config.yaml"
+    }

@@ -1,0 +1,78 @@
+{
+    "1 Pair of PE files": {
+        "content": [
+            {
+                "0": [
+                    "151"
+                ],
+                "1": [
+                    "fastqCount.txt:md5,81ddf3ad4c10ce134361297261419ca3"
+                ],
+                "2": [
+                    [
+                        "all.1.fastq:md5,c9cd5b2586c75c7448674ff3ff5451de",
+                        "all.2.fastq:md5,3b69b59ed5c7111e5d57b900174ef2f6"
+                    ]
+                ],
+                "3": [
+                    
+                ],
+                "avgReadLen": [
+                    "151"
+                ],
+                "counts": [
+                    "fastqCount.txt:md5,81ddf3ad4c10ce134361297261419ca3"
+                ],
+                "paired": [
+                    [
+                        "all.1.fastq:md5,c9cd5b2586c75c7448674ff3ff5451de",
+                        "all.2.fastq:md5,3b69b59ed5c7111e5d57b900174ef2f6"
+                    ]
+                ],
+                "unpaired": [
+                    
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.3"
+        },
+        "timestamp": "2025-02-18T14:49:20.975197828"
+    },
+    "1 Unpaired File": {
+        "content": [
+            {
+                "0": [
+                    "151"
+                ],
+                "1": [
+                    "fastqCount.txt:md5,0fbbbbfd57a93b4851da7a734cfa82b4"
+                ],
+                "2": [
+                    
+                ],
+                "3": [
+                    "all.se.fastq:md5,c9cd5b2586c75c7448674ff3ff5451de"
+                ],
+                "avgReadLen": [
+                    "151"
+                ],
+                "counts": [
+                    "fastqCount.txt:md5,0fbbbbfd57a93b4851da7a734cfa82b4"
+                ],
+                "paired": [
+                    
+                ],
+                "unpaired": [
+                    "all.se.fastq:md5,c9cd5b2586c75c7448674ff3ff5451de"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.3"
+        },
+        "timestamp": "2025-02-18T14:49:11.190556493"
+    }
+}

@@ -1,13 +1,31 @@
 const fs = require('fs')
 const xlsx = require('node-xlsx').default
+const Papa = require('papaparse')
 const config = require('../config')
 const workflowConfig = require('./config')
 
 const cromwellWorkflows = []
-const nextflowWorkflows = ['sra2fastq']
+const nextflowWorkflows = [
+  'sra2fastq',
+  'runFaQCs',
+  'assembly',
+  'annotation',
+  'binning',
+  'antiSmash',
+  'taxonomy',
+  'phylogeny',
+  'refBased',
+  'geneFamily',
+]
 const nextflowConfigs = {
-  profiles: 'common/profiles.nf',
-  nf_reports: 'common/nf_reports.tmpl',
+  executor_config: {
+    slurm: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/configsslurm.config`,
+    local: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/configs/local.config`,
+  },
+  module_params: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/templates/module_params.tmpl`,
+  container_config: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/configs/container.config`,
+  profiles: `${config.NEXTFLOW.WORKFLOW_DIR}/common/profiles.nf`,
+  nf_reports: `${config.NEXTFLOW.WORKFLOW_DIR}/common/nf_reports.tmpl`,
 }
 
 const workflowList = {
@@ -16,7 +34,52 @@ const workflowList = {
     nextflow_main: process.env.NEXTFLOW_MAIN
       ? `${process.env.NEXTFLOW_MAIN} -profile local`
       : `${config.NEXTFLOW.WORKFLOW_DIR}/sra2fastq/nextflow/main.nf -profile local`,
-    config_tmpl: 'sra2fastq/workflow_config.tmpl',
+    config_tmpl: `${config.NEXTFLOW.WORKFLOW_DIR}/sra2fastq/workflow_config.tmpl`,
+  },
+  runFaQCs: {
+    outdir: 'output/ReadsQC',
+    nextflow_main: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/nextflow/main.nf`,
+    config_tmpl: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/templates/workflow_config.tmpl`,
+  },
+  assembly: {
+    outdir: 'output/Assembly',
+    nextflow_main: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/nextflow/main.nf`,
+    config_tmpl: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/templates/workflow_config.tmpl`,
+  },
+  annotation: {
+    outdir: 'output/Annotation',
+    nextflow_main: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/nextflow/main.nf`,
+    config_tmpl: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/templates/workflow_config.tmpl`,
+  },
+  binning: {
+    outdir: 'output/Binning',
+    nextflow_main: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/nextflow/main.nf`,
+    config_tmpl: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/templates/workflow_config.tmpl`,
+  },
+  antiSmash: {
+    outdir: 'output/AntiSmash',
+    nextflow_main: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/nextflow/main.nf`,
+    config_tmpl: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/templates/workflow_config.tmpl`,
+  },
+  taxonomy: {
+    outdir: 'output/Taxonomy',
+    nextflow_main: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/nextflow/main.nf`,
+    config_tmpl: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/templates/workflow_config.tmpl`,
+  },
+  phylogeny: {
+    outdir: 'output/Phylogeny',
+    nextflow_main: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/nextflow/main.nf`,
+    config_tmpl: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/templates/workflow_config.tmpl`,
+  },
+  refBased: {
+    outdir: 'output/RefBased',
+    nextflow_main: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/nextflow/main.nf`,
+    config_tmpl: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/templates/workflow_config.tmpl`,
+  },
+  geneFamily: {
+    outdir: 'output/GeneFamily',
+    nextflow_main: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/nextflow/main.nf`,
+    config_tmpl: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/templates/workflow_config.tmpl`,
   },
 }
 
@@ -46,7 +109,53 @@ const generateWorkflowResult = proj => {
         // link sra downloads to project output
         fs.symlinkSync(`../../../../sra/${accession}`, `${outdir}/${accession}`)
       })
+    } else if (projectConf.workflow.name === 'runFaQCs') {
+      const statsJsonFile = `${outdir}/QC.stats.json`
+      if (fs.existsSync(statsJsonFile)) {
+        result.stats = JSON.parse(fs.readFileSync(statsJsonFile))
+      }
+      const summaryPlotsFile = `${outdir}/QC_summary_plots.html`
+      if (fs.existsSync(summaryPlotsFile)) {
+        result.summaryPlots = `${workflowList[projectConf.workflow.name].outdir}/QC_summary_plots.html`
+      }
+      const reportFile = `${outdir}/QC_final_report.html`
+      if (fs.existsSync(reportFile)) {
+        result.report = `${workflowList[projectConf.workflow.name].outdir}/QC_final_report.html`
+      }
+      const reportLongReadsFile = `${outdir}/NanoPlot-report.html`
+      if (fs.existsSync(reportLongReadsFile)) {
+        result.report = `${workflowList[projectConf.workflow.name].outdir}/NanoPlot-report.html`
+      }
+    } else if (projectConf.workflow.name === 'assembly') {
+      const statsFile = `${outdir}/contigs_stats.txt`
+      if (fs.existsSync(statsFile)) {
+        result.stats = Papa.parse(fs.readFileSync(statsFile).toString(), {
+          delimiter: '\t',
+          header: true,
+          skipEmptyLines: true,
+        }).data
+      }
+      const reportFile = `${outdir}/final_report.pdf`
+      if (fs.existsSync(reportFile)) {
+        result.report = `${workflowList[projectConf.workflow.name].outdir}/final_report.pdf`
+      }
+    } else if (projectConf.workflow.name === 'phylogeny') {
+      const treeAllHtml = `${outdir}/SNPphyloTree.all.html`
+      if (fs.existsSync(treeAllHtml)) {
+        result.treeAllHtml = `${workflowList[projectConf.workflow.name].outdir}/SNPphyloTree.all.html`
+      }
+      const treeCdsHtml = `${outdir}/SNPphyloTree.cds.html`
+      if (fs.existsSync(treeCdsHtml)) {
+        result.treeCdsHtml = `${workflowList[projectConf.workflow.name].outdir}/SNPphyloTree.cds.html`
+      }
+    } else if (projectConf.workflow.name === 'antiSmash') {
+      // antiSMASH HTML output
+      const antiSmashHtml = `${outdir}/output/index.html`
+      if (fs.existsSync(antiSmashHtml)) {
+        result.antiSmashHtml = `${workflowList[projectConf.workflow.name].outdir}/output/index.html`
+      }
     }
+
     fs.writeFileSync(resultJson, JSON.stringify(result))
   }
 }

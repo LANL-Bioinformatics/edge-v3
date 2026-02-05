@@ -1,0 +1,47 @@
+workDir="<%= nextflowOutDir %>/work"
+params {
+    //which modules are run
+    modules {
+        sra2fastq = <% if(typeof source !== 'undefined' && source === 'sra') { %>true<% } else { %>false<%} %>
+        faqcs = <%= runFaQCs %>
+        hostRemoval = false
+        runAssembly = <%= assembly %>
+        annotation = <%= annotation %>
+        readsBinning = <%= binning %>
+        phageFinder = true //true by default -- will run if non-viral reads are annotated
+        readsTaxonomyAssignment = <% if(typeof readTax !== 'undefined') { %><%= readTax %><% } else { %>false<%} %>
+        contigsTaxonomyAssignment = <% if(typeof contigTax !== 'undefined') { %><%= contigTax %><% } else { %>false<%} %>
+        secondaryMetaboliteAnalysis =  <%= antiSmash %>
+        refBasedAnalysis = <%= refBasedAnalysis %>
+        snpTree = <%= phylogeny %>
+        readsGeneFamilyAnalysis = <% if(typeof readGeneFamily !== 'undefined') { %><%= readGeneFamily %><% } else { %>false<%} %>
+        contigsGeneFamilyAnalysis =  <% if(typeof contigGeneFamily !== 'undefined') { %><%= contigGeneFamily %><% } else { %>false<%} %> //contig-based requires annotation output as well (GFF,FAA).
+        geneFamilyAnalysis = 
+    }
+
+    outputLocations {
+        //everything in its separate output for the moment
+        sra2fastqOutDir =  "<%= sraOutdir %>"
+        processProvidedContigsOutDir = "<%= projOutdir %>"
+        qcOutDir = "<%= projOutdir %>/ReadsQC"
+        hostRemovalOutDir = ""
+        assemblyOutDir = "<%= projOutdir %>/Assembly"
+        contigsTaxonomyOutDir = "<%= projOutdir %>/Taxonomy"
+        phageFinderOutDir = ""
+        readBinningOutDir = "<%= projOutdir %>/Binning"
+        readsTaxonomyOutDir = "<%= projOutdir %>/Taxonomy"
+        annotationOutDir = "<%= projOutdir %>/annotation"
+        smaOutDir = "<%= projOutdir %>/AntiSmash"
+        phylogenyOutDir = "<%= projOutdir %>/Phylogeny"
+        geneFamilyOutDir = "<%= projOutdir %>/SpecialtyGenes"
+        reportOutDir = "<%= projOutdir %>"
+    }
+
+<%- include (moduleParams) %>
+}
+
+<%- include (containerConfig) %>
+
+<%- include (nfReports) %>
+
+includeConfig "<%= executorConfig %>"

@@ -22,17 +22,17 @@ const _nav = [
     to: '/user/uploads',
     icon: <CIcon icon={cilCloudUpload} customClassName="nav-icon" />,
   },
-  {
+  /* {
     component: CNavItem,
     name: 'Retrieve SRA Data',
     to: '/user/sradata',
     icon: <CIcon icon={cilCloudUpload} customClassName="nav-icon" />,
-  },
+  }, */
   {
     component: CNavTitle,
     name: 'Workflows',
   },
-  /* {
+  {
     component: CNavGroup,
     name: 'Metagenomics',
     icon: <CIcon icon={cilLayers} customClassName="nav-icon" />,
@@ -47,7 +47,7 @@ const _nav = [
         },
       },
     ],
-  }, */
+  },
 ]
 
 export default _nav

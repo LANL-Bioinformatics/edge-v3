@@ -1,0 +1,47 @@
+workDir="<%= nextflowOutDir %>/work"
+params {
+    //which modules are run
+    modules {
+        sra2fastq = <% if(typeof source !== 'undefined' && source === 'sra') { %>true<% } else { %>false<%} %>
+        faqcs = <% if(workflow === 'runFaQCs') { %>true<% } else { %>false<%} %>
+        hostRemoval = false
+        runAssembly = <% if(workflow === 'assembly') { %>true<% } else { %>false<%} %>
+        annotation = <% if(workflow === 'annotation') { %>true<% } else { %>false<%} %>
+        readsBinning = <% if(workflow === 'binning') { %>true<% } else { %>false<%} %>
+        phageFinder = true //true by default -- will run if non-viral reads are annotated
+        readsTaxonomyAssignment = <% if(typeof readTax !== 'undefined') { %><%= readTax %><% } else { %>false<%} %>
+        contigsTaxonomyAssignment = <% if(typeof contigTax !== 'undefined') { %><%= contigTax %><% } else { %>false<%} %>
+        secondaryMetaboliteAnalysis =  <% if(workflow === 'antiSmash') { %>true<% } else { %>false<%} %>
+        refBasedAnalysis = <% if(workflow === 'refBased') { %>true<% } else { %>false<%} %>
+        snpTree = <% if(workflow === 'phylogeny') { %>true<% } else { %>false<%} %>
+        readsGeneFamilyAnalysis = <% if(typeof readsGeneFamily !== 'undefined') { %><%= readsGeneFamily %><% } else { %>false<%} %>
+        contigsGeneFamilyAnalysis =  <% if(typeof contigsGeneFamily !== 'undefined') { %><%= contigsGeneFamily %><% } else { %>false<%} %> //contig-based requires annotation output as well (GFF,FAA).
+    }
+
+    outputLocations {
+        //everything in its separate output for the moment
+        sra2fastqOutDir =  "<%= sraOutdir %>"
+        processProvidedContigsOutDir = "<%= projOutdir %>"
+        qcOutDir = <% if(workflow === 'runFaQCs') { %>"<%= projOutdir %>"<% } else { %>""<%} %>
+        hostRemovalOutDir = ""
+        assemblyOutDir = <% if(workflow === 'assembly') { %>"<%= projOutdir %>"<% } else { %>""<%} %>
+        contigsTaxonomyOutDir = <% if(typeof contigTax !== 'undefined') { %>"<%= projOutdir %>"<% } else { %>""<%} %>
+        phageFinderOutDir = <% if(workflow === 'annotation') { %>"<%= projOutdir %>"<% } else { %>""<%} %>
+        readBinningOutDir = <% if(workflow === 'binning') { %>"<%= projOutdir %>"<% } else { %>""<%} %>
+        readsTaxonomyOutDir = <% if(typeof readTax !== 'undefined') { %>"<%= projOutdir %>"<% } else { %>""<%} %>
+        annotationOutDir = <% if(workflow === 'annotation') { %>"<%= projOutdir %>"<% } else { %>""<%} %>
+        smaOutDir = <% if(workflow === 'antiSmash') { %>"<%= projOutdir %>"<% } else { %>""<%} %>
+        refBasedOutDir = <% if(workflow === 'refBased') { %>"<%= projOutdir %>"<% } else { %>""<%} %>
+        phylogenyOutDir = <% if(workflow === 'phylogeny') { %>"<%= projOutdir %>"<% } else { %>""<%} %>
+        geneFamilyOutDir = <% if(workflow === 'geneFamily') { %>"<%= projOutdir %>"<% } else { %>""<%} %>
+        reportOutDir = "<%= projOutdir %>"
+    }
+
+<%- include (moduleParams) %>
+}
+
+<%- include (containerConfig) %>
+
+<%- include (nfReports) %>
+
+includeConfig "<%= executorConfig %>"

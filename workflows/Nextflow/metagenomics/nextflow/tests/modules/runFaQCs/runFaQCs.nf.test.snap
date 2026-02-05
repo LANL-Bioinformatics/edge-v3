@@ -1,0 +1,101 @@
+{
+    "PolyA removal": {
+        "content": [
+            [
+                "QC.stats.txt:md5,29b8b7c8ea6f7b64e1bcbe9adb81ecf8"
+            ],
+            [
+                [
+                    "QC.1.trimmed.fastq:md5,deb773f1726c6134a7d2fc069af7b21b",
+                    "QC.2.trimmed.fastq:md5,a793e8ccfe60c0f9462a80d520eecd7a"
+                ]
+            ],
+            [
+                "QC.unpaired.trimmed.fastq:md5,5ed2596cae072d61e24a96d3e4449611"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.3"
+        },
+        "timestamp": "2025-02-18T15:50:45.482881072"
+    },
+    "Basic SE": {
+        "content": [
+            [
+                "QC.stats.txt:md5,e74be317e4f05f00ef89b4c29487cc6b"
+            ],
+            [
+                
+            ],
+            [
+                "QC.unpaired.trimmed.fastq:md5,3a0138c06e9cd504e2cca8e5d93532f1"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.3"
+        },
+        "timestamp": "2025-02-18T15:49:55.731355811"
+    },
+    "SE with adapter removal": {
+        "content": [
+            [
+                "QC.stats.txt:md5,4b6b872f59511bf1db31de374018456c"
+            ],
+            [
+                
+            ],
+            [
+                "QC.unpaired.trimmed.fastq:md5,3e43d37648eea875f5583f5cfcbb16ca"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.3"
+        },
+        "timestamp": "2025-02-18T15:50:32.099762679"
+    },
+    "Basic PE": {
+        "content": [
+            [
+                "QC.stats.txt:md5,29b8b7c8ea6f7b64e1bcbe9adb81ecf8"
+            ],
+            [
+                [
+                    "QC.1.trimmed.fastq:md5,deb773f1726c6134a7d2fc069af7b21b",
+                    "QC.2.trimmed.fastq:md5,a793e8ccfe60c0f9462a80d520eecd7a"
+                ]
+            ],
+            [
+                "QC.unpaired.trimmed.fastq:md5,5ed2596cae072d61e24a96d3e4449611"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.3"
+        },
+        "timestamp": "2025-02-18T15:48:37.815540896"
+    },
+    "PE with adapter removal": {
+        "content": [
+            [
+                "QC.stats.txt:md5,7e832f626a1f59314a2c6df4d1ed7db2"
+            ],
+            [
+                [
+                    "QC.1.trimmed.fastq:md5,1e70223f29baaced4509b62a5e84f074",
+                    "QC.2.trimmed.fastq:md5,649bf376592b80e9ae1cee81d018a65f"
+                ]
+            ],
+            [
+                "QC.unpaired.trimmed.fastq:md5,1ca05e3fe31af0ca222651c3b5135cf7"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.3"
+        },
+        "timestamp": "2025-02-18T15:50:16.310405182"
+    }
+}

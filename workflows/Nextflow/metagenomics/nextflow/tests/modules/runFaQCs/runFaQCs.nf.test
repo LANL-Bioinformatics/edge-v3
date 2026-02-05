@@ -1,0 +1,203 @@
+nextflow_workflow {
+
+    name "Test Workflow FAQCS"
+    script "modules/runFaQCs/runFaQCs.nf"
+    workflow "FAQCS"
+
+    test("Basic PE") {
+
+        when {
+            params {
+                shared {
+                    outDir = "./testing_output"
+                    projName = "testFaQCs"
+                    cpus = 4
+                    pairedFile = true
+                }
+                faqcs {
+                    //all defaults
+                }
+            }
+            workflow {
+                """
+                input[0] = params.faqcs.plus(params.shared)
+                input[1] = "ILLUMINA"
+                input[2] = [file("${projectDir}/test_data/Illumina/Ecoli_10x.1.fastq"),file("${projectDir}/test_data/Illumina/Ecoli_10x.2.fastq")]
+                input[3] = file("${projectDir}/nf_assets/NO_FILE2")
+                input[4] = channel.of("151")
+                """
+            }
+        }
+
+        then {
+            assertAll (
+                {assert workflow.success},
+                {assert snapshot(
+                    workflow.out.qcStats,
+                    workflow.out.paired,
+                    workflow.out.unpaired
+                    ).match()},
+                {assert file(workflow.out.qcReport.find { file(it).name == "QC_qc_report.pdf" }).exists()}
+            )
+        }
+
+    }
+
+    test("Basic SE") {
+
+        when {
+            params {
+                shared {
+                    outDir = "./testing_output"
+                    projName = "testFaQCs"
+                    cpus = 4
+                    pairedFile = false
+                }
+                faqcs {
+                    htmlreport = false
+                }
+            }
+            workflow {
+                """
+                input[0] = params.faqcs.plus(params.shared)
+                input[1] = "ILLUMINA"
+                input[2] = [file("${projectDir}/nf_assets/NO_FILE")]
+                input[3] = file("${projectDir}/test_data/Illumina/Ecoli_10x.1.fastq")
+                input[4] = channel.of("151")
+                """
+            }
+        }
+
+        then {
+            assertAll (
+                {assert workflow.success},
+                {assert snapshot(
+                    workflow.out.qcStats,
+                    workflow.out.paired,
+                    workflow.out.unpaired
+                    ).match()},
+                {assert file(workflow.out.qcReport.find { file(it).name == "QC_qc_report.pdf" }).exists()}
+            )
+        }
+
+    }
+
+    test("PE with adapter removal") {
+
+        when {
+            params {
+                shared {
+                    outDir = "./testing_output"
+                    projName = "testFaQCs"
+                    cpus = 4
+                    pairedFile = true
+                }
+                faqcs {
+                    artifactFile = "${projectDir}/test_data/FaQCs/adapters.fasta"
+                    htmlreport = false
+                }
+            }
+            workflow {
+                """
+                input[0] = params.faqcs.plus(params.shared)
+                input[1] = "ILLUMINA"
+                input[2] = [file("${projectDir}/test_data/Illumina/Ecoli_10x.1.fastq"),file("${projectDir}/test_data/Illumina/Ecoli_10x.2.fastq")]
+                input[3] = file("${projectDir}/nf_assets/NO_FILE2")
+                input[4] = channel.of("151")
+                """
+            }
+        }
+
+        then {
+            assertAll (
+                {assert workflow.success},
+                {assert snapshot(
+                    workflow.out.qcStats,
+                    workflow.out.paired,
+                    workflow.out.unpaired
+                    ).match()},
+                {assert file(workflow.out.qcReport.find { file(it).name == "QC_qc_report.pdf" }).exists()}
+            )
+        }
+
+    }
+
+    test("SE with adapter removal") {
+
+        when {
+            params {
+                shared {
+                    outDir = "./testing_output"
+                    projName = "testFaQCs"
+                    cpus = 4
+                    pairedFile = false
+                }
+                faqcs {
+                    artifactFile = "${projectDir}/test_data/FaQCs/adapters.fasta"
+                    htmlreport = false
+                }
+            }
+            workflow {
+                """
+                input[0] = params.faqcs.plus(params.shared)
+                input[1] = "ILLUMINA"
+                input[2] = [file("${projectDir}/nf_assets/NO_FILE")]
+                input[3] = file("${projectDir}/test_data/Illumina/Ecoli_10x.1.fastq")
+                input[4] = channel.of("151")
+                """
+            }
+        }
+
+        then {
+            assertAll (
+                {assert workflow.success},
+                {assert snapshot(
+                    workflow.out.qcStats,
+                    workflow.out.paired,
+                    workflow.out.unpaired
+                    ).match()},
+                {assert file(workflow.out.qcReport.find { file(it).name == "QC_qc_report.pdf" }).exists()}
+            )
+        }
+
+    }
+
+    test("PolyA removal") {
+
+        when {
+            params {
+                shared {
+                    outDir = "./testing_output"
+                    projName = "testFaQCs"
+                    cpus = 4
+                    pairedFile = true
+                }
+                faqcs {
+                    polyA = true
+                    htmlreport = false
+                }
+            }
+            workflow {
+                """
+                input[0] = params.faqcs.plus(params.shared)
+                input[1] = "ILLUMINA"
+                input[2] = [file("${projectDir}/test_data/Illumina/Ecoli_10x.1.fastq"),file("${projectDir}/test_data/Illumina/Ecoli_10x.2.fastq")]
+                input[3] = file("${projectDir}/nf_assets/NO_FILE2")
+                input[4] = channel.of("151")
+                """
+            }
+        }
+
+        then {
+            assertAll (
+                {assert workflow.success},
+                {assert snapshot(
+                    workflow.out.qcStats,
+                    workflow.out.paired,
+                    workflow.out.unpaired
+                    ).match()},
+                {assert file(workflow.out.qcReport.find { file(it).name == "QC_qc_report.pdf" }).exists()}
+            )
+        }
+    }
+}
