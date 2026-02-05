@@ -6,8 +6,8 @@ const workflowConfig = require('./config')
 const cromwellWorkflows = []
 const nextflowWorkflows = ['sra2fastq']
 const nextflowConfigs = {
-  profiles: 'common/profiles.nf',
-  nf_reports: 'common/nf_reports.tmpl',
+  profiles: `${config.NEXTFLOW.WORKFLOW_DIR}/common/profiles.nf`,
+  nf_reports: `${config.NEXTFLOW.WORKFLOW_DIR}/common/nf_reports.tmpl`,
 }
 
 const workflowList = {
@@ -16,7 +16,7 @@ const workflowList = {
     nextflow_main: process.env.NEXTFLOW_MAIN
       ? `${process.env.NEXTFLOW_MAIN} -profile local`
       : `${config.NEXTFLOW.WORKFLOW_DIR}/sra2fastq/nextflow/main.nf -profile local`,
-    config_tmpl: 'sra2fastq/workflow_config.tmpl',
+    config_tmpl: `${config.NEXTFLOW.WORKFLOW_DIR}/sra2fastq/workflow_config.tmpl`,
   },
 }
 

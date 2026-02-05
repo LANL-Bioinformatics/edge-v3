@@ -25,14 +25,9 @@ if [ ! -d  $io_home ]; then
     mkdir ${io_home}/${dir}
   done
 
-  cromwell_test_data_home=$app_home/workflows/Cromwell/test_data
-  if [ -d  $cromwell_test_data_home ]; then
-    ln -s ${cromwell_test_data_home} ${io_home}/public/cromwell
-  fi
-
-  nextflow_test_data_home=$app_home/workflows/Nextflow/test_data
-  if [ -d  $nextflow_test_data_home ]; then
-    ln -s ${nextflow_test_data_home} ${io_home}/public/nextflow
+  test_data_home=$app_home/workflows/test_data
+  if [ -d  $test_data_home ]; then
+    ln -s ${test_data_home} ${io_home}/public/test_data
   fi
 fi
 
