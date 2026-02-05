@@ -14,7 +14,7 @@ const WORKFLOW_DATA_BASE_DIR = path.join(
   '../../../workflows/data',
 )
 const IO_BASE_DIR =
-  process.env.IO_BASE_DIR || path.join(appServerDir, ' ../../../io')
+  process.env.IO_BASE_DIR || path.join(appServerDir, '../../../io')
 
 const workflowConfig = {
   DATA_DIR: WORKFLOW_DATA_BASE_DIR,
