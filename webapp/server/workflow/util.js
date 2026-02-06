@@ -19,7 +19,7 @@ const nextflowWorkflows = [
 ]
 const nextflowConfigs = {
   executor_config: {
-    slurm: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/configsslurm.config`,
+    slurm: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/configs/slurm.config`,
     local: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/configs/local.config`,
   },
   module_params: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/templates/module_params.tmpl`,
