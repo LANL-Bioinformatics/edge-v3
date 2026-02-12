@@ -1,0 +1,97 @@
+###############################################################################
+#
+# Usage (on a VM):
+#
+# 1. Ensure the necessary persistent volumes exists and are accessible:
+#    $ stat /media/volume/nmdc-edge-web-app-mongo-data
+#    $ stat /media/volume/nmdc-edge-web-app-io-data
+# 2. Set environment variables or populate the relevant `.env` file(s).
+# cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16
+#    $ export JWT_SECRET='...'
+#    $ export OAUTH_SECRET='...'
+#    $ export EMAIL_SHARED_SECRET='...'
+#    $ export DATABASE_USERNAME='...'
+#    $ export DATABASE_PASSWORD='...'
+#
+#    # (Optional) Override default values:
+#    $ export APP_IMAGE='...'
+#    $ export APP_EXTERNAL_HOSTNAME='...'
+#    $ export IO_BASE_DIR_ON_HOST='...'
+#    $ export MONGO_DATA_DIR_ON_HOST='...'
+#    $ export CROMWELL_API_BASE_URL='...'
+#    $ export WORKFLOWS_TEMPLATE_DIR='...'
+#    $ export WORKFLOWS_WDL_DIR='...'
+#
+#    # Note: You can generate a random 20-character string by running:
+#    $ openssl rand -base64 20
+#
+# 3. Spin up the stack.
+#    $ docker compose up --detach
+#
+#    # (Optional) View container logs.
+#    $ docker compose logs -f app
+#    $ docker compose logs -f mongo
+#    $ docker compose logs -f nginx
+#
+###############################################################################
+
+# These are the services that constitute this Docker Compose "stack".
+services:
+  app:
+    container_name: edgev3_app
+    # Reference: https://github.com/microbiomedata/nmdc-edge/pkgs/container/nmdc-edge-web-app
+    image: ${APP_IMAGE}
+    # Alternatively, to build an image from a Dockerfile (which will allow you to specify args at build time):
+    #build:
+    #  context: /path/to/repository/root/directory
+    #  dockerfile: webapp-node20.Dockerfile
+    #  args:
+    #    - USER_ID: ${USER_ID:-60005}
+    #    - GROUP_ID: ${GROUP_ID:-60005}
+    #    - USER_NAME: ${USER_NAME:-webuser}
+    #    - GROUP_NAME: ${GROUP_NAME:-webuser}
+    user: "${USER_ID}:${GROUP_ID}"
+    restart: unless-stopped
+    ports:
+      - "8000:${APP_SERVER_PORT:-5000}"
+    # When the container host is Linux, this makes it so containers can access the host via `host.docker.internal`.
+    # Reference: https://github.com/docker/for-linux/issues/264#issuecomment-784985736
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ${IO_BASE_DIR_ON_HOST:- /mnt/EDGEv3-cluster/EDGEv3/io}:/project/io:z 
+      - ./data/edgev3/webapp/client/env.example:/app/webapp/client/.env:ro
+      - ./data/edgev3/webapp/server/env.example:/app/webapp/server/.env:ro
+    environment:
+      # Note: The `${ENV_VAR_NAME:-default_value}` syntax tells Docker to use the value of the specified environment
+      #       variable if that environment variable exists; otherwise, use the value that follows the `:-` delimiter.
+      DATABASE_HOST: mongo
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      APP_UI_BASE_URL: https://${APP_EXTERNAL_HOSTNAME:-edgev3.edgebioinformatics.org}
+      APP_EXTERNAL_HOSTNAME: ${APP_EXTERNAL_HOSTNAME:-edgev3.edgebioinformatics.org}
+      # Set `IO_BASE_DIR` to the path at which the persistent volume is mounted (see `volumes` above).
+      IO_BASE_DIR: ${IO_BASE_DIR_ON_HOST}
+      # These lines tell Docker to populate these _container_ environment variables (on left)
+      # with the values of the corresponding _host_ environment variables (on right).
+      JWT_SECRET: ${JWT_SECRET}
+      OAUTH_SECRET: ${OAUTH_SECRET}
+      EMAIL_SHARED_SECRET: ${EMAIL_SHARED_SECRET}
+      EMAIL_MAILGUN_API_KEY: ${EMAIL_MAILGUN_API_KEY}
+      EMAIL_MAILGUN_DOMAIN: ${EMAIL_MAILGUN_DOMAIN}
+      ORCID_CLIENT_ID: ${ORCID_CLIENT_ID}
+    depends_on:
+      - mongo
+
+  mongo:
+    container_name: edgev3_mongo
+    image: mongo:6.0.4
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DATABASE_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      - "27017:27017"
+    # Map a persistent volume to `/data/db` within the container.
+    volumes:
+      - ${MONGO_DATA_DIR_ON_HOST:-/media/volume/sdb/mongodb}:/data/db
