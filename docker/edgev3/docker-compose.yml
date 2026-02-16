@@ -60,8 +60,8 @@ services:
       - "host.docker.internal:host-gateway"
     volumes:
       - ${IO_BASE_DIR_ON_HOST:- /mnt/EDGEv3-cluster/EDGEv3/io}:/project/io:z 
-      - ./data/edgev3/webapp/client/env.example:/app/webapp/client/.env:ro
-      - ./data/edgev3/webapp/server/env.example:/app/webapp/server/.env:ro
+      - ${ROOT_DIR}/data/edgev3/webapp/client/.env:/app/webapp/client/.env:ro
+      - ${ROOT_DIR}/data/edgev3/webapp/server/.env:/app/webapp/server/.env:ro
     environment:
       # Note: The `${ENV_VAR_NAME:-default_value}` syntax tells Docker to use the value of the specified environment
       #       variable if that environment variable exists; otherwise, use the value that follows the `:-` delimiter.
