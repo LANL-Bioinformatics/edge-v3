@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-domains=(${DOMAIN} 
+domains=(${DOMAIN})
 
 rsa_key_size=4096
 data_path="./data/certbot"
