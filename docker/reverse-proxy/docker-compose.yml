@@ -25,4 +25,4 @@ services:
 networks:
   edgev3:
     external: true
-    name: edgev3_default
+    name: edge-v3_default
