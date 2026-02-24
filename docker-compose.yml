@@ -50,7 +50,7 @@ services:
     #    - GROUP_ID: ${GROUP_ID:-60005}
     #    - USER_NAME: ${USER_NAME:-webuser}
     #    - GROUP_NAME: ${GROUP_NAME:-webuser}
-    user: "${USER_ID}:${GROUP_ID}"
+    # user: "${USER_ID}:${GROUP_ID}"
     restart: unless-stopped
     ports:
       - "8000:${APP_SERVER_PORT:-5000}"
@@ -58,9 +58,17 @@ services:
     # Reference: https://github.com/docker/for-linux/issues/264#issuecomment-784985736
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    command: 
+      - /bin/sh
+      - -c
+      - | 
+        cd /app//webapp/client/; npm run build;   
+        pm2 resurrect; pm2 reload all --update-env && tail -f /dev/null
     volumes:
       - "./webapp:/app/webapp"
-      - ${IO_BASE_DIR_ON_HOST:- ./io}:${IO_BASE_DIR_ON_CLUSTER:- /home/user/edgev3/io}:z 
+      - ./io:/home/user/io:z 
+      # - client-env:/app/webapp/client/.env:ro
+      # - server-env:/app/webapp/server/.env:ro
       - "/app/webapp/client/build"
       - "/app/webapp/client/node_modules"
       - "/app/webapp/server/node_modules"
@@ -70,18 +78,18 @@ services:
       DATABASE_HOST: mongo
       DATABASE_USERNAME: ${DATABASE_USERNAME}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-      APP_UI_BASE_URL: https://${APP_EXTERNAL_HOSTNAME:-edgev3.edgebioinformatics.org}
-      APP_EXTERNAL_HOSTNAME: ${APP_EXTERNAL_HOSTNAME:-edgev3.edgebioinformatics.org}
+      APP_UI_BASE_URL: http://localhost:8000}
+      APP_EXTERNAL_HOSTNAME: localhost
       # Set `IO_BASE_DIR` to the path at which the persistent volume is mounted (see `volumes` above).
-      IO_BASE_DIR: ${IO_BASE_DIR_ON_CLUSTER:- /home/user/edgev3/io}
+      
       # These lines tell Docker to populate these _container_ environment variables (on left)
       # with the values of the corresponding _host_ environment variables (on right).
-      JWT_SECRET: ${JWT_SECRET}
-      OAUTH_SECRET: ${OAUTH_SECRET}
-      EMAIL_SHARED_SECRET: ${EMAIL_SHARED_SECRET}
-      EMAIL_MAILGUN_API_KEY: ${EMAIL_MAILGUN_API_KEY}
-      EMAIL_MAILGUN_DOMAIN: ${EMAIL_MAILGUN_DOMAIN}
-      ORCID_CLIENT_ID: ${ORCID_CLIENT_ID}
+      # JWT_SECRET: ${JWT_SECRET}
+      # OAUTH_SECRET: ${OAUTH_SECRET}
+      # EMAIL_SHARED_SECRET: ${EMAIL_SHARED_SECRET}
+      # EMAIL_MAILGUN_API_KEY: ${EMAIL_MAILGUN_API_KEY}
+      # EMAIL_MAILGUN_DOMAIN: ${EMAIL_MAILGUN_DOMAIN}
+      # ORCID_CLIENT_ID: ${ORCID_CLIENT_ID}
     depends_on:
       - mongo
 
@@ -96,8 +104,4 @@ services:
       - "27017:27017"
     # Map a persistent volume to `/data/db` within the container.
     volumes:
-      - ${MONGO_DATA_DIR_ON_HOST:-/media/volume/sdb/mongodb}:/data/db
-
-volumes:
-  client-env: ${ROOT_DIR}/data/edgev3/webapp/client/.env
-  server-env: ${ROOT_DIR}/data/edgev3/webapp/server/.env
+      - ./mongodb:/data/db
