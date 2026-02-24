@@ -113,6 +113,7 @@ const generateNextflowWorkflowParams = async (projHome, projectConf, proj) => {
       }
     }
   }
+
   return params
 }
 
