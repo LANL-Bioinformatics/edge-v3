@@ -97,7 +97,3 @@ services:
     # Map a persistent volume to `/data/db` within the container.
     volumes:
       - ${MONGO_DATA_DIR_ON_HOST:-/media/volume/sdb/mongodb}:/data/db
-
-volumes:
-  client-env: ${ROOT_DIR}/data/edgev3/webapp/client/.env
-  server-env: ${ROOT_DIR}/data/edgev3/webapp/server/.env
