@@ -64,6 +64,7 @@ services:
       - "/app/webapp/client/build"
       - "/app/webapp/client/node_modules"
       - "/app/webapp/server/node_modules"
+      - "./workflows:/app/workflows"
     environment:
       # Note: The `${ENV_VAR_NAME:-default_value}` syntax tells Docker to use the value of the specified environment
       #       variable if that environment variable exists; otherwise, use the value that follows the `:-` delimiter.
