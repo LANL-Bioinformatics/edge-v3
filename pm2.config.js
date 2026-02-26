@@ -15,14 +15,14 @@ module.exports = {
       exec_mode: "cluster",
       cwd: "./webapp/server",
       node_args: "--max_old_space_size=1024",
-      max_memory_restart: "150M"
+      max_memory_restart: "500M"
     },
     {
       name: "cronserver",
       script: "cronServer.js",
       cwd: "./webapp/server",
       node_args: "--max_old_space_size=1024",
-      max_memory_restart: "150M"
+      max_memory_restart: "500M"
     }
   ]
 }
