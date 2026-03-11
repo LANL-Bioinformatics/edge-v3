@@ -104,19 +104,19 @@
         //RTA tools: gottcha-genDB-b,gottcha-speDB-b,gottcha-strDB-b,gottcha-genDB-v,gottcha-speDB-v,gottcha-strDB-v,gottcha2-speDB-b,pangia,bwa,metaphlan4,kraken2,centrifuge,diamond
         enabledTools = <% if(typeof enabledTools !== 'undefined') { %>"<%= enabledTools %>"<% } else { %>"gottcha-genDB-b,gottcha-speDB-b,gottcha-strDB-b,gottcha-genDB-v,gottcha-speDB-v,gottcha-strDB-v,gottcha2-speDB-b,pangia,bwa,metaphlan4,kraken2,centrifuge,diamond"<%} %>
         baseDB = "/project/refdata"
-        custom_gottcha_genDB_b =  <% if(typeof custom_gottcha_genDB_b !== 'undefined' && custom_gottcha_genDB_b) { %>"<%= custom_gottcha_genDB_b %>"<% } else { %>null<%} %>
+        custom_gottcha_genDB_b =  <% if(typeof custom_gottcha_genDB_b !== 'undefined' && custom_gottcha_genDB_b) { %>"<%= custom_gottcha_genDB_b %>"<% } else { %>nulll<%} %>
         custom_gottcha_speDB_b =  <% if(typeof custom_gottcha_speDB_b !== 'undefined' && custom_gottcha_speDB_b) { %>"<%= custom_gottcha_speDB_b %>"<% } else { %>null<%} %>
         custom_gottcha_strDB_b =  <% if(typeof custom_gottcha_strDB_b !== 'undefined' && custom_gottcha_strDB_b) { %>"<%= custom_gottcha_strDB_b %>"<% } else { %>null<%} %>
         custom_gottcha_genDB_v =  <% if(typeof custom_gottcha_genDB_v !== 'undefined' && custom_gottcha_genDB_v) { %>"<%= custom_gottcha_genDB_v %>"<% } else { %>null<%} %>
         custom_gottcha_speDB_v =  <% if(typeof custom_gottcha_speDB_v !== 'undefined' && custom_gottcha_speDB_v) { %>"<%= custom_gottcha_speDB_v %>"<% } else { %>null<%} %>
         custom_gottcha_strDB_v =  <% if(typeof  custom_gottcha_strDB_v !== 'undefined' &&  custom_gottcha_strDB_v) { %>"<%= custom_gottcha_strDB_v %>"<% } else { %>null<%} %>
         custom_gottcha2_speDB_b = <% if(typeof  custom_gottcha2_speDB_b !== 'undefined' &&  custom_gottcha2_speDB_b) { %>"<%= custom_gottcha2_speDB_b %>"<% } else { %>"/project/refdata/GOTTCHA2/gottcha_db.species.fna"<%} %>
-        custom_gottcha2_speDB_v =  <% if(typeof custom_gottcha2_speDB_v !== 'undefined' && custom_gottcha2_speDB_v) { %>"<%= custom_gottcha2_speDB_v %>"<% } else { %>"/project/refdata/gottcha2/gottcha_db.species.fna"<%} %>
-        custom_bwa_db= <% if(typeof custom_bwa_db !== 'undefined' && custom_bwa_db) { %>"<%= custom_bwa_db %>"<% } else { %>null<%} %>
-        custom_metaphlan_db= <% if(typeof custom_metaphlan_db !== 'undefined' && custom_metaphlan_db) { %>"<%= custom_metaphlan_db %>"<% } else { %>null<%} %>
-        custom_kraken_db= <% if(typeof custom_kraken_db !== 'undefined' && custom_kraken_db) { %>"<%= custom_kraken_db %>"<% } else { %>null<%} %>
-        custom_pangia_db= <% if(typeof custom_pangia_db !== 'undefined' && custom_pangia_db) { %>"<%= custom_pangia_db %>"<% } else { %>null<%} %>
-        custom_diamond_db= <% if(typeof custom_diamond_db !== 'undefined' && custom_diamond_db) { %>"<%= custom_diamond_db %>"<% } else { %>null<%} %>
+        custom_gottcha2_speDB_v =  <% if(typeof custom_gottcha2_speDB_v !== 'undefined' && custom_gottcha2_speDB_v) { %>"<%= custom_gottcha2_speDB_v %>"<% } else { %>"/project/refdata/GOTTCHA2/gottcha_db.species.fna"<%} %>
+        custom_bwa_db= <% if(typeof custom_bwa_db !== 'undefined' && custom_bwa_db) { %>"<%= custom_bwa_db %>"<% } else { %>"/project/refdata/bwa_index/NCBI-Bacteria-Virus.fna"<%} %>
+        custom_metaphlan_db= <% if(typeof custom_metaphlan_db !== 'undefined' && custom_metaphlan_db) { %>"<%= custom_metaphlan_db %>"<% } else { %>"/project/refdata/metaphlan4"<%} %>
+        custom_kraken_db= <% if(typeof custom_kraken_db !== 'undefined' && custom_kraken_db) { %>"<%= custom_kraken_db %>"<% } else { %>"/project/refdata/Kraken2"<%} %>
+        custom_pangia_db= <% if(typeof custom_pangia_db !== 'undefined' && custom_pangia_db) { %>"<%= custom_pangia_db %>"<% } else { %>"/project/refdata/PanGIA/NCBI_genomes_refseq86*.fa"<%} %>
+        custom_diamond_db= <% if(typeof custom_diamond_db !== 'undefined' && custom_diamond_db) { %>"<%= custom_diamond_db %>"<% } else { %>"/project/refdata/diamond"<%} %>
         custom_centrifuge_db = <% if(typeof custom_centrifuge_db !== 'undefined' && custom_centrifuge_db) { %>"<%= custom_centrifuge_db %>"<% } else { %>"/project/refdata/Centrifuge/hpv.1.cf"<%} %>
     }
 
