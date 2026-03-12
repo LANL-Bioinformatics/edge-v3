@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 FROM continuumio/miniconda3:v25.11.1 AS build
-ENV version=0.6.1
+ENV version=0.6.2
 
 ENV container=docker
 
@@ -17,7 +17,7 @@ RUN conda init bash \
 
 RUN conda install -n snpTree -c bioconda bcftools=1.9 samtools=1.9 phame=1.0.3 \
     perl-bioperl=1.7.8 perl-xml-simple=2.25 perl-xml-libxml=2.0207 perl-bio-phylo=2.0.2 \
-    perl-json=4.10 perl-yaml=1.30
+    perl-json=4.10 perl-yaml=1.30 raxml=8.2.13
 RUN conda install -n snpTree -c conda-forge python=3.7
 RUN conda install -c conda-forge conda-pack=0.8.1
 

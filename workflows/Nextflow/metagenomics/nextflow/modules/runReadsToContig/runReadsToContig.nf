@@ -20,7 +20,7 @@ process validationAlignment {
     path "*.alnstats.txt", emit: alnStats
     path "*_coverage.table", emit: cov_table
     path "*_plots.pdf", emit: contigPlots
-    path "magnitudes.txt", emit: magnitudes
+    path "abundances.txt", emit: magnitudes
     path "Final_contigs.fasta", emit: contig_file, optional:true //not present if using already-assembled contigs
     path "mapping.log", emit: logFile
 
@@ -79,7 +79,7 @@ process validationAlignment {
     $aligner_options &> mapping.log
 
 
-    awk \'{print \$1\"\\t\"\$4}\' ${outPrefix}_coverage.table > magnitudes.txt
+    awk \'{print \$1\"\\t\"\$4}\' ${outPrefix}_coverage.table > abundances.txt
     """
 
 }

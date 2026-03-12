@@ -12,8 +12,8 @@ process readsTaxonomy {
                         --bind=${settings["baseDB"]}:/venv/bin/../../../database \
                         --bind=${settings["baseDB"]}:/venv/opt/krona/taxonomy \
                         ${settings["custom_bwa_db"] != null ? "--bind=${Paths.get(settings["custom_bwa_db"].toString()).getParent()}:/bwa_custom" : ""} \
-                        ${settings["custom_metaphlan_db"] != null ? "--bind=${Paths.get(settings["custom_metaphlan_db"].toString()).getParent()}:/metaphlan_custom" : ""} \
-                        ${settings["custom_kraken_db"] != null ? "--bind=${Paths.get(settings["custom_kraken_db"].toString()).getParent()}:/kraken_custom" : ""} \
+                        ${settings["custom_metaphlan_db"] != null ? "--bind=${Paths.get(settings["custom_metaphlan_db"].toString())}:/metaphlan_custom" : ""} \
+                        ${settings["custom_kraken_db"] != null ? "--bind=${Paths.get(settings["custom_kraken_db"].toString())}:/kraken_custom" : ""} \
                         ${settings["custom_centrifuge_db"] != null ? "--bind=${Paths.get(settings["custom_centrifuge_db"].toString()).getParent()}:/centrifuge_custom" : ""} \
                         ${settings["custom_pangia_db"] != null ? "--bind=${Paths.get(settings["custom_pangia_db"].toString()).getParent()}:/pangia_custom" : ""} \
                         ${settings["custom_diamond_db"] != null ? "--bind=${Paths.get(settings["custom_diamond_db"].toString()).getParent()}:/diamond_custom" : ""} \
@@ -52,7 +52,7 @@ process readsTaxonomy {
     script:
     """
     cat $paired $unpaired > allReads.fastq
-    microbial_profiling.pl -o . \
+    microbial_profiling.pl -o \$PWD \
     -s $taxonomyConfig \
     -c ${task.cpus} \
     allReads.fastq 2>>$errorlog
