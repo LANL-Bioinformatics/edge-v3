@@ -19,6 +19,13 @@ const workflowList = {
       : `${config.NEXTFLOW.WORKFLOW_DIR}/sra2fastq/nextflow/main.nf -profile local`,
     config_tmpl: `${config.NEXTFLOW.WORKFLOW_DIR}/sra2fastq/workflow_config.tmpl`,
   },
+  runFaQCs: {
+    outdir: 'output/ReadsQC',
+    nextflow_main: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/nextflow/main.nf`,
+    config_tmpl: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/templates/workflow_config.tmpl`,
+    zip_output: '<PROJECT>_readsQC.tar.gz',
+    zip_output_cmd: 'cd <PROJECT_HOME>/output && tar -czf <ZIP_OUTPUT> ReadsQC',
+  },
 }
 
 // eslint-disable-next-line no-unused-vars
