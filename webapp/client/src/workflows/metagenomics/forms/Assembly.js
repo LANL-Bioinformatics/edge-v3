@@ -141,10 +141,10 @@ export const Assembly = (props) => {
   }, [props.paramsOn]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (props.allExpand > 0 && !props.disabled) {
+    if (props.allExpand > 0) {
       setCollapseParms(false)
     }
-  }, [props.allExpand]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [props.allExpand])
 
   useEffect(() => {
     if (props.allClosed > 0) {
@@ -213,8 +213,11 @@ export const Assembly = (props) => {
         setOnoff={setOnoff}
         disabled={props.disabled !== undefined ? props.disabled : false}
       />
-      <Collapse isOpen={!collapseParms && form.paramsOn} id={'collapseParameters-' + props.name}>
-        <CardBody>
+      <Collapse
+        isOpen={!collapseParms && form.paramsOn && !props.disabled}
+        id={'collapseParameters-' + props.name}
+      >
+        <CardBody style={props.disabled ? { pointerEvents: 'none', opacity: '0.4' } : {}}>
           <OptionSelector
             name={'assembler'}
             setParams={setMainOption}

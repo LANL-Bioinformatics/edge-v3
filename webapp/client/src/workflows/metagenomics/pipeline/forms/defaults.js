@@ -42,6 +42,7 @@ export const taxClassificationOptions = {
     { value: 'centrifuge', label: 'Centrifuge' },
   ],
 }
+
 export const workflows = {
   runFaQCs: {
     validForm: true,
@@ -736,7 +737,7 @@ export const workflows = {
     },
   },
   binning: {
-    validForm: false,
+    validForm: true,
     errMessage: 'input error',
     paramsOn: true,
     files: [],
@@ -802,25 +803,6 @@ export const workflows = {
           { text: 40, value: 40 },
         ],
       },
-      binningAbundFile: {
-        text: 'Abundance File',
-        tooltip:
-          'Required when input is contig only. Please make sure that your abundance information is provided in the following format (\t stands for a tab delimiter): (contig header)\t(abundance). <br/> \
-           For example: <br/>A0001 30.89<br/>A0002 20.02<br/><br/>Note: Acceptable file name extensions: txt, tsv',
-        value: null,
-        display: null,
-        fileInput: {
-          enableInput: true,
-          placeholder: '(Required) Select a file or enter a file http(s) url',
-          dataSources: ['upload', 'public', 'project'],
-          fileTypes: ['txt', 'tsv'],
-          projectTypes: ['assembly'],
-          projectScope: ['self+shared'],
-          viewFile: false,
-          isOptional: false,
-          cleanupInput: true,
-        },
-      },
       doCheckM: {
         text: 'CheckM',
         tooltip:
@@ -839,7 +821,6 @@ export const workflows = {
         isValid: true,
         error: 'Minimum Contig Length error. Default: 1000, range: 1 - 10000',
       },
-      binningAbundFile: { isValid: false, error: 'Abundance File input error.' },
     },
   },
   antiSmash: {

@@ -9,17 +9,18 @@ import { postData, getData, notify, apis, isValidFileInput } from 'src/edge/comm
 import { LoaderDialog, MessageDialog } from 'src/edge/common/Dialogs'
 import { HtmlText } from 'src/edge/common/HtmlText'
 import { Project } from 'src/edge/project/forms/Project'
-import { InputRawReads } from '../forms/InputRawReads'
+import { InputRawReads } from 'src/edge/project/forms/InputRawReads'
+import { components } from 'src/edge/project/forms/defaults'
 import { RunFaQCs } from '../forms/RunFaQCs'
 import { Assembly } from '../forms/Assembly'
 import { Annotation } from '../forms/Annotation'
-import { Binning } from '../forms/Binning'
+import { Binning } from './forms/Binning'
 import { AntiSmash } from '../forms/AntiSmash'
 import { Taxonomy } from '../forms/Taxonomy'
 import { Phylogeny } from '../forms/Phylogeny'
 import { RefBased } from '../forms/RefBased'
 import { GeneFamily } from '../forms/GeneFamily'
-import { inputRawReads, workflows } from '../defaults'
+import { workflows } from './forms/defaults'
 
 const Main = (props) => {
   const pipeline = 'metagenomics'
@@ -27,7 +28,7 @@ const Main = (props) => {
   const [submitting, setSubmitting] = useState(false)
   const [requestSubmit, setRequestSubmit] = useState(false)
   const [projectParams, setProjectParams] = useState()
-  const [rawDataParams, setRawDataParams] = useState()
+  const [rawDataParams, setRawDataParams] = useState({ ...components.inputRawReads })
   const [selectedWorkflows, setSelectedWorkflows] = useState({ ...workflows })
   const [refGenomeOptions, setRefGenomeOptions] = useState(null)
   const [doValidation, setDoValidation] = useState(0)
@@ -36,8 +37,19 @@ const Main = (props) => {
   const [sysMsg, setSysMsg] = useState()
   const [allExpand, setAllExpand] = useState(0)
   const [allClosed, setAllClosed] = useState(0)
+  const [reloadBinning, setReloadBinning] = useState(0)
   //disable the expand | close
   const disableExpandClose = false
+
+  const updateBinning = () => {
+    if (!selectedWorkflows['assembly'].paramsOn || selectedWorkflows['assembly'].disabled) {
+      selectedWorkflows['binning'].disabled = true
+      selectedWorkflows['binning'].paramsOn = false
+    } else {
+      selectedWorkflows['binning'].disabled = false
+    }
+    setReloadBinning(reloadBinning + 1)
+  }
 
   //callback function for child component
   const setProject = (params) => {
@@ -49,22 +61,6 @@ const Main = (props) => {
   const setRawData = (params) => {
     //console.log('rawData:', params)
     setRawDataParams(params)
-    //disable readsQC
-    if (params.inputs.source.value === 'fasta' && selectedWorkflows['runFaQCs']) {
-      selectedWorkflows['runFaQCs'].paramsOn = false
-      selectedWorkflows['runFaQCs'].disabled = true
-    } else {
-      selectedWorkflows['runFaQCs'].paramsOn = true
-      selectedWorkflows['runFaQCs'].disabled = false
-    }
-    //disable assembly
-    if (params.inputs.source.value === 'fasta' && selectedWorkflows['assembly']) {
-      selectedWorkflows['assembly'].paramsOn = false
-      selectedWorkflows['assembly'].disabled = true
-    } else {
-      selectedWorkflows['assembly'].paramsOn = true
-      selectedWorkflows['assembly'].disabled = false
-    }
     setDoValidation(doValidation + 1)
   }
   const setWorkflowParams = (params, workflowName) => {
@@ -240,6 +236,23 @@ const Main = (props) => {
   }
 
   useEffect(() => {
+    //disable readsQC
+    if (rawDataParams.inputs.source.value === 'fasta') {
+      selectedWorkflows['runFaQCs'].disabled = true
+      selectedWorkflows['assembly'].disabled = true
+      selectedWorkflows['runFaQCs'].paramsOn = false
+      selectedWorkflows['assembly'].paramsOn = false
+    } else {
+      selectedWorkflows['runFaQCs'].disabled = false
+      selectedWorkflows['assembly'].disabled = false
+      selectedWorkflows['runFaQCs'].paramsOn = true
+      selectedWorkflows['assembly'].paramsOn = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rawDataParams.inputs.source.value])
+
+  useEffect(() => {
+    updateBinning()
     setRequestSubmit(true)
 
     if (projectParams && !projectParams.validForm) {
@@ -257,30 +270,26 @@ const Main = (props) => {
   }, [doValidation]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    function loadRefList() {
-      getData('/api/workflow/data/reflist')
-        .then((data) => {
-          return data.reflist.reduce(function (options, ref) {
-            options.push({ value: ref, label: ref.replaceAll('_', ' ') })
-            return options
-          }, [])
-        })
-        .then((options) => {
-          setRefGenomeOptions(options)
-        })
-        .catch((error) => {
-          alert(error)
-        })
+    updateBinning()
+    setRequestSubmit(true)
+
+    if (projectParams && !projectParams.validForm) {
+      setRequestSubmit(false)
     }
-    //load ref list
-    loadRefList()
-    //set default
-    selectedWorkflows['binning'].paramsOn = false
-    selectedWorkflows['phylogeny'].paramsOn = false
-    selectedWorkflows['refBased'].paramsOn = false
-    selectedWorkflows['geneFamily'].paramsOn = false
-    setDoValidation(doValidation + 1)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    if (rawDataParams && !rawDataParams.validForm) {
+      setRequestSubmit(false)
+    }
+
+    Object.keys(selectedWorkflows).forEach((workflow) => {
+      if (
+        selectedWorkflows[workflow].paramsOn &&
+        !selectedWorkflows[workflow].disabled &&
+        !selectedWorkflows[workflow].validForm
+      ) {
+        setRequestSubmit(false)
+      }
+    })
+  }, [doValidation]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     let url = apis.userInfo
@@ -330,19 +339,10 @@ const Main = (props) => {
           <InputRawReads
             setParams={setRawData}
             isValidFileInput={isValidFileInput}
-            source={inputRawReads.source}
-            sourceDisplay={inputRawReads.text}
             sourceOptionsOn={true}
-            sourceOptions={inputRawReads.sourceOptions}
-            text={inputRawReads.text}
-            tooltip={inputRawReads.tooltip}
             title={'Input Raw Reads'}
-            fastqSettings={inputRawReads.fastq}
-            fastaSettings={inputRawReads.fasta}
             isValid={rawDataParams ? rawDataParams.validForm : true}
             errMessage={rawDataParams ? rawDataParams.errMessage : null}
-            allExpand={allExpand}
-            allClosed={allClosed}
           />
           <br></br>
           Choose Processes / Analyses
@@ -448,8 +448,9 @@ const Main = (props) => {
             allClosed={allClosed}
             onoff={true}
             collapseParms={true}
-            paramsOn={false}
+            paramsOn={true}
             disabled={selectedWorkflows['binning'] ? selectedWorkflows['binning'].disabled : false}
+            reload={reloadBinning}
           />
           <AntiSmash
             name={'antiSmash'}
