@@ -76,6 +76,11 @@ do
   fi
 done
 
+echo "Install jbrowse2 cli ... and init jbrowse2 io directory"
+npm install -g @jbrowse/cli
+jbrowse create ${io_home}/jbrowse2 --force
+mkdir -p ${io_home}/jbrowse2/data
+
 echo "Setup LANL EDGE webapp ..."
 #install client
 echo "install client..."
