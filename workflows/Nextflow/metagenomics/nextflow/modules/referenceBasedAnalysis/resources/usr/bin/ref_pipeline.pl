@@ -227,7 +227,7 @@ sub correct_fasta_header {
 		if (/^>(\S+)\s*(.*)/){
 			my $id = $1;
 			my $desc = $2;
-			$id =~ s/\W/_/g;
+			$id =~ s/[^\w.]/_/g;
 			push @headers, $id;
 			if ($id_check{$id}){
 				&lprint("There is duplicate fasta header unique id (first non space word). $id\n");

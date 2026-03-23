@@ -875,7 +875,7 @@ sub fold {
          }
          $seq_name=$1;
          $seq_desc=$2;
-         $seq_name =~ s/\W/\_/g;
+         $seq_name =~ s/[^\w.]/_/g;
          $seq="";
          $seq_num++;
       }

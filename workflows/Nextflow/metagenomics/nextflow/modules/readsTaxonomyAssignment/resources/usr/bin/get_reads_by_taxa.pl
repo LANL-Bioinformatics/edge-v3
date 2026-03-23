@@ -22,7 +22,7 @@ if (scalar(@ARGV)!=3){
 my %hash;
 loadTaxonomy();
 my $target_lineage = taxid2lineage($target_taxID);
-$target_lineage =~ s/\W/_/g;
+$target_lineage =~ s/[^\w.]/_/g;
 #print $target_lineage,"\n";
 if ( -f $file1 || $file1 eq "-") {
   my $fh;
@@ -35,7 +35,7 @@ if ( -f $file1 || $file1 eq "-") {
     my ($readsID,$taxID) = split /\t/;
     $taxID =~ s/ //g;
     my $lineage=taxid2lineage($taxID);
-    $lineage =~ s/\W/_/g;
+    $lineage =~ s/[^\w.]/_/g;
     if ($lineage =~ /$target_lineage/){
     #  print join("\t",$readsID,$taxID,$lineage),"\n";
       $hash{$readsID}=1;

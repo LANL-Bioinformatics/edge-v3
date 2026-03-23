@@ -57,7 +57,7 @@ while (my $line=<$fh>)
         $seq =~ s/(.{70})/$1\n/g; 
         chomp $seq;
         my $fasta_header;
-    $id =~ s/\W/_/g;
+    $id =~ s/[^\w.]/_/g;
         if($do_annotation){
             # genbank format limit the LOCUS name length
             if ($id_mapping){
