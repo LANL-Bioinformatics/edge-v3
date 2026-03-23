@@ -24,6 +24,7 @@ process referenceBasedPipeline {
     path "readsToRef.gaps", emit: gaps
     path "readsToRef.vcf", optional:true, emit: vcf
     path "*.sort.bam", emit: bam
+    path "reference.fasta", emit: referenceFasta
     path "reference.gff", optional:true, emit:gff
     path "*consensus.changelog", optional:true, emit:consensusLogs
     path "*consensus.gaps", optional:true, emit:consensusGaps
@@ -93,6 +94,39 @@ process referenceBasedPipeline {
     """
 
     
+}
+
+process generateJbrowse2Tracks {
+    label "r2g"
+    label "small"
+
+    publishDir(
+        path: "${settings["refBasedOutDir"]}",
+        mode: 'copy'
+    )
+
+    input:
+    val settings
+    path referenceFasta
+    path referenceGff
+    path alignmentBam
+    path variantVcf
+
+    output:
+    path "JBrowse2", emit: jbrowse2
+
+    script:
+    def gffArg = referenceGff.name != "NO_FILE8" ? "--gff $referenceGff" : ""
+    def vcfArg = variantVcf.name != "NO_FILE9" ? "--vcf $variantVcf" : ""
+
+    """
+    jbrowse2_prepare_tracks.sh \
+    --outdir JBrowse2 \
+    --assembly $referenceFasta \
+    --bam $alignmentBam \
+    $gffArg \
+    $vcfArg
+    """
 }
 
 //extracts reads that were unmapped to reference
@@ -342,5 +376,13 @@ workflow REFERENCEBASEDANALYSIS {
             referenceBasedPipeline.out.consensusGaps.ifEmpty("${projectDir}/nf_assets/NO_FILE7"),
             reference)
     }
+
+    generateJbrowse2Tracks(
+        settings,
+        referenceBasedPipeline.out.referenceFasta,
+        referenceBasedPipeline.out.gff.ifEmpty("${projectDir}/nf_assets/NO_FILE8"),
+        referenceBasedPipeline.out.bam,
+        referenceBasedPipeline.out.vcf.ifEmpty("${projectDir}/nf_assets/NO_FILE9")
+    )
 
 }
