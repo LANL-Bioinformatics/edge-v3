@@ -20,7 +20,7 @@ process referenceBasedPipeline {
     path unpaired
 
     output:
-    path "*"
+    path "*", emit: files
     path "readsToRef.gaps", emit: gaps
     path "readsToRef.vcf", optional:true, emit: vcf
     path "*.sort.bam", emit: bam
@@ -100,32 +100,37 @@ process generateJbrowse2Tracks {
     label "r2g"
     label "small"
 
-    publishDir(
-        path: "${settings["refBasedOutDir"]}",
-        mode: 'copy'
-    )
+    containerOptions {
+        def refBasedDir = settings["refBasedOutDir"]
+        def workflowProjectDir = refBasedDir.take(refBasedDir.lastIndexOf("/output/RefBased"))
+        def workflowProjectsBaseDir = workflowProjectDir.take(workflowProjectDir.lastIndexOf('/'))
+        def ioBaseDir = workflowProjectsBaseDir.take(workflowProjectsBaseDir.lastIndexOf('/'))
+        def jbrowse2BaseDir = "${ioBaseDir}/jbrowse2"
+        "--bind=${workflowProjectDir}:${workflowProjectDir} --bind=${jbrowse2BaseDir}:${jbrowse2BaseDir}"
+    }
 
     input:
     val settings
-    path referenceFasta
-    path referenceGff
-    path alignmentBam
-    path variantVcf
+    path refBasedFiles
 
     output:
-    path "JBrowse2", emit: jbrowse2
+    path "jbrowse2.done", emit: jbrowse2
+    path "jbrowse2_path.json", emit: jbrowse2Ui
 
     script:
-    def gffArg = referenceGff.name != "NO_FILE8" ? "--gff $referenceGff" : ""
-    def vcfArg = variantVcf.name != "NO_FILE9" ? "--vcf $variantVcf" : ""
+    def refBasedDir = settings["refBasedOutDir"]
+    def workflowProjectDir = refBasedDir.take(refBasedDir.lastIndexOf("/output/RefBased"))
+    def workflowProjectsBaseDir = workflowProjectDir.take(workflowProjectDir.lastIndexOf('/'))
+    def ioBaseDir = workflowProjectsBaseDir.take(workflowProjectsBaseDir.lastIndexOf('/'))
+    def jbrowse2BaseDir = "${ioBaseDir}/jbrowse2"
 
     """
     jbrowse2_prepare_tracks.sh \
-    --outdir JBrowse2 \
-    --assembly $referenceFasta \
-    --bam $alignmentBam \
-    $gffArg \
-    $vcfArg
+    --project-dir ${workflowProjectDir} \
+    --jbrowse2-base-dir ${jbrowse2BaseDir}
+
+    cp ${refBasedDir}/jbrowse2_path.json .
+    touch jbrowse2.done
     """
 }
 
@@ -379,10 +384,7 @@ workflow REFERENCEBASEDANALYSIS {
 
     generateJbrowse2Tracks(
         settings,
-        referenceBasedPipeline.out.referenceFasta,
-        referenceBasedPipeline.out.gff.ifEmpty("${projectDir}/nf_assets/NO_FILE8"),
-        referenceBasedPipeline.out.bam,
-        referenceBasedPipeline.out.vcf.ifEmpty("${projectDir}/nf_assets/NO_FILE9")
+        referenceBasedPipeline.out.files.collect()
     )
 
 }

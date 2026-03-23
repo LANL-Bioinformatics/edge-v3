@@ -2,32 +2,18 @@
 
 set -euo pipefail
 
-outdir=""
-assembly=""
-gff=""
-bam=""
-vcf=""
+
+project_dir=""
+jbrowse2_base_dir=""
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --outdir)
-            outdir="$2"
+        --project-dir)
+            project_dir="$2"
             shift 2
             ;;
-        --assembly)
-            assembly="$2"
-            shift 2
-            ;;
-        --gff)
-            gff="$2"
-            shift 2
-            ;;
-        --bam)
-            bam="$2"
-            shift 2
-            ;;
-        --vcf)
-            vcf="$2"
+        --jbrowse2-base-dir)
+            jbrowse2_base_dir="$2"
             shift 2
             ;;
         *)
@@ -37,52 +23,153 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-if [[ -z "$outdir" || -z "$assembly" || -z "$bam" ]]; then
-    echo "Usage: $0 --outdir DIR --assembly reference.fasta --bam reads.sort.bam [--gff reference.gff] [--vcf reads.vcf]" >&2
+if [[ -z "$project_dir" || -z "$jbrowse2_base_dir" ]]; then
+    echo "Usage: $0 --project-dir DIR --jbrowse2-base-dir DIR" >&2
     exit 1
 fi
 
+mkdir -p "$project_dir"
+
+shopt -s nullglob
+
+refbased_dir="$project_dir/output/RefBased"
+outdir="$project_dir/output/Jbrowse2"
+config_json="$outdir/ref_config.json"
+ui_json="$refbased_dir/jbrowse2_path.json"
+reference_fasta="$refbased_dir/reference.fasta"
+
 mkdir -p "$outdir"
 
-assembly_base="$(basename "$assembly")"
-bam_base="$(basename "$bam")"
+if [[ ! -s "$reference_fasta" ]]; then
+    echo "Missing reference FASTA: $reference_fasta" >&2
+    exit 1
+fi
 
-cp "$assembly" "$outdir/$assembly_base"
-samtools faidx "$outdir/$assembly_base"
+rm -f "$config_json"
 
-jbrowse create "$outdir" --force
-jbrowse add-assembly "$outdir/$assembly_base" \
-    --out "$outdir" \
-    --load inPlace \
+samtools faidx "$reference_fasta"
+
+declare -A fasta_seq_ids=()
+while read -r seq_id _; do
+    fasta_seq_ids["$seq_id"]=1
+done < <(awk '/^>/ {sub(/^>/, "", $1); print $1}' "$reference_fasta")
+
+first_seq_id="$(awk '/^>/ {sub(/^>/, "", $1); print $1; exit}' "$reference_fasta")"
+
+track_name_from_gff() {
+    local gff_file="$1"
+    local seq_id
+    seq_id="$(awk 'BEGIN { FS = "\t" } $0 !~ /^#/ && NF > 0 { print $1; exit }' "$gff_file")"
+    if [[ -n "$seq_id" && -n "${fasta_seq_ids[$seq_id]:-}" ]]; then
+        printf '%s\n' "$seq_id"
+    else
+        basename "$gff_file" | sed -E 's/\.(gff3|gff)$//'
+    fi
+}
+
+track_name_from_bam() {
+    local bam_file="$1"
+    local seq_id
+    seq_id="$(
+        samtools view -H "$bam_file" | awk '
+            /^@SQ/ {
+                for (i = 1; i <= NF; i++) {
+                    if ($i ~ /^SN:/) {
+                        sub(/^SN:/, "", $i)
+                        print $i
+                        exit
+                    }
+                }
+            }
+        '
+    )"
+    if [[ -n "$seq_id" && -n "${fasta_seq_ids[$seq_id]:-}" ]]; then
+        printf '%s\n' "$seq_id"
+    else
+        basename "$bam_file" .bam
+    fi
+}
+
+track_name_from_vcf() {
+    local vcf_file="$1"
+    local seq_id
+    seq_id="$(awk 'BEGIN { FS = "\t" } $0 !~ /^#/ && NF > 0 { print $1; exit }' "$vcf_file")"
+    if [[ -n "$seq_id" && -n "${fasta_seq_ids[$seq_id]:-}" ]]; then
+        printf '%s\n' "$seq_id"
+    else
+        basename "$vcf_file" | sed -E 's/\.vcf(\.gz)?$//'
+    fi
+}
+
+jbrowse add-assembly \
+    --load copy \
+    --out "$config_json" \
+    "$reference_fasta" \
     --force
 
-cp "$bam" "$outdir/$bam_base"
-samtools index -b "$outdir/$bam_base"
-jbrowse add-track "$outdir/$bam_base" \
-    --out "$outdir" \
-    --load inPlace \
-    --force
 
-if [[ -n "$gff" && -s "$gff" ]]; then
+for gff in "$refbased_dir"/*.gff "$refbased_dir"/*.gff3; do
     gff_base="$(basename "$gff")"
-    sorted_gff="$outdir/${gff_base%.gz}.sorted"
-    awk 'BEGIN { header = 1 } /^#/ && header { print; next } { header = 0; print > "'"$sorted_gff"'.body" }' "$gff" > "$sorted_gff"
-    sort -k1,1 -k4,4n "$sorted_gff.body" >> "$sorted_gff"
-    rm -f "$sorted_gff.body"
-    bgzip -f "$sorted_gff"
-    tabix -f -p gff "$sorted_gff.gz"
-    jbrowse add-track "$sorted_gff.gz" \
-        --out "$outdir" \
-        --load inPlace \
-        --force
-fi
 
-if [[ -n "$vcf" && -s "$vcf" ]]; then
-    vcf_base="$(basename "$vcf")"
-    bgzip -f -c "$vcf" > "$outdir/$vcf_base.gz"
-    tabix -f -p vcf "$outdir/$vcf_base.gz"
-    jbrowse add-track "$outdir/$vcf_base.gz" \
-        --out "$outdir" \
-        --load inPlace \
+    if [[ "$gff_base" == "reference.gff" || "$gff_base" == "reference.gff3" ]]; then
+        continue
+    fi
+
+    gff_gz="$outdir/${gff_base}.gz"
+    bgzip -f -c "$gff" > "$gff_gz"
+    tabix -f -p gff "$gff_gz"
+
+    jbrowse add-track \
+        "$gff_gz" \
+        --load symlink \
+        --out "$config_json" \
+        --category Annotations \
+        --name "$(track_name_from_gff "$gff")" \
         --force
-fi
+
+done
+
+for bam in "$refbased_dir"/*.bam; do
+    if [[ ! -e "${bam}.bai" ]]; then
+        samtools index "$bam"
+    fi
+    jbrowse add-track \
+        "$bam" \
+        --load symlink \
+        --out "$config_json" \
+        --category Alignments \
+        --name "$(track_name_from_bam "$bam")" \
+        --force
+done
+
+for vcf in "$refbased_dir"/*.vcf; do
+    if [[ "$(basename "$vcf")" == "readsToRef.vcf" ]]; then
+        continue
+    fi
+
+    if [[ ! -e "${vcf}.gz" ]]; then
+        bgzip -f -c "$vcf" > "${vcf}.gz"
+    fi
+    if [[ ! -e "${vcf}.gz.tbi" ]]; then
+        tabix -f -p vcf "${vcf}.gz"
+    fi
+    jbrowse add-track \
+        "${vcf}.gz" \
+        --load symlink \
+        --out "$config_json" \
+        --category Variants \
+        --name "$(track_name_from_vcf "$vcf")" \
+        --force
+done
+
+project_id="$(basename "$project_dir")"
+symlinked_jbrowse2_dir="$jbrowse2_base_dir/data/$project_id"
+
+mkdir -p "$jbrowse2_base_dir/data"
+ln -sfn "$outdir" "$symlinked_jbrowse2_dir"
+
+cat > "$ui_json" <<EOF
+{
+  "jbrowse2_path": "jbrowse2/?config=data%2F${project_id}%2Fref_config.json&&loc=${first_seq_id}:1..10000&tracks=reference-ReferenceSequenceTrack&assembly=reference&tracklist=true"
+}
+EOF
