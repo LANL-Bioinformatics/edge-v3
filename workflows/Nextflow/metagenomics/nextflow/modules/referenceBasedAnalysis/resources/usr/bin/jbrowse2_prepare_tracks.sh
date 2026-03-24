@@ -101,6 +101,14 @@ track_name_from_vcf() {
     fi
 }
 
+prepare_gff_for_indexing() {
+    local gff_file="$1"
+    awk '
+        /^##FASTA$/ { exit }
+        { print }
+    ' "$gff_file"
+}
+
 jbrowse add-assembly \
     --load copy \
     --out "$config_json" \
@@ -116,7 +124,7 @@ for gff in "$refbased_dir"/*.gff "$refbased_dir"/*.gff3; do
     fi
 
     gff_gz="$outdir/${gff_base}.gz"
-    bgzip -f -c "$gff" > "$gff_gz"
+    prepare_gff_for_indexing "$gff" | bgzip -f -c > "$gff_gz"
     tabix -f -p gff "$gff_gz"
 
     jbrowse add-track \
