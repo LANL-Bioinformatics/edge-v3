@@ -123,7 +123,7 @@ for gff in "$refbased_dir"/*.gff "$refbased_dir"/*.gff3; do
         continue
     fi
 
-    gff_gz="$outdir/${gff_base}.gz"
+    gff_gz="$gff.gz"
     prepare_gff_for_indexing "$gff" | bgzip -f -c > "$gff_gz"
     tabix -f -p gff "$gff_gz"
 
