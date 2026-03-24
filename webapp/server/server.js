@@ -87,8 +87,6 @@ app.use(
 app.use('/uploads', express.static(config.IO.UPLOADED_FILES_DIR))
 app.use('/publicdata', express.static(config.IO.PUBLIC_BASE_DIR))
 app.use('/workflow-docs', express.static(config.IO.WORKFLOW_DOCS_DIR))
-app.use('/jbrowse2', express.static(config.IO.JBROWSE2_BASE_DIR))
-
 
 // Serving React as static files in Express and redirect url path to React client app
 if (config.NODE_ENV === 'production') {
