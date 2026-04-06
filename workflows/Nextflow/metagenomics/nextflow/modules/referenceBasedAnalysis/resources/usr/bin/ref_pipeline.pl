@@ -116,12 +116,14 @@ sub check_reference_genome
          my $ref_fasta_file="$outputDir/$file_name.fasta";
          if (is_genbank($file))
          {
+             $genbankFile = $file;
              $format{"genbank"}++;
              &lprint ("Converting $file_name Genbank to Fasta and GFF\n");
              if ($file_suffix =~ /gz/)
              {
-		 &executeCommand("gunzip -c $file > $outputDir/$file_name.gbk");
-                 &executeCommand("genbank2fasta.pl $outputDir/$file_name.gbk > $ref_fasta_file");
+                 $genbankFile = "$outputDir/$file_name.gbk";
+		         &executeCommand("gunzip -c $file > $genbankFile");
+                 &executeCommand("genbank2fasta.pl $genbankFile > $ref_fasta_file");
                  &executeCommand("gunzip -c $file >> $referenceGBK");
              }
              else
@@ -129,6 +131,9 @@ sub check_reference_genome
                  &executeCommand("genbank2fasta.pl $file > $ref_fasta_file");
                  &executeCommand("cat $file >> $referenceGBK");
              }	
+             if ( ! -e "$outputDir/$file_name.gff" ){
+                 &executeCommand("genbank2gff3.pl -e 3 --outdir stdout $genbankFile > $outputDir/$file_name.gff");
+             }
          }elsif (is_fasta($file)){
              $format{"fasta"}++;
              if ($file_suffix =~ /gz/){
@@ -145,7 +150,12 @@ sub check_reference_genome
          my $file_gff3="";
          $file_gff3 = "$file_path/$file_name.gff" if ( -e "$file_path/$file_name.gff" );
          $file_gff3 = "$file_path/$file_name.gff3" if ( -e "$file_path/$file_name.gff3" );
-         &executeCommand("cat $file_gff3 >> $gff3File") if ( -e "$file_gff3");
+         if ( -e "$file_gff3"){
+            &executeCommand("cat $file_gff3 >> $gff3File") 
+         }
+            
+         
+
     }
     &executeCommand("genbank2gff3.pl -e 3 --outdir stdout $referenceGBK > $gff3File") if ( -s $referenceGBK && ! -e $gff3File);
     if ( scalar (keys %format) > 1)
@@ -227,7 +237,7 @@ sub correct_fasta_header {
 		if (/^>(\S+)\s*(.*)/){
 			my $id = $1;
 			my $desc = $2;
-			$id =~ s/\W/_/g;
+			$id =~ s/[^\w.]/_/g;
 			push @headers, $id;
 			if ($id_check{$id}){
 				&lprint("There is duplicate fasta header unique id (first non space word). $id\n");

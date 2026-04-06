@@ -208,18 +208,18 @@ workflow {
     }
 
     //report generation
-    REPORT(
-        baseSettings, 
-        platform,
-        counts.ifEmpty{file("${projectDir}/nf_assets/NO_FILE")},
-        qcStats.ifEmpty{file("${projectDir}/nf_assets/NO_FILE2")},
-        qcReport.ifEmpty{file("${projectDir}/nf_assets/NO_FILE3")},
-        hostRemovalReport.ifEmpty{file("${projectDir}/nf_assets/NO_FILE4")},
-        rtaReports.ifEmpty{file("${projectDir}/nf_assets/NO_FILE5")}, 
-        ctaReport.ifEmpty{file("${projectDir}/nf_assets/NO_FILE6")},
-        contigStatsReport.ifEmpty{file("${projectDir}/nf_assets/NO_FILE7")},
-        contigPlots.ifEmpty{file("${projectDir}/nf_assets/NO_FILE8")},
-        annStats.ifEmpty{file("${projectDir}/nf_assets/NO_FILE9")},
-        alnStats.ifEmpty{file("${projectDir}/nf_assets/NO_FILEa")}
-    )
+    //REPORT(
+    //    baseSettings, 
+    //    platform,
+    //    counts.ifEmpty{file("${projectDir}/nf_assets/NO_FILE")},
+    //    qcStats.ifEmpty{file("${projectDir}/nf_assets/NO_FILE2")},
+    //    qcReport.ifEmpty{file("${projectDir}/nf_assets/NO_FILE3")},
+    //    hostRemovalReport.ifEmpty{file("${projectDir}/nf_assets/NO_FILE4")},
+    //    rtaReports.ifEmpty{file("${projectDir}/nf_assets/NO_FILE5")}, 
+    //    ctaReport.ifEmpty{file("${projectDir}/nf_assets/NO_FILE6")},
+    //    contigStatsReport.ifEmpty{file("${projectDir}/nf_assets/NO_FILE7")},
+    //    contigPlots.ifEmpty{file("${projectDir}/nf_assets/NO_FILE8")},
+    //    annStats.ifEmpty{file("${projectDir}/nf_assets/NO_FILE9")},
+    //    alnStats.ifEmpty{file("${projectDir}/nf_assets/NO_FILEa")}
+    //)
 }
