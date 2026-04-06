@@ -227,6 +227,45 @@ const metaGWorkflowResult = (outdir, workflow, projCode) => {
       result[workflow].treeCdsHtml =
         `${outdir.replace(pattern, '')}/SNPphyloTree.cds.html`
     }
+  } else if (workflow === 'refBased') {
+    // summary table for reads aligned to reference
+    const statsFile = `${outdir}/readsToRef.alnstats.txt`
+    if (fs.existsSync(statsFile)) {
+      result[workflow].summary = Papa.parse(
+        fs.readFileSync(statsFile).toString(),
+        {
+          delimiter: '\t',
+          header: true,
+          skipEmptyLines: true,
+        },
+      ).data
+    }
+    // base_coverage plot and histogram plot for each reference
+    const pngFiles = fs
+      .readdirSync(`${outdir}/Coverage_plots`)
+      .filter(file => file.endsWith('.png'))
+    if (pngFiles.length > 0) {
+      result[workflow].coveragePlots = pngFiles.map(
+        file => `${outdir.replace(pattern, '')}/Coverage_plots/${file}`,
+      )
+    }
+    // snps
+    const snpsFile = `${outdir}/readsToRef.SNPs_report.json`
+    if (fs.existsSync(snpsFile)) {
+      result[workflow].snps = JSON.parse(fs.readFileSync(snpsFile)).data
+    }
+    // indels
+    const indelsFile = `${outdir}/readsToRef.Indels_report.json`
+    if (fs.existsSync(indelsFile)) {
+      result[workflow].indels = JSON.parse(fs.readFileSync(indelsFile)).data
+    }
+    // jbrowse url for reference-based workflow
+    const jbrowseUrlFile = `${outdir}/jbrowse2_path.json`
+    if (fs.existsSync(jbrowseUrlFile)) {
+      result[workflow].jbrowse = JSON.parse(
+        fs.readFileSync(jbrowseUrlFile),
+      ).jbrowse2_path
+    }
   }
 
   return result
@@ -272,6 +311,11 @@ const generateWorkflowResult = proj => {
       result = {
         ...result,
         ...metaGWorkflowResult(outdir, 'phylogeny', proj.code).phylogeny,
+      }
+    } else if (projectConf.workflow.name === 'refBased') {
+      result = {
+        ...result,
+        ...metaGWorkflowResult(outdir, 'refBased', proj.code).refBased,
       }
     } else if (projectConf.workflow.name === 'metagenomics') {
       projectConf.pipeline.forEach(workflow => {

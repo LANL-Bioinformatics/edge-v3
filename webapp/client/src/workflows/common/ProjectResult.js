@@ -9,6 +9,7 @@ import { Assembly } from '../metagenomics/results/Assembly'
 import { Binning } from '../metagenomics/results/Binning'
 import { Phylogeny } from '../metagenomics/results/Phylogeny'
 import { AntiSmash } from '../metagenomics/results/AntiSmash'
+import { RefBased } from '../metagenomics/results/RefBased'
 import { MetaG } from '../metagenomics/pipeline/results/MetaG'
 
 const ProjectResult = (props) => {
@@ -256,6 +257,15 @@ const ProjectResult = (props) => {
               )}
               {project.type === 'antiSmash' && (
                 <AntiSmash
+                  result={result}
+                  project={project}
+                  userType={type}
+                  allExpand={allExpand}
+                  allClosed={allClosed}
+                />
+              )}
+              {project.type === 'refBased' && (
+                <RefBased
                   result={result}
                   project={project}
                   userType={type}
