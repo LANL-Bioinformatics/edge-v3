@@ -20,10 +20,11 @@ process referenceBasedPipeline {
     path unpaired
 
     output:
-    path "*"
+    path "*", emit: files
     path "readsToRef.gaps", emit: gaps
     path "readsToRef.vcf", optional:true, emit: vcf
     path "*.sort.bam", emit: bam
+    path "reference.fasta", emit: referenceFasta
     path "reference.gff", optional:true, emit:gff
     path "*consensus.changelog", optional:true, emit:consensusLogs
     path "*consensus.gaps", optional:true, emit:consensusGaps
@@ -93,6 +94,44 @@ process referenceBasedPipeline {
     """
 
     
+}
+
+process generateJbrowse2Tracks {
+    label "r2g"
+    label "small"
+
+    containerOptions {
+        def refBasedDir = settings["refBasedOutDir"]
+        def workflowProjectDir = refBasedDir.take(refBasedDir.lastIndexOf("/output/RefBased"))
+        def workflowProjectsBaseDir = workflowProjectDir.take(workflowProjectDir.lastIndexOf('/'))
+        def ioBaseDir = workflowProjectsBaseDir.take(workflowProjectsBaseDir.lastIndexOf('/'))
+        def jbrowse2BaseDir = "${ioBaseDir}/jbrowse2"
+        "--bind=${workflowProjectDir}:${workflowProjectDir} --bind=${jbrowse2BaseDir}:${jbrowse2BaseDir}"
+    }
+
+    input:
+    val settings
+    path refBasedFiles
+
+    output:
+    path "jbrowse2.done", emit: jbrowse2
+    path "jbrowse2_path.json", emit: jbrowse2Ui
+
+    script:
+    def refBasedDir = settings["refBasedOutDir"]
+    def workflowProjectDir = refBasedDir.take(refBasedDir.lastIndexOf("/output/RefBased"))
+    def workflowProjectsBaseDir = workflowProjectDir.take(workflowProjectDir.lastIndexOf('/'))
+    def ioBaseDir = workflowProjectsBaseDir.take(workflowProjectsBaseDir.lastIndexOf('/'))
+    def jbrowse2BaseDir = "${ioBaseDir}/jbrowse2"
+
+    """
+    jbrowse2_prepare_tracks.sh \
+    --project-dir ${workflowProjectDir} \
+    --jbrowse2-base-dir ${jbrowse2BaseDir}
+
+    cp ${refBasedDir}/jbrowse2_path.json .
+    touch jbrowse2.done
+    """
 }
 
 //extracts reads that were unmapped to reference
@@ -342,5 +381,10 @@ workflow REFERENCEBASEDANALYSIS {
             referenceBasedPipeline.out.consensusGaps.ifEmpty("${projectDir}/nf_assets/NO_FILE7"),
             reference)
     }
+
+    generateJbrowse2Tracks(
+        settings,
+        referenceBasedPipeline.out.files.collect()
+    )
 
 }
