@@ -32,7 +32,17 @@ export const Annotation = (props) => {
       />
       <Collapse isOpen={!collapseCard}>
         <CardBody>
-          <h5>Summary</h5>
+          <span className="edge-text-size-large edge-text-bold">Summary</span>{' '}
+          <a
+            className="edge-link"
+            href={`${url}${props.result.stats}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            [full]
+          </a>
+          <br></br>
+          <br></br>
           {props.result.stats && (
             <>
               <PdfViewer pdf={`${url}${props.result.stats}`} />
@@ -40,15 +50,17 @@ export const Annotation = (props) => {
               <br></br>
             </>
           )}
-          <h5>Opaver Web Path</h5>
+          <span className="edge-text-size-large edge-text-bold">Opaver Web Path</span>{' '}
           <a
-            className="edge-link edge-text-size-small"
+            className="edge-link"
             href={`${config.APP.BASE_URI}/${props.result.opaver_web}`}
             target="_blank"
             rel="noopener noreferrer"
           >
-            [full window view]
+            [full]
           </a>
+          <br></br>
+          <br></br>
           {props.result.opaver_web && (
             <>
               <embed

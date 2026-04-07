@@ -111,7 +111,9 @@ export const RefBased = (props) => {
         <CardBody>
           {props.result.summary && (
             <>
-              <h5>Summary</h5>
+              <span className="edge-text-size-large edge-text-bold">Summary</span>
+              <br></br>
+              <br></br>
               <ThemeProvider theme={theme}>
                 <MaterialReactTable
                   columns={summaryColumns}
@@ -131,7 +133,11 @@ export const RefBased = (props) => {
           )}
           {coveragePlots.length > 0 && (
             <>
-              <h5>Reference Genome Coverage Plots</h5>
+              <span className="edge-text-size-large edge-text-bold">
+                Reference Genome Coverage Plots
+              </span>
+              <br></br>
+              <br></br>
               <Row key="coveragePlots">
                 {coveragePlots.map((plot, id) => (
                   <Col key={plot.plotId} xs="12" md="3" lg="3">
@@ -161,7 +167,9 @@ export const RefBased = (props) => {
           )}
           {props.result.snps && (
             <>
-              <h5>SNPs</h5>
+              <span className="edge-text-size-large edge-text-bold">SNPs</span>
+              <br></br>
+              <br></br>
               <ThemeProvider theme={theme}>
                 <MaterialReactTable
                   key={'snps-table'}
@@ -189,7 +197,9 @@ export const RefBased = (props) => {
           )}
           {props.result.indels && (
             <>
-              <h5>Indels</h5>
+              <span className="edge-text-size-large edge-text-bold">Indels</span>
+              <br></br>
+              <br></br>
               <ThemeProvider theme={theme}>
                 <MaterialReactTable
                   key={'indels-table'}
@@ -217,15 +227,16 @@ export const RefBased = (props) => {
           )}
           {props.result.jbrowse && (
             <>
-              <h5>Genome Context</h5>
+              <span className="edge-text-size-large edge-text-bold">Genome Context</span>{' '}
               <a
                 href={`${config.APP.BASE_URI}/${props.result.jbrowse}`}
                 target="_blank"
                 rel="noreferrer"
-                className="edge-text-size-small"
+                className="edge-link"
               >
-                [full window view]
+                [full]
               </a>
+              <br></br>
               <div key={'refBased-jbrowse'}>
                 <embed
                   key={'refBased-jbrowse-embed'}
