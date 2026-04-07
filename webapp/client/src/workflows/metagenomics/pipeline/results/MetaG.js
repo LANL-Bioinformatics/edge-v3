@@ -1,5 +1,6 @@
 import { RunFaQCs } from '../../results/RunFaQCs'
 import { Assembly } from '../../results/Assembly'
+import { Annotation } from '../../results/Annotation'
 import { Binning } from '../../results/Binning'
 import { AntiSmash } from '../../results/AntiSmash'
 import { Phylogeny } from '../../results/Phylogeny'
@@ -25,6 +26,18 @@ export const MetaG = (props) => {
         } else if (workflow === 'assembly') {
           return (
             <Assembly
+              key={index}
+              result={props.result[workflow]}
+              project={props.project}
+              title={workflows[workflow].title + ' Result'}
+              userType={props.type}
+              allExpand={props.allExpand}
+              allClosed={props.allClosed}
+            />
+          )
+        } else if (workflow === 'annotation') {
+          return (
+            <Annotation
               key={index}
               result={props.result[workflow]}
               project={props.project}

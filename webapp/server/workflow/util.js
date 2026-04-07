@@ -197,6 +197,13 @@ const metaGWorkflowResult = (outdir, workflow, projCode) => {
       result[workflow].report =
         `${outdir.replace(pattern, '')}/final_report.pdf`
     }
+  } else if (workflow === 'annotation') {
+    const statsFile = `${outdir}/annotation_stats_plots.pdf`
+    if (fs.existsSync(statsFile)) {
+      result[workflow].stats = statsFile.replace(pattern, '')
+    }
+    result[workflow].opaver_web =
+      `opaver_web/pathway_anno.html?data=${projCode}`
   } else if (workflow === 'binning') {
     const statsFile = `${outdir}/contigs_stats.txt`
     if (fs.existsSync(statsFile)) {
@@ -296,6 +303,11 @@ const generateWorkflowResult = proj => {
       result = {
         ...result,
         ...metaGWorkflowResult(outdir, 'assembly', proj.code).assembly,
+      }
+    } else if (projectConf.workflow.name === 'annotation') {
+      result = {
+        ...result,
+        ...metaGWorkflowResult(outdir, 'annotation', proj.code).annotation,
       }
     } else if (projectConf.workflow.name === 'binning') {
       result = {
