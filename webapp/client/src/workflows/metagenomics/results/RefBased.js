@@ -118,11 +118,6 @@ export const RefBased = (props) => {
                 <MaterialReactTable
                   columns={summaryColumns}
                   data={summaryData}
-                  enableColumnActions={false}
-                  enableColumnFilters={false}
-                  enablePagination={false}
-                  enableSorting={false}
-                  enableBottomToolbar={false}
                   enableFullScreenToggle={false}
                   initialState={{ density: 'compact' }}
                 />
@@ -175,11 +170,6 @@ export const RefBased = (props) => {
                   key={'snps-table'}
                   columns={snpsColumns}
                   data={snpsData}
-                  enableColumnActions={false}
-                  enableColumnFilters={false}
-                  enablePagination={true}
-                  enableSorting={false}
-                  enableBottomToolbar={true}
                   enableFullScreenToggle={false}
                   initialState={{
                     density: 'compact',
@@ -205,11 +195,6 @@ export const RefBased = (props) => {
                   key={'indels-table'}
                   columns={indelsColumns}
                   data={indelsData}
-                  enableColumnActions={false}
-                  enableColumnFilters={false}
-                  enablePagination={true}
-                  enableSorting={false}
-                  enableBottomToolbar={true}
                   enableFullScreenToggle={false}
                   initialState={{
                     density: 'compact',
