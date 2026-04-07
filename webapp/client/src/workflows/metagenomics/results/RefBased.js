@@ -79,7 +79,7 @@ export const RefBased = (props) => {
             plotId = `${pngFilename.replace('readsToRef_', '').replace('_coverage_histogram.png', '')} Fold`
           }
 
-          return { plotId: plotId, plotPath: `${url}/${plot}` }
+          return { plotId: plotId, plotPath: `${url}${plot}` }
         }),
       )
     }
@@ -132,22 +132,24 @@ export const RefBased = (props) => {
             <>
               <h5>Reference Genome Coverage Plots</h5>
               <Row key="coveragePlots">
-                {coveragePlots.map((plot) => (
+                {coveragePlots.map((plot, id) => (
                   <Col key={plot.plotId} xs="12" md="3" lg="3">
-                    {`${plot.plotId}`} &nbsp;
-                    <a
-                      className="edge-link edge-text-size-small"
-                      href={plot.plotPath}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      [full]
-                    </a>
-                    <img
-                      key={`plot-${plot.plotId}`}
-                      src={plot.plotPath}
-                      style={{ width: '100%', height: 'auto' }}
-                    />
+                    <span className="pt-3 edge-text-size-small">{`${plot.plotId}`}</span>
+                    <br></br>
+                    <span key={id} title="Click to view the image in full screen">
+                      <a
+                        className="edge-link edge-text-size-small"
+                        href={plot.plotPath}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <img
+                          key={`plot-${plot.plotId}`}
+                          src={plot.plotPath}
+                          style={{ width: '100%', height: 'auto' }}
+                        />
+                      </a>
+                    </span>
                     <br></br>
                     <br></br>
                   </Col>
