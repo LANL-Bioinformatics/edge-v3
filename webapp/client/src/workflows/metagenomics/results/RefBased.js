@@ -121,6 +121,7 @@ export const RefBased = (props) => {
                   enablePagination={false}
                   enableSorting={false}
                   enableBottomToolbar={false}
+                  enableFullScreenToggle={false}
                   initialState={{ density: 'compact' }}
                 />
               </ThemeProvider>
@@ -171,6 +172,7 @@ export const RefBased = (props) => {
                   enablePagination={true}
                   enableSorting={false}
                   enableBottomToolbar={true}
+                  enableFullScreenToggle={false}
                   initialState={{
                     density: 'compact',
                     pagination: {
@@ -198,6 +200,7 @@ export const RefBased = (props) => {
                   enablePagination={true}
                   enableSorting={false}
                   enableBottomToolbar={true}
+                  enableFullScreenToggle={false}
                   initialState={{
                     density: 'compact',
                     pagination: {
