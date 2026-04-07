@@ -37,11 +37,17 @@ export const Phylogeny = (props) => {
         <CardBody>
           {props.result.treeAllHtml && (
             <>
-              <b>SNPphyloTree All</b>
-              <br></br>
-              <a href={`${url}${props.result.treeAllHtml}`} target="_blank" rel="noreferrer">
-                [Full Window View]
+              <span className="edge-text-size-large edge-text-bold">SNPphyloTree All</span>{' '}
+              <a
+                className="edge-link"
+                href={`${url}${props.result.treeAllHtml}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                [Full]
               </a>
+              <br></br>
+              <br></br>
               <iframe
                 key={iframeKey}
                 src={`${url}${props.result.treeAllHtml}`}
@@ -53,11 +59,17 @@ export const Phylogeny = (props) => {
           )}
           {props.result.treeAllHtml && (
             <>
-              <b>SNPphyloTree CDS</b>
-              <br></br>
-              <a href={`${url}${props.result.treeCdsHtml}`} target="_blank" rel="noreferrer">
-                [Full Window View]
+              <span className="edge-text-size-large edge-text-bold">SNPphyloTree CDS</span>{' '}
+              <a
+                className="edge-link"
+                href={`${url}${props.result.treeCdsHtml}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                [Full]
               </a>
+              <br></br>
+              <br></br>
               <iframe
                 key={iframeKey2}
                 src={`${url}${props.result.treeCdsHtml}`}

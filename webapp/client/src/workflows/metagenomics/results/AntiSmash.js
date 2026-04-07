@@ -34,7 +34,12 @@ export const AntiSmash = (props) => {
         <CardBody>
           {props.result.antiSmashHtml && (
             <>
-              <a href={url + props.result.antiSmashHtml} target="_blank" rel="noreferrer">
+              <a
+                className="edge-link"
+                href={url + props.result.antiSmashHtml}
+                target="_blank"
+                rel="noreferrer"
+              >
                 [full window view]
               </a>
               <br></br>

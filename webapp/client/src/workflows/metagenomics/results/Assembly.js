@@ -34,7 +34,12 @@ export const Assembly = (props) => {
         <CardBody>
           {props.result.report && (
             <>
-              <a href={url + props.result.report} target="_blank" rel="noreferrer">
+              <a
+                className="edge-link"
+                href={url + props.result.report}
+                target="_blank"
+                rel="noreferrer"
+              >
                 [Assembly Report]
               </a>
               <br></br>

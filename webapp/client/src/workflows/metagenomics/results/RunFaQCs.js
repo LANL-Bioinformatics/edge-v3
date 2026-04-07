@@ -39,7 +39,12 @@ export const RunFaQCs = (props) => {
           )}
           {props.result.report && (
             <>
-              <a href={`${url}${props.result.report}`} target="_blank" rel="noreferrer">
+              <a
+                className="edge-link"
+                href={`${url}${props.result.report}`}
+                target="_blank"
+                rel="noreferrer"
+              >
                 [Detailed QC Report]
               </a>
               <div key={'readsQC-summary'}>
