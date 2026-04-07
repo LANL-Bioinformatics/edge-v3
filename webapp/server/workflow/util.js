@@ -248,13 +248,15 @@ const metaGWorkflowResult = (outdir, workflow, projCode) => {
       ).data
     }
     // base_coverage plot and histogram plot for each reference
-    const pngFiles = fs
-      .readdirSync(`${outdir}/Coverage_plots`)
-      .filter(file => file.endsWith('.png'))
-    if (pngFiles.length > 0) {
-      result[workflow].coveragePlots = pngFiles.map(
-        file => `${outdir.replace(pattern, '')}/Coverage_plots/${file}`,
-      )
+    if (fs.existsSync(`${outdir}/Coverage_plots`)) {
+      const pngFiles = fs
+        .readdirSync(`${outdir}/Coverage_plots`)
+        .filter(file => file.endsWith('.png'))
+      if (pngFiles.length > 0) {
+        result[workflow].coveragePlots = pngFiles.map(
+          file => `${outdir.replace(pattern, '')}/Coverage_plots/${file}`,
+        )
+      }
     }
     // snps
     const snpsFile = `${outdir}/readsToRef.SNPs_report.json`
