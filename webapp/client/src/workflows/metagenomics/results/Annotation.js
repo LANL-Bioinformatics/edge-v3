@@ -45,7 +45,7 @@ export const Annotation = (props) => {
           <br></br>
           {props.result.stats && (
             <>
-              <PdfViewer pdf={`${url}${props.result.stats}`} />
+              <PdfViewer pdf={`${url}${props.result.stats}`} scale={'1.2'} />
               <br></br>
               <br></br>
             </>
