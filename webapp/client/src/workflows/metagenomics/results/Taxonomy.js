@@ -45,6 +45,19 @@ export const Taxonomy = (props) => {
             header: columnId,
             accessorKey: columnId,
             id: columnId,
+            Cell: ({ cell }) =>
+              columnId.startsWith('TOP') && cell.getValue() && cell.getValue() !== 'N/A' ? (
+                <a
+                  className="edge-link"
+                  href={`https://www.ncbi.nlm.nih.gov/datasets/taxonomy/${cell.getValue()}/`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {cell.getValue()}
+                </a>
+              ) : (
+                cell.getValue()
+              ),
           }))
         : [],
     [summaryData],
