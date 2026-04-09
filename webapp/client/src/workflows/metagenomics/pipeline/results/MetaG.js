@@ -3,6 +3,7 @@ import { Assembly } from '../../results/Assembly'
 import { Annotation } from '../../results/Annotation'
 import { Binning } from '../../results/Binning'
 import { AntiSmash } from '../../results/AntiSmash'
+import { Taxonomy } from '../../results/Taxonomy'
 import { Phylogeny } from '../../results/Phylogeny'
 import { RefBased } from '../../results/RefBased'
 import { workflows } from '../../defaults'
@@ -62,6 +63,18 @@ export const MetaG = (props) => {
         } else if (workflow === 'antiSmash') {
           return (
             <AntiSmash
+              key={index}
+              result={props.result[workflow]}
+              project={props.project}
+              title={workflows[workflow].title + ' Result'}
+              userType={props.type}
+              allExpand={props.allExpand}
+              allClosed={props.allClosed}
+            />
+          )
+        } else if (workflow === 'taxonomy') {
+          return (
+            <Taxonomy
               key={index}
               result={props.result[workflow]}
               project={props.project}

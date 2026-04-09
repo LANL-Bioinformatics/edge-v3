@@ -223,6 +223,97 @@ const metaGWorkflowResult = (outdir, workflow, projCode) => {
       result[workflow].antiSmashHtml =
         `${outdir.replace(pattern, '')}/output/index.html`
     }
+  } else if (workflow === 'taxonomy') {
+    // summary table for taxonomy annotation
+    const summaryFile = `${outdir}/report/summary.txt`
+    if (fs.existsSync(summaryFile)) {
+      result[workflow].summary = Papa.parse(
+        fs.readFileSync(summaryFile).toString(),
+        {
+          delimiter: '\t',
+          header: true,
+          skipEmptyLines: true,
+        },
+      ).data
+    }
+    // figures for taxonomy annotation
+    // Taxonomy/report/heatmap_DATASET-allReads.genus.pdf
+    // Taxonomy/report/heatmap_DATASET-allReads.species.pdf
+    // Taxonomy/report/heatmap_DATASET-allReads.strain.pdf
+    // Taxonomy/report/radarchart_DATASET_allReads.genus.html
+    // Taxonomy/report/radarchart_DATASET_allReads.species.html
+    // Taxonomy/report/radarchart_DATASET_allReads.strain.html
+    result[workflow].genus = {}
+    result[workflow].species = {}
+    result[workflow].strain = {}
+    const heatmapGenus = `${outdir}/report/heatmap_DATASET-allReads.genus.pdf`
+    if (fs.existsSync(heatmapGenus)) {
+      result[workflow].genus.heatmap =
+        `${outdir.replace(pattern, '')}/report/heatmap_DATASET-allReads.genus.pdf`
+    }
+    const heatmapSpecies = `${outdir}/report/heatmap_DATASET-allReads.species.pdf`
+    if (fs.existsSync(heatmapSpecies)) {
+      result[workflow].species.heatmap =
+        `${outdir.replace(pattern, '')}/report/heatmap_DATASET-allReads.species.pdf`
+    }
+    const heatmapStrain = `${outdir}/report/heatmap_DATASET-allReads.strain.pdf`
+    if (fs.existsSync(heatmapStrain)) {
+      result[workflow].strain.heatmap =
+        `${outdir.replace(pattern, '')}/report/heatmap_DATASET-allReads.strain.pdf`
+    }
+    const radarGenus = `${outdir}/report/radarchart_DATASET_allReads.genus.html`
+    if (fs.existsSync(radarGenus)) {
+      result[workflow].genus.radar =
+        `${outdir.replace(pattern, '')}/report/radarchart_DATASET_allReads.genus.html`
+    }
+    const radarSpecies = `${outdir}/report/radarchart_DATASET_allReads.species.html`
+    if (fs.existsSync(radarSpecies)) {
+      result[workflow].species.radar =
+        `${outdir.replace(pattern, '')}/report/radarchart_DATASET_allReads.species.html`
+    }
+    const radarStrain = `${outdir}/report/radarchart_DATASET_allReads.strain.html`
+    if (fs.existsSync(radarStrain)) {
+      result[workflow].strain.radar =
+        `${outdir.replace(pattern, '')}/report/radarchart_DATASET_allReads.strain.html`
+    }
+    // Individual Tools result table and figures
+    if (fs.existsSync(`${outdir}/report/1_allReads`)) {
+      const tools = fs
+        .readdirSync(`${outdir}/report/1_allReads`)
+        .filter(file =>
+          fs.statSync(`${outdir}/report/1_allReads/${file}`).isDirectory(),
+        )
+      result[workflow].tools = {}
+      tools.forEach(tool => {
+        result[workflow].tools[tool] = {}
+        // table
+        // tool/allReads-tool.list.txt
+        const toolTable = `${outdir}/report/1_allReads/${tool}/allReads-${tool}.list.txt`
+        if (fs.existsSync(toolTable)) {
+          result[workflow].tools[tool].table = Papa.parse(
+            fs.readFileSync(toolTable).toString(),
+            {
+              delimiter: '\t',
+              header: true,
+              skipEmptyLines: true,
+            },
+          ).data.filter(row =>
+            Object.values(row).some(value => value === 'species'),
+          )
+        }
+        // figures
+        // gottcha-genDB-b/allReads-gottcha-genDB-b.krona.html
+        // gottcha-genDB-b/allReads-gottcha-genDB-b.tree.svg
+        const toolKrona = `${outdir}/report/1_allReads/${tool}/allReads-${tool}.krona.html`
+        if (fs.existsSync(toolKrona)) {
+          result[workflow].tools[tool].krona = toolKrona.replace(pattern, '')
+        }
+        const toolTree = `${outdir}/report/1_allReads/${tool}/allReads-${tool}.tree.svg`
+        if (fs.existsSync(toolTree)) {
+          result[workflow].tools[tool].tree = toolTree.replace(pattern, '')
+        }
+      })
+    }
   } else if (workflow === 'phylogeny') {
     const treeAllHtml = `${outdir}/SNPphyloTree.all.html`
     if (fs.existsSync(treeAllHtml)) {
@@ -320,6 +411,11 @@ const generateWorkflowResult = proj => {
       result = {
         ...result,
         ...metaGWorkflowResult(outdir, 'antiSmash', proj.code).antiSmash,
+      }
+    } else if (projectConf.workflow.name === 'taxonomy') {
+      result = {
+        ...result,
+        ...metaGWorkflowResult(outdir, 'taxonomy', proj.code).taxonomy,
       }
     } else if (projectConf.workflow.name === 'phylogeny') {
       result = {

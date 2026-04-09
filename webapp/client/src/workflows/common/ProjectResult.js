@@ -10,6 +10,7 @@ import { Annotation } from '../metagenomics/results/Annotation'
 import { Binning } from '../metagenomics/results/Binning'
 import { Phylogeny } from '../metagenomics/results/Phylogeny'
 import { AntiSmash } from '../metagenomics/results/AntiSmash'
+import { Taxonomy } from '../metagenomics/results/Taxonomy'
 import { RefBased } from '../metagenomics/results/RefBased'
 import { MetaG } from '../metagenomics/pipeline/results/MetaG'
 
@@ -256,6 +257,15 @@ const ProjectResult = (props) => {
                   allClosed={allClosed}
                 />
               )}
+              {project.type === 'antiSmash' && (
+                <AntiSmash
+                  result={result}
+                  project={project}
+                  userType={type}
+                  allExpand={allExpand}
+                  allClosed={allClosed}
+                />
+              )}
               {project.type === 'phylogeny' && (
                 <Phylogeny
                   result={result}
@@ -265,8 +275,8 @@ const ProjectResult = (props) => {
                   allClosed={allClosed}
                 />
               )}
-              {project.type === 'antiSmash' && (
-                <AntiSmash
+              {project.type === 'taxonomy' && (
+                <Taxonomy
                   result={result}
                   project={project}
                   userType={type}
