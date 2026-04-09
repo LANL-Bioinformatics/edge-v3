@@ -75,6 +75,19 @@ export const Taxonomy = (props) => {
           header: columnId,
           accessorKey: columnId,
           id: columnId,
+          Cell: ({ cell }) =>
+            columnId === 'TAXID' && cell.getValue() ? (
+              <a
+                className="edge-link"
+                href={`https://www.ncbi.nlm.nih.gov/datasets/taxonomy/${cell.getValue()}/`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {cell.getValue()}
+              </a>
+            ) : (
+              cell.getValue()
+            ),
         }))
         setToolTableColumns((prev) => ({ ...prev, [tool]: columns }))
       }
