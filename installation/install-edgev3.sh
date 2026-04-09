@@ -18,7 +18,6 @@ if [ ! -d  $io_home ]; then
     "sra"
     "db"
     "bulksubmissions"
-    "opaver_web"
   )
 
   for dir in "${dirs[@]}"
@@ -30,6 +29,12 @@ if [ ! -d  $io_home ]; then
   if [ -d  $test_data_home ]; then
     ln -s ${test_data_home} ${io_home}/public/test_data
   fi
+
+  opaver_web_home=$app_home/workflows/data/opaver_web
+  if [ -d  $opaver_web_home ]; then
+    ln -s ${opaver_web_home} ${io_home}/opaver_web
+  fi
+
 fi
 
 echo "Generate Cromwell wdl imports.zip"
