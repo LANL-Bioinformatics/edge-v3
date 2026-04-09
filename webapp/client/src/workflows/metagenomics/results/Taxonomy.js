@@ -76,7 +76,16 @@ export const Taxonomy = (props) => {
           accessorKey: columnId,
           id: columnId,
           Cell: ({ cell }) =>
-            columnId === 'TAXID' && cell.getValue() ? (
+            columnId === 'TAXA' && cell.getValue() ? (
+              <a
+                className="edge-link"
+                href={`https://www.ncbi.nlm.nih.gov/datasets/taxonomy/${cell.getValue()}/`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {cell.getValue()}
+              </a>
+            ) : columnId === 'NAME' && cell.getValue() ? (
               <a
                 className="edge-link"
                 href={`https://www.ncbi.nlm.nih.gov/datasets/taxonomy/${cell.getValue()}/`}
