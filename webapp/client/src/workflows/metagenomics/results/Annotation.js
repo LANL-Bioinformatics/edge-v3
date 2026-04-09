@@ -63,7 +63,7 @@ export const Annotation = (props) => {
           <br></br>
           {props.result.opaver_web && (
             <>
-              <embed
+              <iframe
                 key={`opaver-${props.project.code}`}
                 src={`${config.APP.BASE_URI}/${props.result.opaver_web}`}
                 className="edge-iframe"

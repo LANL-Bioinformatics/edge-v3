@@ -238,7 +238,7 @@ export const Taxonomy = (props) => {
                           [full]
                         </a>
                         <br></br>
-                        <embed
+                        <iframe
                           key={'radar-' + taxLevel}
                           className="edge-iframe"
                           src={`${url}${props.result[taxLevel].radar}`}
@@ -320,7 +320,7 @@ export const Taxonomy = (props) => {
                           </a>
                           <br></br>
                           <br></br>
-                          <embed
+                          <iframe
                             key={`krona-${tool.value}`}
                             className="edge-iframe"
                             src={`${url}${props.result.tools[tool.value].krona}`}

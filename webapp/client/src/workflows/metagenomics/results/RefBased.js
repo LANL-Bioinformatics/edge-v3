@@ -223,8 +223,8 @@ export const RefBased = (props) => {
               </a>
               <br></br>
               <div key={'refBased-jbrowse'}>
-                <embed
-                  key={'refBased-jbrowse-embed'}
+                <iframe
+                  key={'refBased-jbrowse-iframe'}
                   src={`${config.APP.BASE_URI}/${props.result.jbrowse}`}
                   className="edge-iframe"
                   title={'jbrowse'}
