@@ -26,6 +26,9 @@ const {
   getRunStats,
   getProjectsByType,
 } = require('../controllers/auth-user-project-controller')
+const {
+  getOutputTreeData,
+} = require('../controllers/common-project-controller')
 
 /**
  * @swagger
@@ -425,6 +428,14 @@ router.get(
   },
 )
 
+router.get(
+  '/projects/:code/outputTreeData',
+  projectCodeValidationRules(),
+  projectCodeValidate,
+  async (req, res) => {
+    await getOutputTreeData(req, res, 'user')
+  },
+)
 /**
  * @swagger
  * /api/auth-user/projects/{code}/batch/outputs:

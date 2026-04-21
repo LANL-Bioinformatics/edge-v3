@@ -130,6 +130,67 @@ const getAllFiles = (
   return arrayOfFiles
 }
 
+// Get file data for react-dropdown-tree-select file browser
+const getTreeFiles = (dirPath, displayPath, apiPath, fileRelPath) => {
+  const files = fs.readdirSync(dirPath)
+
+  const arrayOfFiles = []
+
+  files.forEach(file => {
+    try {
+      const newFilePath = path.join(dirPath, '/', file)
+      const newFileRelPath = path.join(fileRelPath, '/', file)
+      const newDisplayPath = path.join(displayPath, '/', file)
+      const newApiPath = path.join(apiPath, '/', file)
+      if (fs.statSync(`${dirPath}/${file}`).isDirectory()) {
+        const children = getTreeFiles(
+          `${dirPath}/${file}`,
+          `${displayPath}/${file}`,
+          `${apiPath}/${file}`,
+          `${fileRelPath}/${file}`,
+        ).sort(
+          (a, b) =>
+            b.type.localeCompare(a.type) || a.label.localeCompare(b.label),
+        )
+        arrayOfFiles.push({
+          id: newDisplayPath,
+          value: file,
+          path: newApiPath,
+          url: newApiPath,
+          filePath: newFileRelPath,
+          label: file,
+          children,
+          disabled: false,
+          className: 'folder',
+          type: 'folder',
+        })
+      } else {
+        const stats = fs.statSync(newFilePath)
+        const className =
+          path.extname(file).toLowerCase().replace('.', '') || 'unknown'
+        arrayOfFiles.push({
+          id: newDisplayPath,
+          value: file,
+          path: newApiPath,
+          url: newApiPath,
+          filePath: newFileRelPath,
+          size: stats.size,
+          modified: Number(new Date(stats.mtime)),
+          label: `${file} (${(stats.size / 1024).toFixed(2)} KB)`,
+          children: [],
+          disabled: false,
+          className: `file file-${className}`,
+          type: 'file',
+        })
+      }
+    } catch (err) {
+      logger.error(`getTreeFile failed: ${err}`)
+    }
+  })
+
+  return arrayOfFiles
+}
+
 const fileStats = async file => {
   let stats = {}
   if (!file) {
@@ -255,16 +316,28 @@ const linkCopyFile = async (file, dir, action, uploadOnly) => {
   }
 }
 
+// The output zip file is in the io/tmp/<random> dir, and the zip file name is <project_name>_outputs.tgz
+const zipFiles = async (name, files) => {
+  const cmd = `tar -czf ${name} ${files.join(' ')}`
+  await execCmd(cmd)
+  if (fs.existsSync(name)) {
+    return name
+  }
+  return null
+}
+
 module.exports = {
   write2log,
   postData,
   getData,
   timeFormat,
   getAllFiles,
+  getTreeFiles,
   findInputsize,
   execCmd,
   spawnCmd,
   sleep,
   pidIsRunning,
   linkCopyFile,
+  zipFiles,
 }

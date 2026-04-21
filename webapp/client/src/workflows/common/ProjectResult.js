@@ -21,10 +21,12 @@ const ProjectResult = (props) => {
   const [conf, setConf] = useState()
   const [result, setResult] = useState()
   const [outputs, setOutputs] = useState()
+  const [outputTreeData, setOutputTreeData] = useState()
   const [confLoading, setConfLoading] = useState(false)
   const [runStatsLoading, setRunStatsLoading] = useState(false)
   const [resultLoading, setResultLoading] = useState(false)
   const [outputLoading, setOutputLoading] = useState(false)
+  const [outputTreeDataLoading, setOutputTreeDataLoading] = useState(false)
   const [error, setError] = useState()
   const [view_log_file, setView_log_file] = useState(false)
   const [log_file_content, setLog_file_content] = useState('')
@@ -118,6 +120,27 @@ const ProjectResult = (props) => {
         })
     }
 
+    const getProjectOutputTreeData = () => {
+      let url = `${apis.publicProjects}/${project.code}/outputTreeData`
+      if (type === 'admin') {
+        url = `${apis.adminProjects}/${project.code}/outputTreeData`
+      } else if (type === 'user') {
+        url = `${apis.userProjects}/${project.code}/outputTreeData`
+      }
+      //project files
+      getData(url)
+        .then((data) => {
+          //console.log(data.fileData)
+          setOutputTreeDataLoading(false)
+          setOutputTreeData(data.fileData)
+        })
+        .catch((error) => {
+          setOutputTreeDataLoading(false)
+          alert(JSON.stringify(error))
+          setError(error)
+        })
+    }
+
     if (project && project.code) {
       setConfLoading(true)
       getProjectConf()
@@ -126,6 +149,8 @@ const ProjectResult = (props) => {
       if (['complete', 'running', 'failed'].includes(project.status)) {
         setOutputLoading(true)
         getProjectOutputs()
+        setOutputTreeDataLoading(true)
+        getProjectOutputTreeData()
       }
       if (project.status === 'complete') {
         setResultLoading(true)
@@ -153,7 +178,9 @@ const ProjectResult = (props) => {
   return (
     <div className="animated fadeIn">
       <LoaderDialog
-        loading={confLoading || runStatsLoading || resultLoading || outputLoading}
+        loading={
+          confLoading || runStatsLoading || resultLoading || outputLoading || outputTreeDataLoading
+        }
         text="Loading..."
       />
       <FileViewerDialog
@@ -307,6 +334,7 @@ const ProjectResult = (props) => {
           {outputs && (
             <ProjectOutputs
               outputs={outputs}
+              outputTreeData={outputTreeData}
               filePath={'/projects/' + project.code + '/output'}
               allExpand={allExpand}
               allClosed={allClosed}

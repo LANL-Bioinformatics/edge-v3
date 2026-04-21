@@ -11,6 +11,10 @@ const {
   getResult,
   getRunStats,
 } = require('../controllers/project-controller')
+const {
+  getOutputTreeData,
+} = require('../controllers/common-project-controller')
+const { zipProjectOutputs } = require('../../workflow/util')
 
 /**
  * @swagger
@@ -168,6 +172,15 @@ router.get(
   },
 )
 
+router.get(
+  '/:code/outputTreeData',
+  projectCodeValidationRules(),
+  projectCodeValidate,
+  async (req, res) => {
+    await getOutputTreeData(req, res, 'public')
+  },
+)
+
 /**
  * @swagger
  * /api/public/projects/{code}/result:
@@ -249,6 +262,16 @@ router.get(
   projectCodeValidate,
   async (req, res) => {
     await getRunStats(req, res)
+  },
+)
+
+// zip download
+router.post(
+  '/:code/download',
+  projectCodeValidationRules(),
+  projectCodeValidate,
+  async (req, res) => {
+    await zipProjectOutputs(req, res, 'public')
   },
 )
 
