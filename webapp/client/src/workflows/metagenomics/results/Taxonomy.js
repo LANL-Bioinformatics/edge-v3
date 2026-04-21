@@ -83,7 +83,7 @@ export const Taxonomy = (props) => {
     setToolOptions((prev) => [...prev, ...options])
     //set table columns for each tool
     tools.forEach((tool) => {
-      if (props.result.tools[tool].table) {
+      if (props.result.tools[tool].table?.length > 0) {
         const columns = Object.keys(props.result.tools[tool].table[0]).map((columnId) => ({
           header: columnId,
           accessorKey: columnId,
@@ -262,83 +262,103 @@ export const Taxonomy = (props) => {
                       }}
                     />
                     <br></br>
-                    {toolToDisplay.map((tool) =>
-                      props.result.tools[tool.value].table ? (
-                        <div key={tool.value}>
-                          <h5 className="edge-text-bold">{tool.label}</h5>
-                          <ThemeProvider theme={theme}>
-                            <MaterialReactTable
-                              columns={toolTableColumns[tool.value]}
-                              data={
-                                props.result.tools[tool.value].table
-                                  ? props.result.tools[tool.value].table
-                                  : []
-                              }
-                              globalFilterFn="includesString" //turn off fuzzy matching and use simple includesString filter function
-                              enableFullScreenToggle={false}
-                              initialState={{
-                                density: 'compact',
-                                pagination: {
-                                  pageSize: 5, // Set initial rows per page to 5
-                                  pageIndex: 0, // Start on the first page
-                                },
-                              }}
-                              renderEmptyRowsFallback={() => (
-                                <center>
-                                  <br></br>No result to display
-                                </center>
-                              )}
+                    {toolToDisplay.map((tool) => (
+                      <div key={tool.value}>
+                        <span className="edge-text-bold">{tool.label}</span>
+                        <br></br>
+                        {props.result.tools[tool.value].table?.length > 0 ? (
+                          <>
+                            <ThemeProvider theme={theme}>
+                              <MaterialReactTable
+                                columns={toolTableColumns[tool.value]}
+                                data={
+                                  props.result.tools[tool.value].table
+                                    ? props.result.tools[tool.value].table
+                                    : []
+                                }
+                                globalFilterFn="includesString" //turn off fuzzy matching and use simple includesString filter function
+                                enableFullScreenToggle={false}
+                                initialState={{
+                                  density: 'compact',
+                                  pagination: {
+                                    pageSize: 5, // Set initial rows per page to 5
+                                    pageIndex: 0, // Start on the first page
+                                  },
+                                }}
+                                renderEmptyRowsFallback={() => (
+                                  <center>
+                                    <br></br>No result to display
+                                  </center>
+                                )}
+                              />
+                            </ThemeProvider>
+                            <br></br>
+                            <br></br>
+                          </>
+                        ) : (
+                          <span className="red-text">
+                            No table data available
+                            <br></br>
+                          </span>
+                        )}
+                        {props.result.tools[tool.value].tree ? (
+                          <>
+                            <span>Tree plot at species level </span>{' '}
+                            <a
+                              href={`${url}${props.result.tools[tool.value].tree}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="edge-link"
+                            >
+                              [full]
+                            </a>
+                            <br></br>
+                            <img
+                              key={`tree-${tool.value}`}
+                              src={`${url}${props.result.tools[tool.value].tree}`}
+                              alt={`${tool.label} tree plot`}
+                              style={{ width: '100%', height: 'auto' }}
                             />
-                          </ThemeProvider>
-                          <br></br>
-                          <br></br>
-                          <span className="edge-text-bold">Tree plot at species level </span>{' '}
-                          <a
-                            href={`${url}${props.result.tools[tool.value].tree}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="edge-link"
-                          >
-                            [full]
-                          </a>
-                          <br></br>
-                          <img
-                            key={`tree-${tool.value}`}
-                            src={`${url}${props.result.tools[tool.value].tree}`}
-                            alt={`${tool.label} tree plot`}
-                            style={{ width: '100%', height: 'auto' }}
-                          />
-                          <br></br>
-                          <span className="edge-text-bold">Krona plot at species level </span>{' '}
-                          <a
-                            href={`${url}${props.result.tools[tool.value].krona}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="edge-link"
-                          >
-                            [full]
-                          </a>
-                          <br></br>
-                          <br></br>
-                          <iframe
-                            key={`krona-${tool.value}`}
-                            className="edge-iframe"
-                            src={`${url}${props.result.tools[tool.value].krona}`}
-                            alt={`${tool.label} krona plot`}
-                          />
-                        </div>
-                      ) : (
-                        <div key={tool.value}>
-                          <span className="edge-text-bold">{tool.label}</span> <br></br>
-                          <span className="red-text">No result available</span>
-                          <br></br>
-                          <br></br>
-                        </div>
-                      ),
-                    )}
+                            <br></br>
+                            <br></br>
+                          </>
+                        ) : (
+                          <span className="red-text">
+                            No tree plot available<br></br>
+                          </span>
+                        )}
+                        {props.result.tools[tool.value].krona ? (
+                          <>
+                            <span>Krona plot at species level </span>{' '}
+                            <a
+                              href={`${url}${props.result.tools[tool.value].krona}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="edge-link"
+                            >
+                              [full]
+                            </a>
+                            <br></br>
+                            <br></br>
+                            <iframe
+                              key={`krona-${tool.value}`}
+                              className="edge-iframe"
+                              src={`${url}${props.result.tools[tool.value].krona}`}
+                              alt={`${tool.label} krona plot`}
+                            />
+                            <br></br>
+                            <br></br>
+                          </>
+                        ) : (
+                          <span className="red-text">
+                            No krona plot available<br></br>
+                          </span>
+                        )}
+                      </div>
+                    ))}
                   </>
                 ) : (
-                  <span>
+                  <span className="red-text">
                     No available
                     <br></br>
                     <br></br>
