@@ -191,10 +191,14 @@ const zipProjectOutputs = async (code, type, req) => {
     }
     fs.mkdirSync(outDir)
 
-    const zipName = `${proj.name.replaceAll(' ', '_')}_${new Date().toISOString().split('.')[0].replace(/:/g, '-')}.tgz`
-    await zipFiles(`${outDir}/${zipName}`, req.files)
+    const zipName = `${proj.name.replaceAll(' ', '_')}_${proj.type.replaceAll(' ', '_')}_${new Date().toISOString().split('.')[0].replace(/:/g, '-')}.tgz`
+    await zipFiles(
+      `${outDir}/${zipName}`,
+      `${config.IO.PROJECT_BASE_DIR}/${proj.code}/output`,
+      req.body.filePaths,
+    )
     // relative url to download the zip file
-    return `/tmp/${tmp}/${zipName}`
+    return `/${tmp}/${zipName}`
   } catch (err) {
     return Promise.reject(err)
   }

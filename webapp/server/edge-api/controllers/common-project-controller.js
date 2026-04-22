@@ -5,6 +5,7 @@ const {
   getProjectOutputTreeData,
   getProjectResult,
   getProjectRunStats,
+  zipProjectOutputs,
 } = require('../utils/project')
 const logger = require('../../utils/logger')
 const config = require('../../config')
@@ -151,24 +152,20 @@ const getOutputTreeData = async (req, res, type) => {
   }
 }
 
-// Get project output files
-const zipOutputs = async (req, res, type) => {
+// zip project output files
+const downloadOutputs = async (req, res, type) => {
   try {
-    logger.debug(`/api/${type}/projects/${req.params.code}/zipOutputs`)
-    const files = await getProjectOutputTreeData(
-      req.params.code,
-      type,
-      req.params.files,
-    )
+    logger.debug(`/api/${type}/projects/${req.params.code}/downloadOutputs`)
+    const url = await zipProjectOutputs(req.params.code, type, req)
 
     return res.json({
-      zipUrl: files,
+      zipUrl: url,
       message: 'Action successful',
       success: true,
     })
   } catch (err) {
     logger.error(
-      `/api/${type}/projects/${req.params.code}/outputTreeData failed: ${err}`,
+      `/api/${type}/projects/${req.params.code}/downloadOutputs failed: ${err}`,
     )
     return res.status(500).json({
       message: sysError,
@@ -184,5 +181,5 @@ module.exports = {
   getOutputTreeData,
   getResult,
   getRunStats,
-  zipOutputs,
+  downloadOutputs,
 }

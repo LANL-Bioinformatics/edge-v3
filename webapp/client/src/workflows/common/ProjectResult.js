@@ -333,6 +333,8 @@ const ProjectResult = (props) => {
           )}
           {outputs && (
             <ProjectOutputs
+              type={props.type}
+              project={project}
               outputs={outputs}
               outputTreeData={outputTreeData}
               filePath={'/projects/' + project.code + '/output'}

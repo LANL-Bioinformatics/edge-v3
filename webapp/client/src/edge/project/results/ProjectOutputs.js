@@ -108,6 +108,7 @@ const ProjectOutputs = (props) => {
   return (
     <Card className="workflow-result-card">
       <ProjectOutputDownload
+        type={props.type}
         isOpen={downloadModalOpen}
         project={props.project}
         outputTreeData={props.outputTreeData}

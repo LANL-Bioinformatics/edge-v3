@@ -2,12 +2,15 @@ import { useState, useMemo } from 'react'
 import { Button, Modal, ModalBody, ModalFooter } from 'reactstrap'
 import DropdownTreeSelect from 'react-dropdown-tree-select'
 import 'react-dropdown-tree-select/dist/styles.css'
-import { LoaderDialog } from 'src/edge/common/Dialogs'
+import { LoaderDialog, MessageDialog } from 'src/edge/common/Dialogs'
+import { postData, apis } from '/src/edge/common/util'
 
 export const ProjectOutputDownload = (props) => {
   const [submitting, setSubmitting] = useState(false)
   const [fileSelected, setFileSelected] = useState([])
-  const [resetTreeSelector, setResetTreeSelector] = useState(0)
+  const [openSuccessDialog, setOpenSuccessDialog] = useState(false)
+  const [openErrorDialog, setOpenErrorDialog] = useState(false)
+  const [downloadMsg, setDownloadMsg] = useState('')
 
   const treeSelectorSearchPredicate = (node, searchTerm) => {
     //return node.label && node.label.toLowerCase().startsWith(searchTerm)
@@ -32,8 +35,7 @@ export const ProjectOutputDownload = (props) => {
         onChange={(currentNode, selectedNodes) => onChangeFiles(currentNode, selectedNodes)}
       />
     ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props.outputTreeData, resetTreeSelector],
+    [props.outputTreeData],
   )
 
   const onChangeFiles = (currentNode, selectedNodes) => {
@@ -43,9 +45,8 @@ export const ProjectOutputDownload = (props) => {
     }
     let files = []
     selectedNodes.map((item) => {
-      files.push({ path: item.filePath, id: item.id, value: item.value })
+      files.push({ id: item.id, value: item.value })
     })
-    //console.log('files selected::', files)
     setFileSelected(files)
   }
 
@@ -57,25 +58,55 @@ export const ProjectOutputDownload = (props) => {
     setSubmitting(true)
     let filePaths = []
     fileSelected.forEach((file) => {
-      filePaths.push(file.path)
+      //use relative path to zip files in output folder
+      filePaths.push(file.id)
     })
-    const url = '/projects/download'
-    getData(url, { project: props.project, filePaths: filePaths }, 'POST')
+    let url = `${apis.publicProjects}/${props.project.code}/downloadOutputs`
+    if (props.type === 'admin') {
+      url = `${apis.adminProjects}/${props.project.code}/downloadOutputs`
+    } else if (props.type === 'user') {
+      url = `${apis.userProjects}/${props.project.code}/downloadOutputs`
+    }
+    postData(url, { filePaths: filePaths })
       .then((data) => {
-        //console.log('download url::', data.downloadUrl)
-        window.open(data.downloadUrl, '_blank')
         setSubmitting(false)
         props.closeModal()
+        setFileSelected([])
+        setDownloadMsg(
+          'Please click the link <a href="' +
+            `${apis.tmp}/${data.zipUrl}` +
+            '" target="_blank">here</a> to download the zip file. ',
+        )
+        setOpenSuccessDialog(true)
       })
       .catch((err) => {
-        alert(err)
         setSubmitting(false)
+        setFileSelected([])
+        setOpenErrorDialog(true)
       })
   }
 
   return (
     <>
       <LoaderDialog loading={submitting === true} text="Zipping files..." />
+      <MessageDialog
+        className="modal-sm modal-danger"
+        title="Error!"
+        isOpen={openErrorDialog}
+        html={true}
+        message={
+          'Failed to zip outputs. Please select smaller number of files or folders to download.'
+        }
+        handleClickClose={() => setOpenErrorDialog(false)}
+      />
+      <MessageDialog
+        className="modal-sm modal-success"
+        title="Success!"
+        isOpen={openSuccessDialog}
+        html={true}
+        message={downloadMsg}
+        handleClickClose={() => setOpenSuccessDialog(false)}
+      />
       <Modal isOpen={props.isOpen} size="lg" centered>
         <ModalBody className="justify-content-center" style={{ height: '600px' }}>
           {treeSelector}
@@ -90,7 +121,14 @@ export const ProjectOutputDownload = (props) => {
           >
             Download Outputs
           </Button>{' '}
-          <Button size="sm" color="secondary" onClick={() => props.closeModal()}>
+          <Button
+            size="sm"
+            color="secondary"
+            onClick={() => {
+              setFileSelected([])
+              props.closeModal()
+            }}
+          >
             Cancel
           </Button>
         </ModalFooter>

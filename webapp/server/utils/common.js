@@ -153,7 +153,9 @@ const getTreeFiles = (dirPath, displayPath, apiPath, fileRelPath) => {
             b.type.localeCompare(a.type) || a.label.localeCompare(b.label),
         )
         arrayOfFiles.push({
-          id: newDisplayPath,
+          // use display path as id to avoid duplicated id when files with same name in different folders
+          // replace leading / in display path to avoid issue in zip files from output folder
+          id: newDisplayPath.replace(/^\//, ''),
           value: file,
           path: newApiPath,
           url: newApiPath,
@@ -169,7 +171,7 @@ const getTreeFiles = (dirPath, displayPath, apiPath, fileRelPath) => {
         const className =
           path.extname(file).toLowerCase().replace('.', '') || 'unknown'
         arrayOfFiles.push({
-          id: newDisplayPath,
+          id: newDisplayPath.replace(/^\//, ''),
           value: file,
           path: newApiPath,
           url: newApiPath,
@@ -317,8 +319,8 @@ const linkCopyFile = async (file, dir, action, uploadOnly) => {
 }
 
 // The output zip file is in the io/tmp/<random> dir, and the zip file name is <project_name>_outputs.tgz
-const zipFiles = async (name, files) => {
-  const cmd = `tar -czf ${name} ${files.join(' ')}`
+const zipFiles = async (name, filePath, files) => {
+  const cmd = `tar -czf ${name} -C ${filePath} ${files.join(' ')}`
   await execCmd(cmd)
   if (fs.existsSync(name)) {
     return name
