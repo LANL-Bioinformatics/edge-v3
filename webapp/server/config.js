@@ -178,6 +178,9 @@ const config = {
       // delete old db backups every day at 2 am
       DATABASE_BACKUP_PRUNER:
         process.env.CRON_DATABASE_BACKUP_PRUNER_SCHEDULE || '0 2 * * *',
+      // delete old temp files every hour
+      TEMP_FILE_CLEANUP:
+        process.env.CRON_TEMP_FILE_CLEANUP_SCHEDULE || '0 * * * *',
     },
   },
   DATABASE: {
