@@ -72,12 +72,17 @@ export const ProjectOutputDownload = (props) => {
         setSubmitting(false)
         props.closeModal()
         setFileSelected([])
-        setDownloadMsg(
-          'Please click the link <a href="' +
-            `${apis.tmp}/${data.zipUrl}` +
-            '" target="_blank">here</a> to download the zip file. ',
-        )
-        setOpenSuccessDialog(true)
+        //disable this, use popup to open the download link
+        // setDownloadMsg(
+        //   'Please click the link <a href="' +
+        //     `${apis.tmp}/${data.zipUrl}` +
+        //     '" target="_blank">here</a> to download the zip file. ',
+        // )
+        //setOpenSuccessDialog(true)
+
+        //open the download link in new tab
+        //have to change browser settings to allow popups, otherwise it will be blocked by browser security policy
+        window.open(`${apis.tmp}/${data.zipUrl}`, '_blank')
       })
       .catch((err) => {
         setSubmitting(false)

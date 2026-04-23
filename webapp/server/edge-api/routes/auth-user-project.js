@@ -440,8 +440,8 @@ router.get(
 
 router.post(
   '/projects/:code/downloadOutputs',
-  addValidationRules(),
-  addValidate,
+  projectCodeValidationRules(),
+  projectCodeValidate,
   async (req, res) => {
     await downloadOutputs(req, res, 'user')
   },

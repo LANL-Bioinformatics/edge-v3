@@ -13,8 +13,8 @@ const {
 } = require('../controllers/project-controller')
 const {
   getOutputTreeData,
+  downloadOutputs,
 } = require('../controllers/common-project-controller')
-const { zipProjectOutputs } = require('../../workflow/util')
 
 /**
  * @swagger
@@ -265,14 +265,12 @@ router.get(
   },
 )
 
-// zip download
 router.post(
-  '/:code/download',
+  '/:code/downloadOutputs',
   projectCodeValidationRules(),
   projectCodeValidate,
   async (req, res) => {
-    await zipProjectOutputs(req, res, 'public')
+    await downloadOutputs(req, res, 'public')
   },
 )
-
 module.exports = router
