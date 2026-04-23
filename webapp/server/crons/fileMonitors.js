@@ -3,10 +3,14 @@ const logger = require('../utils/logger')
 const config = require('../config')
 
 const cleanupTempFiles = () => {
-  logger.debug('Clean up temp files')
-  const tempDir = config.IO.TEMP_DIR
-  const ONE_HOUR = 60 * 60 * 1000
-  findRemoveSync(tempDir, { age: ONE_HOUR })
+  const tempDir = config.IO.TMP_BASE_DIR
+  logger.debug(`Cleaning up temp files in: ${tempDir}`)
+  const ONE_HOUR = 60 * 60 // seconds
+  findRemoveSync(tempDir, {
+    dir: '^[a-zA-Z0-9]{8}$', // match the tmp dir created for zip files
+    regex: true,
+    age: { seconds: ONE_HOUR },
+  })
 }
 
 module.exports = {
