@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { MyTooltip } from '../../common/MyTooltip'
+import { MessageDialog } from '../../common/Dialogs'
 import { defaults, capitalizeFirstLetter } from '../../common/util'
 import { inspectFastqFiles, FASTQ_PLATFORM, FASTQ_LAYOUT } from '../../common/fastqInspector'
 import { Switcher } from './Switcher'
@@ -15,9 +16,14 @@ export const FastqInput = (props) => {
     platform: props.seqPlatformDefaultValue,
   })
   const [doValidation, setDoValidation] = useState(0)
+  const [inspectionNotice, setInspectionNotice] = useState({
+    isOpen: false,
+    message: '',
+  })
   const inspectionRun = useRef(0)
 
   const setNewState2 = (name, value) => {
+    inspectionRun.current += 1
     setState({
       ...form,
       [name]: value,
@@ -28,6 +34,7 @@ export const FastqInput = (props) => {
     setNewState2(name, inForm.isTrue)
   }
   const setPlatform = (inForm, name) => {
+    inspectionRun.current += 1
     let paired = form.paired
     if (inForm.option.toLowerCase() !== 'illumina') {
       paired = false
@@ -53,6 +60,82 @@ export const FastqInput = (props) => {
       value: match ? match.value : platform,
       display: match ? match.text : platform,
     }
+  }
+  const hasPairingProblem = (result) =>
+    result.mismatch || (result.reason || '').includes('missing an R')
+  const getDetectedPaired = (result) => {
+    if (hasPairingProblem(result)) {
+      return false
+    }
+    if (result.layout === FASTQ_LAYOUT.TWO_FILE || result.layout === FASTQ_LAYOUT.INTERLEAVED) {
+      return true
+    }
+    if (result.layout === FASTQ_LAYOUT.SINGLE) {
+      return false
+    }
+    return null
+  }
+  const getLayoutDisplay = (result) => {
+    if (result.mismatch) {
+      return 'Not paired (R1/R2 names mismatch)'
+    }
+    if ((result.reason || '').includes('missing an R')) {
+      return 'Not paired (missing mate record)'
+    }
+    if (result.layout === FASTQ_LAYOUT.TWO_FILE) {
+      return 'Paired-end (R1/R2 files)'
+    }
+    if (result.layout === FASTQ_LAYOUT.INTERLEAVED) {
+      return 'Paired-end (interleaved FASTQ)'
+    }
+    if (result.layout === FASTQ_LAYOUT.SINGLE) {
+      return result.longReadDetected ? 'Single-end or long-read' : 'Single-end'
+    }
+    return 'Unknown'
+  }
+  const getPlatformDisplay = (fastqForm) =>
+    fastqForm.platform_display || fastqForm.platform || FASTQ_PLATFORM.UNKNOWN
+  const getNoticeAction = (interleavedChanged, pairingProblem) => {
+    if (interleavedChanged) {
+      return 'Interleaved paired FASTQ was detected; the selected file remains in the single-file input.'
+    }
+    if (pairingProblem) {
+      return 'The form was not changed; please review the selected R1/R2 FASTQ files.'
+    }
+    return 'The form was updated to match the detected FASTQ sample.'
+  }
+  const getInspectionNotice = (result, selectedForm) => {
+    const detectedPaired = getDetectedPaired(result)
+    const detectedPlatform = getPlatformOption(result.platform)
+    const selectedPlatform = getPlatformDisplay(selectedForm)
+    const interleavedChanged = result.layout === FASTQ_LAYOUT.INTERLEAVED && !selectedForm.paired
+    const pairingProblem = hasPairingProblem(result)
+    const platformChanged =
+      result.platform !== FASTQ_PLATFORM.UNKNOWN &&
+      detectedPlatform.value.toLowerCase() !== (selectedForm.platform || '').toLowerCase()
+    const pairedChanged =
+      result.layout !== FASTQ_LAYOUT.INTERLEAVED &&
+      detectedPaired !== null &&
+      detectedPaired !== selectedForm.paired
+
+    if (!platformChanged && !pairedChanged && !interleavedChanged) {
+      return null
+    }
+
+    const platformText =
+      result.platform === FASTQ_PLATFORM.UNKNOWN
+        ? `${FASTQ_PLATFORM.UNKNOWN} (kept ${selectedPlatform})`
+        : detectedPlatform.display
+
+    return [
+      'Detected FASTQ settings differ from your current selection.',
+      '<br/><br/>',
+      `Detected platform: ${platformText}`,
+      '<br/>',
+      `Detected read format: ${getLayoutDisplay(result)}`,
+      '<br/><br/>',
+      getNoticeAction(interleavedChanged, pairingProblem),
+    ].join('')
   }
   const getInspectionSources = (fastqForm) => {
     if (!fastqForm.validForm) {
@@ -81,6 +164,7 @@ export const FastqInput = (props) => {
         if (inspectionRun.current !== runId) {
           return
         }
+        const notice = getInspectionNotice(result, fastqForm)
 
         setState((current) => {
           const next = {
@@ -105,6 +189,12 @@ export const FastqInput = (props) => {
 
           return next
         })
+        if (notice) {
+          setInspectionNotice({
+            isOpen: true,
+            message: notice,
+          })
+        }
         setDoValidation((value) => value + 1)
       })
       .catch((error) => {
@@ -157,6 +247,18 @@ export const FastqInput = (props) => {
 
   return (
     <>
+      <MessageDialog
+        isOpen={inspectionNotice.isOpen}
+        title="FASTQ detected settings"
+        html={true}
+        message={inspectionNotice.message}
+        handleClickClose={() =>
+          setInspectionNotice({
+            isOpen: false,
+            message: '',
+          })
+        }
+      />
       {props.text && (
         <MyTooltip
           id={`fileInputTooltip-${props.name}`}
