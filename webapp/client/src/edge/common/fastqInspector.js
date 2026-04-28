@@ -21,9 +21,9 @@ const DEFAULT_SAMPLE_RECORDS = 1000
 const DEFAULT_SAMPLE_PAIRS = 1000
 
 const ILLUMINA_PATTERNS = [
-  /^@[^:\s]+:\d+:[^:\s]+:\d+:\d+:\d+:\d+\s+[12]:[YN]:\d+:\S+/i,
-  /^@[^:\s]+:\d+:\d+:\d+:\d+#?[A-Z0-9]*\/[12]/i,
-  /^@[^:\s]+:\d+:[^:\s]+:\d+:\d+:\d+:\d+/i,
+  /^@[^:\s]*:\d+:[^:\s]+:\d+:\d+:\d+:\d+\s+[12]:[YN]:\d+:\S+/i,
+  /^@[^:\s]*:\d+:\d+:\d+:\d+#?[A-Z0-9]*\/[12]/i,
+  /^@[^:\s]*:\d+:[^:\s]+:\d+:\d+:\d+:\d+/i,
 ]
 
 const NANOPORE_PATTERNS = [
