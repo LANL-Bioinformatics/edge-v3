@@ -24,6 +24,7 @@ if __name__ == "__main__":
     parser.add_argument("--refdata-dir", type=Path, required=True, help="Path to reference data directory")
     parser.add_argument("--opaver-web-dir", type=Path, required=True, help="Path to OPAVER web directory")
     parser.add_argument("--template-file", type=Path, required=True, help="Path to Nextflow config template file")
+    parser.add_argument("--nextflow-config-file", type=Path, help="Path to Nextflow config file (if not provided, it will be rendered from the template and config JSON file)")
 
     args = parser.parse_args()
 
@@ -36,5 +37,9 @@ if __name__ == "__main__":
     opaver_web_dir = args.opaver_web_dir
     template_file = args.template_file
 
-    run_nextflow_pipeline(projects_dir, conf_json_file, project_name, project_code, nextflowOutDir,
-                           refdata_dir, opaver_web_dir, template_file)
+    if args.nextflow_config_file:
+        # If a Nextflow config file is provided, use it directly
+        run(["nextflow", "run", "main.nf", "-c", str(args.nextflow_config_file)], check=True)
+    else:
+        run_nextflow_pipeline(projects_dir, conf_json_file, project_name, project_code, nextflowOutDir,
+                               refdata_dir, opaver_web_dir, template_file)
