@@ -84,7 +84,7 @@ def get_module_run_input_dict(conf_dict:dict) -> dict:
 
 
 def create_render_dict(conf_dict:dict, output_template_dict:dict, module_run_input_dict:dict, 
-                       nextflowOutDir:Path, refdata_dir:Path, opaver_web_dir:Path, project_name) -> dict:
+                       nextflowOutDir:Path, refdata_dir:Path, opaver_web_dir:Path, project_name, project_code) -> dict:
     """
     Creates a dictionary for rendering the Nextflow config template.
     """
@@ -95,7 +95,7 @@ def create_render_dict(conf_dict:dict, output_template_dict:dict, module_run_inp
     render_dict['keggViewerDir'] = opaver_web_dir
     render_dict.update(output_template_dict)
     render_dict.update(module_run_input_dict)
-    render_dict.update({'nextflowOutDir':str(nextflowOutDir)})
+    render_dict.update({'nextflowOutDir':str(nextflowOutDir / project_code)})
     for pipeline in conf_dict['pipeline']:
         if pipeline['name'] == 'taxonomy':
             pipeline['input']['enabledTools'] = ','.join(pipeline['input']['enabledTools'])
@@ -122,7 +122,7 @@ def render_nextflow_config(projects_dir:Path, conf_json_file:Path,
     module_run_input_dict = get_module_run_input_dict(conf_dict)
 
     render_dict = create_render_dict(conf_dict, output_template_dict, module_run_input_dict, 
-                                     nextflowOutDir, refdata_dir, opaver_web_dir, project_name)
+                                     nextflowOutDir, refdata_dir, opaver_web_dir, project_name, project_code)
     # Render nextflow config template with output directories
     environment = jinja2.Environment()
     template = environment.from_string(template_file.read_text())
