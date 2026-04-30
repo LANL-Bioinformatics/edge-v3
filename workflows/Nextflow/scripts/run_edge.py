@@ -12,7 +12,17 @@ def run_nextflow_pipeline(projects_dir:Path, conf_json_file:Path, project_name:s
     render_nextflow_config(projects_dir, conf_json_file, project_name, project_code, nextflowOutDir,
                            refdata_dir, opaver_web_dir, template_file)
     config_path = projects_dir / project_code / 'nextflow.config'
-    run(["nextflow", "run", "main.nf", "-c", str(config_path)], check=True)
+    call_nextflow_run(config_path)
+
+
+def call_nextflow_run(config_path:Path) -> None:
+    """
+    Calls the Nextflow pipeline with the provided config file path.
+    """
+    root_dir = Path.cwd().parent.parent.parent
+    main_nf_path = str(root_dir / 'workflows/Nextflow/metagenomics/nextflow/main.nf')
+    run(["nextflow", "-C", str(config_path), "run", main_nf_path], check=True)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="run EDGE Nextflow pipeline")
@@ -39,7 +49,7 @@ if __name__ == "__main__":
 
     if args.nextflow_config_file:
         # If a Nextflow config file is provided, use it directly
-        run(["nextflow", "run", "main.nf", "-c", str(args.nextflow_config_file)], check=True)
+        call_nextflow_run(args.nextflow_config_file)
     else:
         run_nextflow_pipeline(projects_dir, conf_json_file, project_name, project_code, nextflowOutDir,
                                refdata_dir, opaver_web_dir, template_file)
