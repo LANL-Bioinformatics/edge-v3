@@ -1,6 +1,7 @@
 from subprocess import run
 import argparse
 from pathlib import Path
+import os
 
 from config_nextflow import render_nextflow_config
 
