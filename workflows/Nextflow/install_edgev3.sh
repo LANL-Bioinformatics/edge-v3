@@ -94,7 +94,7 @@ log "Installing Python packages"
 sudo dnf install python3-pip -y
 python3 -m venv edgev3_env
 source edgev3_env/bin/activate
-pip install -y jinja2 
+pip install jinja2 
 
 
 # prompt user for file paths and store as environment variables
@@ -151,15 +151,15 @@ echo ""
 read -p "Save these variables to .env file? (y/n): " SAVE_ENV
 
 if [[ $SAVE_ENV == "y" || $SAVE_ENV == "Y" ]]; then
-    cat > .env << EOF
+    cat  <<EOF >> ~/.bash_profile
 export PROJECTS_DIR="$PROJECTS_DIR"
 export NEXTFLOW_OUT_DIR="$NEXTFLOW_OUT_DIR"
 export REFDATA_DIR="$REFDATA_DIR"
 export OPAVER_WEB_DIR="$OPAVER_WEB_DIR"
 export TEMPLATE_FILE="$TEMPLATE_FILE"
 EOF
-    echo "Variables saved to .env file"
-    echo "Source it later with: source .env"
+    echo "Variables saved to .bash_profile"
+    echo "Source it later with: source ~/.bash_profile"
 fi
 
 exit 0
