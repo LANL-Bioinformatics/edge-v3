@@ -1,0 +1,234 @@
+{
+    "category": "metagenomics",
+    "workflow": {
+        "name": "metagenomics"
+    },
+    "rawReads": {
+        "source": "fastq",
+        "seqPlatform": "Illumina",
+        "paired": false,
+        "inputFiles": [
+            "/path/to/sample.fastq.gz"
+        ]
+    },
+    "pipeline": [
+        {
+            "name": "runFaQCs",
+            "input": {
+                "trimQual": 20,
+                "trim5end": 0,
+                "trim3end": 0,
+                "trimAdapter": false,
+                "trimRate": 0.2,
+                "trimPolyA": false,
+                "artifactFile": null,
+                "minLen": 50,
+                "avgQual": 0,
+                "numN": 2,
+                "filtLC": 0.85,
+                "filtPhiX": false
+            }
+        },
+        {
+            "name": "assembly",
+            "input": {
+                "assembler": "IDBA_UD",
+                "minContigSize": 200,
+                "aligner": "bwa",
+                "aligner_options": null,
+                "extractUnmapped": false,
+                "idba_minK": 31,
+                "idba_maxK": 121,
+                "idba_step": 20
+            }
+        },
+        {
+            "name": "annotation",
+            "input": {
+                "annotationMinContigSize": 700,
+                "annotateProgram": "prokka",
+                "taxKingdom": "bacteria",
+                "gcode": 11,
+                "customProtein": null,
+                "customHMM": null,
+                "evalue": "1e-09",
+                "keggView": true
+            }
+        },
+        {
+            "name": "binning",
+            "input": {
+                "binningMinLength": 1000,
+                "binningMaxItr": 50,
+                "binningProb": 0.9,
+                "binningMarkerSet": 107,
+                "doCheckM": false
+            }
+        },
+        {
+            "name": "antiSmash",
+            "input": {
+                "smaTaxon": "bacteria",
+                "knownclusterblast": true,
+                "subclusterblast": true,
+                "clusterblast": false,
+                "mibig": false,
+                "fullhmm": false,
+                "pfam2go": false,
+                "asf": true,
+                "rre": true,
+                "tigrfam": false,
+                "cassis": false
+            }
+        },
+        {
+            "name": "taxonomy",
+            "input": {
+                "contigTax": true,
+                "readTax": true,
+                "enabledTools": [
+                    "gottcha-speDB-b",
+                    "gottcha-speDB-v",
+                    "gottcha2-speDB-b",
+                    "pangia",
+                    "metaphlan4",
+                    "kraken2",
+                    "centrifuge"
+                ],
+                "splitTrimMinQ": 20,
+                "custom_gottcha_genDB_b": null,
+                "custom_gottcha_speDB_b": null,
+                "custom_gottcha_strDB_b": null,
+                "custom_gottcha_genDB_v": null,
+                "custom_gottcha_speDB_v": null,
+                "custom_gottcha_strDB_v": null,
+                "custom_gottcha2_speDB_b": null,
+                "custom_bwa_db": null,
+                "custom_metaphlan_db": null,
+                "custom_kraken_db": null,
+                "custom_pangia_db": null,
+                "custom_diamond_db": null,
+                "custom_centrifuge_db": null
+            }
+        },
+        {
+            "name": "refBased",
+            "input": {
+                "selectGenomes": [],
+                "referenceGenomes": [],
+                "r2gAligner": "bwa",
+                "r2gAlignerOptions": null,
+                "r2gMinMapQual": 60,
+                "r2gMaxClip": 50,
+                "r2gVariantCall": true,
+                "r2gMapUnmapped": false,
+                "r2gExtractMapped": false,
+                "r2gExtractUnmapped": false,
+                "r2gGetConsensus": false,
+                "r2gVariantCallMinQual": 60,
+                "r2gVariantCallPloidy": "diploid"
+            }
+        }
+    ],
+    "inputDisplay": {
+        "Raw Reads": {
+            "Input Source": "READS/FASTQ",
+            "Sequencing Platform": "Illumina",
+            "Paired-End?": false,
+            " Files": [
+                "uploads/0000-0002-8457-2000@orcid.org/main/Ecoli_10x-int.fastq.gz"
+            ]
+        },
+        "Reads QC": {
+            "Trim Quality Level": 20,
+            "Cut #bp from 5'-end": 0,
+            "Cut #bp from 3'-end": 0,
+            "Trim Adapter": false,
+            "Trim Adapter mismatch ratio": 0.2,
+            "Trim polyA": false,
+            "Adapter/Primer FASTA": null,
+            "Minimum Read Length": 50,
+            "Average Quality Cutoff": 0,
+            "\"N\" Base Cutoff": 2,
+            "Low Complexity Filter": 0.85,
+            "Filter phiX": false
+        },
+        "Assembly": {
+            "Assembler": "IDBA_UD",
+            "Minimum Contig Length": 200,
+            "Validation Aligner": "Bowtie 2",
+            "Aligner Options": null,
+            "Extract Unmapped/Unassembled Reads": false,
+            "Minimum Kmer Length": 31,
+            "Maximum Kmer Length": 121,
+            "Step Size": 20
+        },
+        "Annotation": {
+            "Minimum Contig Length": 700,
+            "Annotation Tool": "Prokka",
+            "Specify Kingdom": "Bacteria",
+            "Genetic Code": 11,
+            "Protein FASTA/GenBank for Prokka": null,
+            "Trusted HMM for Prokka": null,
+            "Similarity e-value cut-off1": "1e-09",
+            "KEGG Pathway View": true
+        },
+        "Binning": {
+            "Minimum Contig Length": 1000,
+            "Maximum EM Algorithm Iteration": 50,
+            "EM Probability": 0.9,
+            "Marker Gene Sets": 107,
+            "CheckM": false
+        },
+        "AntiSmash": {
+            "Taxon": "bacteria",
+            "Known ClusterBlast": true,
+            "Sub ClusterBlast": true,
+            "ClusterBlast": false,
+            "MIBiG cluster comparison": false,
+            "Cluster Pfam analysis": false,
+            "Pfam-based GO term annotation": false,
+            "Active Site Finder": true,
+            "RREFinder": true,
+            "TIGRFam analysis": false,
+            "Cluster-border prediction based on transcription factor binding sites (CASSIS)": false
+        },
+        "Taxonomy Classification": {
+            "Contigs Classification": true,
+            "Reads Classification": true,
+            "Classification Tools": "GOTTCHA Species (Bacterial DB), GOTTCHA Species (Viral DB), GOTTCHA2 Species, PanGIA NCBI Refseq89, MetaPhlAn4, Kraken2, Centrifuge",
+            "Splitrim Quality Level": 20,
+            "CUSTOM GOTTCHA-genDB-b": null,
+            "CUSTOM GOTTCHA-speDB-b": null,
+            "CUSTOM GOTTCHA-strDB-b": null,
+            "CUSTOM GOTTCHA-genDB-v": null,
+            "CUSTOM GOTTCHA-speDB-v": null,
+            "CUSTOM GOTTCHA-strDB-v": null,
+            "CUSTOM GOTTCHA2-speDB-b": null,
+            "CUSTOM BWA DB": null,
+            "CUSTOM Metaphlan DB": null,
+            "CUSTOM Kraken DB": null,
+            "CUSTOM Pangia DB": null,
+            "CUSTOM Diamond DB": null,
+            "CUSTOM Centrifuge DB": null
+        },
+        "Reference-Based Analysis": {
+            "Select Genome(s)": [],
+            "Reference Genome": [],
+            "Read Aligner": "Bowtie 2",
+            "Aligner Options": null,
+            "Map Quality": 60,
+            "MaxClip": 50,
+            "Variant Call": true,
+            "Identify Unmapped Reads": false,
+            "Extract Mapped Reads": false,
+            "Extract Unmapped Reads": false,
+            "Consensus Fasta": false,
+            "Variant QUAL": 60,
+            "Ploidy": "Diploid"
+        }
+    },
+    "files": [
+        "/path/to/sample.fastq.gz"
+    ]
+}
