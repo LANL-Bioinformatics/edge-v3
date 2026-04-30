@@ -1,0 +1,349 @@
+
+workDir="{{ nextflowOutDir }}/work"
+params {
+    //which modules are run
+    modules {
+        sra2fastq = {% if source is defined and source == 'sra' %}true{% else %}false{% endif %}
+        faqcs = {% if runFaQCs is defined %}{{ runFaQCs }}{% else %}false{% endif %}
+        hostRemoval = false
+        runAssembly = {% if assembly is defined %}{{ assembly }}{% else %}false{% endif %}
+        annotation = {% if annotation is defined %}{{ annotation }}{% else %}false{% endif %}
+        readsBinning = {% if binning is defined %}{{ binning }}{% else %}false{% endif %}
+        phageFinder = true //true by default -- will run if non-viral reads are annotated
+        readsTaxonomyAssignment = {% if readTax is defined %}{{ readTax }}{% else %}false{% endif %}
+        contigsTaxonomyAssignment = {% if contigTax is defined %}{{ contigTax }}{% else %}false{% endif %}
+        secondaryMetaboliteAnalysis = {% if antiSmash is defined %}{{ antiSmash }}{% else %}false{% endif %}
+        refBasedAnalysis = {% if refBased is defined %}{{ refBased }}{% else %}false{% endif %}
+        snpTree = {% if phylogeny is defined %}{{ phylogeny }}{% else %}false{% endif %}
+        readsGeneFamilyAnalysis = {% if readsGeneFamily is defined %}{{ readsGeneFamily }}{% else %}false{% endif %}
+        contigsGeneFamilyAnalysis = {% if contigsGeneFamily is defined %}{{ contigsGeneFamily }}{% else %}false{% endif %} //contig-based requires annotation output as well (GFF,FAA).
+    }
+
+    outputLocations {
+        //everything in its separate output for the moment
+        sra2fastqOutDir =  "{{ sraOutdir }}"
+        processProvidedContigsOutDir = "{{ contigsOutdir }}"
+        qcOutDir = "{{ qcOutdir }}"
+        hostRemovalOutDir = ""
+        assemblyOutDir ="{{ assemblyOutdir }}"
+        contigsTaxonomyOutDir ="{{ taxonomyOutdir }}"
+        phageFinderOutDir = "{{ annotationOutdir }}"
+        readBinningOutDir = "{{ binningOutdir }}"
+        readsTaxonomyOutDir = "{{ taxonomyOutdir }}"
+        annotationOutDir = "{{ annotationOutdir }}"
+        smaOutDir = "{{ antiSmashOutdir }}"
+        refBasedOutDir = "{{ refBasedOutdir }}"
+        phylogenyOutDir = "{{ phylogenyOutdir }}"
+        geneFamilyOutDir = "{{ geneFamilyOutdir }}"
+        reportOutDir = "{{ reportOutdir }}"
+    }
+
+    shared {
+        inputFastq = {% if inputFastq is defined %}{{ inputFastq | tojson }}{% else %}[]{% endif %}
+        inputFastq2 = {% if inputFastq2 is defined %}{{ inputFastq2 | tojson }}{% else %}[]{% endif %}
+        pairedFile = {% if paired is defined %}{{ paired }}{% else %}false{% endif %}
+        inputContigs = {% if inputFasta is defined %}"{{ inputFasta }}"{% else %}"${projectDir}/nf_assets/NO_FILE3"{% endif %}
+        assembledContigs = "${projectDir}/nf_assets/NO_FILE3" //contigs provided to bypass assembly
+        projName = "{{ project }}"
+        fastqSource = {% if seqPlatform is defined %}"{{ seqPlatform }}"{% else %}null{% endif %}
+    }
+
+    sra2fastq {
+        accessions = {% if accessions is defined %}{{ accessions | tojson }}{% else %}[]{% endif %}
+    }
+
+    faqcs {
+        trimQual = {% if trimQual is defined %}{{ trimQual }}{% else %}20{% endif %}
+        trim5end = {% if trim5end is defined %}{{ trim5end }}{% else %}0{% endif %}
+        trim3end = {% if trim3end is defined %}{{ trim3end }}{% else %}0{% endif %}
+        trimAdapter = {% if trimAdapter is defined %}{{ trimAdapter }}{% else %}false{% endif %}
+        trimPolyA = {% if trimPolyA is defined %}{{ trimPolyA }}{% else %}false{% endif %}
+        artifactFile = {% if artifactFile is defined and artifactFile %}"{{ artifactFile }}"{% else %}"${projectDir}/nf_assets/NO_FILE3"{% endif %}
+        minLen = {% if minLen is defined %}{{ minLen }}{% else %}50{% endif %}
+        avgQual = {% if avgQual is defined %}{{ avgQual }}{% else %}0{% endif %}
+        numN = {% if numN is defined %}{{ numN }}{% else %}2{% endif %}
+        filtLC = {% if filtLC is defined %}{{ filtLC }}{% else %}0.85{% endif %}
+        filtPhiX = {% if filtPhiX is defined %}{{ filtPhiX }}{% else %}false{% endif %}
+        htmlreport = true
+    }
+
+    hostRemoval {
+        host = ["${projectDir}/nf_assets/NO_FILE3"]
+        similarity = 90
+        bwaMemOptions = null
+    }
+
+    assembly {
+        //assemblers: IDBA_UD, SPAdes, Unicycler, Megahit, LRASM
+        assembler = {% if assembler is defined %}"{{ assembler }}"{% else %}"IDBA_UD"{% endif %}
+        minContigSize = {% if minContigSize is defined %}{{ minContigSize }}{% else %}200{% endif %}
+
+        idba{
+            maxK = {% if idba_maxK is defined %}{{ idba_maxK }}{% else %}null{% endif %}
+            minK = {% if idba_minK is defined %}{{ idba_minK }}{% else %}31{% endif %}
+            step = {% if idba_step is defined %}{{ idba_step }}{% else %}20{% endif %}
+        }
+        spades {
+            pacbio = {% if spades_pacbio is defined and spades_pacbio %}"{{ spades_pacbio }}"{% else %}"${projectDir}/nf_assets/NO_FILE3"{% endif %}
+            nanopore = {% if spades_nanopore is defined and spades_nanopore %}"{{ spades_nanopore }}"{% else %}"${projectDir}/nf_assets/NO_FILE4"{% endif %}
+            algorithm = {% if spades_algorithm is defined %}"{{ spades_algorithm }}"{% else %}null{% endif %}
+        }
+        megahit {
+            preset = {% if megahit_preset is defined %}"{{ megahit_preset }}"{% else %}null{% endif %}
+        }
+        unicycler {
+            longreads = {% if Unicycler_longreads is defined and Unicycler_longreads %}"{{ Unicycler_longreads }}"{% else %}"${projectDir}/nf_assets/NO_FILE3"{% endif %}
+            minLongReads = {% if Unicycler_minLongReads is defined %}{{ Unicycler_minLongReads }}{% else %}2000{% endif %}
+            bridgingMode = {% if Unicycler_bridgingMode is defined %}"{{ Unicycler_bridgingMode }}"{% else %}"normal"{% endif %}
+        }
+        lrasm {
+            preset = {% if Lrasm_preset is defined %}"{{ Lrasm_preset }}"{% else %}null{% endif %}
+            algorithm = {% if Lrasm_algorithm is defined %}"{{ Lrasm_algorithm }}"{% else %}null{% endif %}
+            ec = {% if Lrasm_ec is defined %}{{ Lrasm_ec }}{% else %}false{% endif %}
+            numConsensus = {% if Lrasm_numConsensus is defined %}{{ Lrasm_numConsensus }}{% else %}null{% endif %}
+        }
+    }
+
+    r2c {
+        r2c_aligner = {% if aligner is defined %}"{{ aligner }}"{% else %}"bwa"{% endif %}
+        r2c_aligner_options = {% if aligner_options is defined %}"{{ aligner_options }}"{% else %}""{% endif %}
+        r2g_max_clip = null
+        extractUnmapped = {% if extractUnmapped is defined %}{{ extractUnmapped }}{% else %}false{% endif %}
+        rowLimit = null
+    }
+
+    annotation {
+        contigSizeForAnnotation = {% if annotationMinContigSize is defined %}{{ annotationMinContigSize }}{% else %}700{% endif %}
+        taxKingdom = {% if taxKingdom is defined %}"{{ taxKingdom }}"{% else %}"bacteria"{% endif %}
+        //annotaters: prokka, ratt
+        annotateProgram = {% if annotateProgram is defined %}"{{ annotateProgram }}"{% else %}"prokka"{% endif %} //default
+        customProtein = {% if customProtein is defined and customProtein %}"{{ customProtein }}"{% else %}"${projectDir}/nf_assets/NO_FILE"{% endif %} //setup for optional file pattern
+        customHMM = {% if customHMM is defined and customHMM %}"{{ customHMM }}"{% else %}"${projectDir}/nf_assets/NO_FILE2"{% endif %}
+        sourceGBK = {% if sourceGBK is defined %}"{{ sourceGBK }}"{% else %}null{% endif %}
+        evalue = {% if evalue is defined %}{{ evalue }}{% else %}0.000000001{% endif %}
+        gcode = {% if gcode is defined %}{{ gcode }}{% else %}11{% endif %}
+        keggView = {% if keggView is defined %}{{ keggView }}{% else %}false{% endif %}
+        keggViewerDir = {% if keggViewerDir is defined %}"{{ keggViewerDir }}"{% else %}"undefined"{% endif %}
+    }
+
+    binning {
+        binningMinLength = {% if binningMinLength is defined %}{{ binningMinLength }}{% else %}1000{% endif %}
+        binningMaxItr = {% if binningMaxItr is defined %}{{ binningMaxItr }}{% else %}50{% endif %}
+        binningProb = {% if binningProb is defined %}{{ binningProb }}{% else %}0.9{% endif %}
+        //107 or 40
+        binningMarkerSet = {% if binningMarkerSet is defined %}{{ binningMarkerSet }}{% else %}107{% endif %}
+        binningAbundFile = {% if binningAbundFile is defined and binningAbundFile %}"{{ binningAbundFile }}"{% else %}"${projectDir}/nf_assets/NO_FILE3"{% endif %}
+        doCheckM = {% if doCheckM is defined %}{{ doCheckM }}{% else %}false{% endif %}
+        checkMdb = "/media/volume/edgev3-refdata/refdata/checkM_DB"
+    }
+
+    readsTaxonomy {
+        splitTrimMinQ = {% if splitTrimMinQ is defined %}{{ splitTrimMinQ }}{% else %}20{% endif %}
+        //RTA tools: gottcha-genDB-b,gottcha-speDB-b,gottcha-strDB-b,gottcha-genDB-v,gottcha-speDB-v,gottcha-strDB-v,gottcha2-speDB-b,pangia,bwa,metaphlan4,kraken2,centrifuge,diamond
+        enabledTools = {% if enabledTools is defined %}"{{ enabledTools }}"{% else %}"gottcha-genDB-b,gottcha-speDB-b,gottcha-strDB-b,gottcha-genDB-v,gottcha-speDB-v,gottcha-strDB-v,gottcha2-speDB-b,pangia,bwa,metaphlan4,kraken2,centrifuge,diamond"{% endif %}
+        baseDB = "/media/volume/edgev3-refdata/refdata"
+        custom_gottcha_genDB_b = {% if custom_gottcha_genDB_b is defined and custom_gottcha_genDB_b %}"{{ custom_gottcha_genDB_b }}"{% else %}"/media/volume/edgev3-refdata/refdata/nextflow/database/GOTTCHA/GOTTCHA_BACTERIA_c4937_k24_u30_xHUMAN3x.genus"{% endif %}
+        custom_gottcha_speDB_b = {% if custom_gottcha_speDB_b is defined and custom_gottcha_speDB_b %}"{{ custom_gottcha_speDB_b }}"{% else %}"/media/volume/edgev3-refdata/refdata/nextflow/database/GOTTCHA/GOTTCHA_BACTERIA_c4937_k24_u30_xHUMAN3x.species"{% endif %}
+        custom_gottcha_strDB_b = {% if custom_gottcha_strDB_b is defined and custom_gottcha_strDB_b %}"{{ custom_gottcha_strDB_b }}"{% else %}"/media/volume/edgev3-refdata/refdata/nextflow/database/GOTTCHA/GOTTCHA_BACTERIA_c4937_k24_u30_xHUMAN3x.strain"{% endif %}
+        custom_gottcha_genDB_v = {% if custom_gottcha_genDB_v is defined and custom_gottcha_genDB_v %}"{{ custom_gottcha_genDB_v }}"{% else %}"/media/volume/edgev3-refdata/refdata/nextflow/database/GOTTCHA/GOTTCHA_VIRUSES_c5900_k24_u30_xHUMAN3x.genus"{% endif %}
+        custom_gottcha_speDB_v = {% if custom_gottcha_speDB_v is defined and custom_gottcha_speDB_v %}"{{ custom_gottcha_speDB_v }}"{% else %}"/media/volume/edgev3-refdata/refdata/nextflow/database/GOTTCHA/GOTTCHA_VIRUSES_c5900_k24_u30_xHUMAN3x.species"{% endif %}
+        custom_gottcha_strDB_v = {% if custom_gottcha_strDB_v is defined and custom_gottcha_strDB_v %}"{{ custom_gottcha_strDB_v }}"{% else %}"/media/volume/edgev3-refdata/refdata/nextflow/database/GOTTCHA/GOTTCHA_VIRUSES_c5900_k24_u30_xHUMAN3x.strain"{% endif %}
+        custom_gottcha2_speDB_b = {% if custom_gottcha2_speDB_b is defined and custom_gottcha2_speDB_b %}"{{ custom_gottcha2_speDB_b }}"{% else %}"/media/volume/edgev3-refdata/refdata/GOTTCHA2/gottcha_db.species.fna"{% endif %}
+        custom_gottcha2_speDB_v = {% if custom_gottcha2_speDB_v is defined and custom_gottcha2_speDB_v %}"{{ custom_gottcha2_speDB_v }}"{% else %}"/media/volume/edgev3-refdata/refdata/GOTTCHA2/gottcha_db.species.fna"{% endif %}
+        custom_bwa_db= {% if custom_bwa_db is defined and custom_bwa_db %}"{{ custom_bwa_db }}"{% else %}"/media/volume/edgev3-refdata/refdata/bwa_index/NCBI-Bacteria-Virus.fna"{% endif %}
+        custom_metaphlan_db= {% if custom_metaphlan_db is defined and custom_metaphlan_db %}"{{ custom_metaphlan_db }}"{% else %}"/media/volume/edgev3-refdata/refdata/metaphlan4"{% endif %}
+        custom_kraken_db= {% if custom_kraken_db is defined and custom_kraken_db %}"{{ custom_kraken_db }}"{% else %}"/media/volume/edgev3-refdata/refdata/Kraken2"{% endif %}
+        custom_pangia_db= {% if custom_pangia_db is defined and custom_pangia_db %}"{{ custom_pangia_db }}"{% else %}"/media/volume/edgev3-refdata/refdata/PanGIA/NCBI_genomes_refseq86*.fa"{% endif %}
+        custom_diamond_db= {% if custom_diamond_db is defined and custom_diamond_db %}"{{ custom_diamond_db }}"{% else %}"/media/volume/edgev3-refdata/refdata/diamond/RefSeq_Release83.nr_protein_withRefSeq_viral_102317.protein.faa.dmnd"{% endif %}
+        custom_centrifuge_db = {% if custom_centrifuge_db is defined and custom_centrifuge_db %}"{{ custom_centrifuge_db }}"{% else %}"/media/volume/edgev3-refdata/refdata/Centrifuge/hpv.1.cf"{% endif %}
+    }
+
+    contigsTaxonomy {
+        miccrDB = "/media/volume/edgev3-refdata/refdata/miccrDB"
+        rowLimit = 3000
+    }
+
+    SMA {
+        database = "/media/volume/edgev3-refdata/refdata/antismash" //path to downloaded database location (download-antismash-databases --database-dir <DBPATH>)
+        smaTaxon = {% if smaTaxon is defined %}"{{ smaTaxon }}"{% else %}"bacteria"{% endif %}
+        clusterblast = {% if clusterblast is defined %}{{ clusterblast }}{% else %}false{% endif %}
+        subclusterblast = {% if subclusterblast is defined %}{{ subclusterblast }}{% else %}true{% endif %}
+        knownclusterblast = {% if knownclusterblast is defined %}{{ knownclusterblast }}{% else %}true{% endif %}
+        mibig = {% if mibig is defined %}{{ mibig }}{% else %}false{% endif %} 
+        smcogs = false 
+        pfam2go = {% if pfam2go is defined %}{{ pfam2go }}{% else %}false{% endif %}
+        asf = {% if asf is defined %}{{ asf }}{% else %}true{% endif %} 
+        rre = {% if rre is defined %}{{ rre }}{% else %}true{% endif %}
+        fullhmm = {% if fullhmm is defined %}{{ fullhmm }}{% else %}false{% endif %}
+        tigrfam = {% if tigrfam is defined %}{{ tigrfam }}{% else %}false{% endif %}
+        cassis = {% if cassis is defined %}{{ cassis }}{% else %}false{% endif %} //only with fungi
+    }
+
+    refBased {
+        selectGenomes = {% if selectGenomes is defined %}{{ selectGenomes | tojson }}{% else %}[]{% endif %}
+        referenceGenomes = {% if referenceGenomes is defined %}{{ referenceGenomes | tojson }}{% else %}[]{% endif %}
+        //expects id_mapping.txt in the same directory as refDB
+        refDB = "/media/volume/edgev3-refdata/refdata/bwa_index/NCBI-Bacteria-Virus.fna"
+        genomeLocation = "/media/volume/edgev3-refdata/refdata/NCBI_genomes"
+        r2gAligner = {% if r2gAligner is defined %}"{{ r2gAligner }}"{% else %}"bwa"{% endif %} //bowtie2, bwa, minimap2
+        r2gAlignerOptions = {% if r2gAlignerOptions is defined %}"{{ r2gAlignerOptions }}"{% else %}""{% endif %}
+        r2gMinMapQual = {% if r2gMinMapQual is defined %}{{ r2gMinMapQual }}{% else %}60{% endif %}
+        r2gMaxClip = {% if r2gMaxClip is defined %}{{ r2gMaxClip }}{% else %}50{% endif %}
+        r2gVariantCall = {% if r2gVariantCall is defined %}{{ r2gVariantCall }}{% else %}false{% endif %} //needs genbank file
+        r2gVariantCallMinQual = {% if r2gVariantCallMinQual is defined %}{{ r2gVariantCallMinQual }}{% else %}60{% endif %}
+        r2gVariantCallPloidy = {% if r2gVariantCallPloidy is defined %}"{{ r2gVariantCallPloidy }}"{% else %}"diploid"{% endif %} 
+
+        //read extraction
+        r2gMapUnmapped = {% if r2gMapUnmapped is defined %}{{ r2gMapUnmapped }}{% else %}false{% endif %}
+        r2gExtractMapped = {% if r2gExtractMapped is defined %}{{ r2gExtractMapped }}{% else %}false{% endif %}
+        r2gExtractUnmapped = {% if r2gExtractUnmapped is defined %}{{ r2gExtractUnmapped }}{% else %}false{% endif %}
+
+        //consensus options
+        r2gGetConsensus = {% if r2gGetConsensus is defined %}{{ r2gGetConsensus }}{% else %}false{% endif %}
+        r2gConsensusMinMapQual = {% if r2gConsensusMinMapQual is defined %}{{ r2gConsensusMinMapQual }}{% else %}60{% endif %}
+        r2gConsensusMinCov = {% if r2gConsensusMinCov is defined %}{{ r2gConsensusMinCov }}{% else %}5{% endif %}
+        r2gConsensusMaxCov = {% if r2gConsensusMaxCov is defined %}{{ r2gConsensusMaxCov }}{% else %}8000{% endif %}
+        r2gConsensusMinBaseQual = {% if r2gConsensusMinBaseQual is defined %}{{ r2gConsensusMinBaseQual }}{% else %}20{% endif %}
+        r2gConsensusAltProp = {% if r2gConsensusAltProp is defined %}{{ r2gConsensusAltProp }}{% else %}0.5{% endif %}
+        r2gConsensusAltIndelProp = {% if r2gConsensusAltIndelProp is defined %}{{ r2gConsensusAltIndelProp }}{% else %}0.5{% endif %}
+        r2gConsensusDisableBAQ = {% if r2gConsensusDisableBAQ is defined %}{{ r2gConsensusDisableBAQ }}{% else %}true{% endif %}
+        r2gConsensusPCRdedup = {% if r2gConsensusPCRdedup is defined %}{{ r2gConsensusPCRdedup }}{% else %}true{% endif %}
+        r2gConsensusHomopolymerFilt = {% if r2gConsensusHomopolymerFilt is defined %}{{ r2gConsensusHomopolymerFilt }}{% else %}false{% endif %}
+        r2gConsensusStrandBiasFilt = {% if r2gConsensusStrandBiasFilt is defined %}{{ r2gConsensusStrandBiasFilt }}{% else %}false{% endif %}
+        r2gConsensusVarlogOpt = {% if r2gConsensusVarlogOpt is defined %}{{ r2gConsensusVarlogOpt }}{% else %}false{% endif %}
+        r2gConsensusCompOpt = {% if r2gConsensusCompOpt is defined %}{{ r2gConsensusCompOpt }}{% else %}false{% endif %}
+    } 
+
+    contigsToRef {
+        identity = 85
+        contigRefDB = "/media/volume/edgev3-refdata/refdata/miccrDB"
+        mapUnmappedContigs = {% if mapUnmappedContigs is defined %}{{ mapUnmappedContigs }}{% else %}false{% endif %}
+    }
+
+
+    snpTree {
+        //SNP DB path. Should contain SNPdb, bwa_index, NCBI genomes
+        snpDBbase = "/media/volume/edgev3-refdata/refdata"
+        //SNP databases: Ecoli, Yersinia, Francisella, Brucella, Bacillus
+        snpDBname = {% if snpDBname is defined and snpDBname %}"{{ snpDBname }}"{% else %}null{% endif %}
+        //List of genome name from NCBI genomes see $EDGE/edge_ui/data/Ref_list.json
+        snpGenomes = {% if snpGenomes is defined %}{{ snpGenomes | tojson }}{% else %}[]{% endif %}
+        //User-provided reference genomes
+        snpGenomesFiles = {% if snpGenomesFiles is defined %}{{ snpGenomesFiles | tojson }}{% else %}[]{% endif %}
+        //A reference genome from above two options for reads/contigs mapping
+        snpRefGenome = {% if snpRefGenome is defined %}"{{ snpRefGenome }}"{% else %}null{% endif %}
+        // SRA accessions ByrRun, ByExp, BySample, ByStudy
+        phylAccessions = {% if phylAccessions is defined %}{{ phylAccessions | tojson }}{% else %}[]{% endif %}
+        //FastTree or RAxML
+        treeMaker = {% if treeMaker is defined %}"{{ treeMaker }}"{% else %}"FastTree"{% endif %}
+        phameBootstrap = {% if phameBootstrap is defined %}{{ phameBootstrap }}{% else %}false{% endif %}
+        phameBootstrapNum = {% if phameBootstrapNum is defined %}{{ phameBootstrapNum }}{% else %}100{% endif %}
+    }
+
+    geneFamily{
+        inputFAA = {% if inputFAA is defined and inputFAA %}"{{ inputFAA }}"{% else %}"${projectDir}/nf_assets/NO_FILE3"{% endif %} //input for contig-based single-workflow version--needs annotation output
+        inputGFF = {% if inputGFF is defined and inputGFF %}"{{ inputGFF }}"{% else %}"${projectDir}/nf_assets/NO_FILE4"{% endif %} //input for contig-based single-workflow version--needs annotation output
+        virulenceFactorTool = {% if virulenceFactorTool is defined %}"{{ virulenceFactorTool }}"{% else %}"MetaVF Toolkit"{% endif %} //"MetaVF Toolkit" or "PathoFact2" 
+        rgiDB = "/media/volume/edgev3-refdata/refdata/RGI"
+        pf2DB = "/media/volume/edgev3-refdata/refdata/PathoFact2"
+        genomadDB = "/media/volume/edgev3-refdata/refdata/genomad_db-v1.6"
+        pf2Config = "${projectDir}/modules/geneFamilyAnalysis/resources/usr/bin/EDGE_PF2_Config.yaml"
+    }
+}
+
+//container settings
+apptainer {
+    enabled = true
+    cacheDir = "/media/volume/edgev3-refdata/refdata/nextflow/.apptainer"
+    pullTimeout = "1 hour"
+    runOptions = "--compat"
+}
+
+//discover and auto-bind subworkflow bin folders
+nextflow.enable.moduleBinaries = true
+
+//submission rate limit: needed for sra2fastq to operate correctly
+executor {
+    submitRateLimit = '1/5sec'
+}
+
+//which containers to use for which processes
+process {
+    withLabel: 'sra2fastq' {
+        container = 'ghcr.io/lanl-bioinformatics/edge_sra2fastq:1.6.3'
+    }
+    withLabel: 'countFastq' {
+        container = 'ghcr.io/lanl-bioinformatics/edge_count_fastq:0.3.1'
+    }
+    withLabel: 'processContigs' {
+        container = 'ghcr.io/lanl-bioinformatics/edge_count_fastq:0.3.1'
+    }
+    withLabel: 'qc'{
+        container= 'ghcr.io/lanl-bioinformatics/edge_run_faqcs:1.6.2'
+    }
+    withLabel: 'hostRemoval' {
+        container= 'ghcr.io/lanl-bioinformatics/edge_host_removal:1.7.5'
+    }
+    withLabel: 'assembly' {
+        container = 'ghcr.io/lanl-bioinformatics/edge_run_assembly:1.7.2'
+    }
+    withLabel: 'r2c' {
+        container = 'ghcr.io/lanl-bioinformatics/edge_run_r2c:1.7.0'
+    }
+    withLabel: 'r2g' {
+        container = 'ghcr.io/lanl-bioinformatics/edge_ref_based:0.18.1'
+    }
+    withLabel: 'rta' {
+        container = 'ghcr.io/lanl-bioinformatics/edge_reads_taxonomy:1.15.1'
+    }
+    withLabel: 'cta' {
+        container = 'ghcr.io/lanl-bioinformatics/edge_contigs_taxonomy:1.12.1'
+    }
+
+ withLabel: 'annotation' {
+        container = 'ghcr.io/lanl-bioinformatics/edge_annotation:0.6.1'
+    }
+    withLabel: 'phageFinder' {
+        container = 'ghcr.io/lanl-bioinformatics/edge_phage_finder:1.2.1'
+    }
+    withLabel: 'sma' {
+        container = 'ghcr.io/lanl-bioinformatics/edge_sma:0.15.3'
+    }
+    withLabel: 'binning' {
+        container = 'ghcr.io/lanl-bioinformatics/edge_binning:1.0.1'
+    }
+    withLabel: 'phyl' {
+        container = 'ghcr.io/lanl-bioinformatics/edge_snp_tree:0.6.2'
+    }
+    withLabel: 'gfa' {
+        container = 'apwat/gene_family_analysis:pf2_0.3.3'
+    }
+    withLabel: 'vf' {
+        container = 'apwat/mvf:0.3'
+    }
+    withLabel: 'report' {
+        container = 'ghcr.io/lanl-bioinformatics/edge_report:0.5.1'
+    }
+}
+
+report {
+    enabled = true
+    file = '{{ nextflowOutDir }}/report.html'
+    overwrite = true
+}
+
+timeline {
+    enabled = true
+    file = '{{ nextflowOutDir }}/timeline.html'
+    overwrite = true
+}
+
+trace {
+    enabled = true
+    file = '{{ nextflowOutDir }}/trace.txt'
+    fields = 'name,status,start,complete,duration'
+    overwrite = true
+}
+
+//sets executor to slurm
+executor.name = "local"
