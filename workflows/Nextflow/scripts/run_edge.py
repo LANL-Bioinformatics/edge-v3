@@ -2,7 +2,7 @@ from subprocess import run
 import argparse
 from pathlib import Path
 
-from config_nextflow import create_output_directory_dict, render_nextflow_config
+from config_nextflow import render_nextflow_config
 
 def run_nextflow_pipeline(projects_dir:Path, conf_json_file:Path, project_name:str, project_code:str, 
                           nextflowOutDir:Path, refdata_dir:Path, opaver_web_dir:Path, template_file: Path) -> None:
@@ -13,7 +13,7 @@ def run_nextflow_pipeline(projects_dir:Path, conf_json_file:Path, project_name:s
                            refdata_dir, opaver_web_dir, template_file)
     config_path = projects_dir / project_code / 'nextflow.config'
     run(["nextflow", "run", "main.nf", "-c", str(config_path)], check=True)
-    
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="run EDGE Nextflow pipeline")
     parser.add_argument("--nextflow-out-dir", type=Path, required=True, help="Path to Nextflow output directory")
@@ -24,3 +24,17 @@ if __name__ == "__main__":
     parser.add_argument("--refdata-dir", type=Path, required=True, help="Path to reference data directory")
     parser.add_argument("--opaver-web-dir", type=Path, required=True, help="Path to OPAVER web directory")
     parser.add_argument("--template-file", type=Path, required=True, help="Path to Nextflow config template file")
+
+    args = parser.parse_args()
+
+    conf_json_file = args.conf_json_file
+    projects_dir = args.projects_dir
+    project_code = args.project_code
+    project_name = args.project_name
+    nextflowOutDir = args.nextflow_out_dir
+    refdata_dir = args.refdata_dir
+    opaver_web_dir = args.opaver_web_dir
+    template_file = args.template_file
+
+    run_nextflow_pipeline(projects_dir, conf_json_file, project_name, project_code, nextflowOutDir,
+                           refdata_dir, opaver_web_dir, template_file)
