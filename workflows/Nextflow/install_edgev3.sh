@@ -88,13 +88,13 @@ log "Installing Apptainer..."
 sudo dnf install -y epel-release
 sudo dnf install -y apptainer
 
-git clone https://github.com/LANL-Bioinformatics/edge-v3.git
+# git clone https://github.com/LANL-Bioinformatics/edge-v3.git
 
 log "Installing Python packages"
 sudo dnf install python3-pip -y
 python3 -m venv edgev3_env
 source edgev3_env/bin/activate
-pip install jinja2 -y
+pip install -y jinja2 
 
 
 # prompt user for file paths and store as environment variables
