@@ -16,14 +16,14 @@ def run_nextflow_pipeline(projects_dir:Path, conf_json_file:Path, project_name:s
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="run EDGE Nextflow pipeline")
-    parser.add_argument("--nextflow-out-dir", type=Path, required=True, help="Path to Nextflow output directory")
-    parser.add_argument("--projects-dir", type=Path, required=True, help="Path to directory for storing all project output directories")
-    parser.add_argument("--project-code", type=str, required=True, help="Project code used for naming output directories (projects_dir/project_code/)")
-    parser.add_argument("--project-name", type=str, required=True, help="Project name chosen by user")
-    parser.add_argument("--conf-json-file", type=Path, required=True, help="Path to config JSON file used to define pipeline parameters and modules to run")
-    parser.add_argument("--refdata-dir", type=Path, required=True, help="Path to reference data directory")
-    parser.add_argument("--opaver-web-dir", type=Path, required=True, help="Path to OPAVER web directory")
-    parser.add_argument("--template-file", type=Path, required=True, help="Path to Nextflow config template file")
+    parser.add_argument("--nextflow-out-dir", type=Path, help="Path to Nextflow output directory")
+    parser.add_argument("--projects-dir", type=Path, help="Path to directory for storing all project output directories")
+    parser.add_argument("--project-code", type=str, help="Project code used for naming output directories (projects_dir/project_code/)")
+    parser.add_argument("--project-name", type=str, help="Project name chosen by user")
+    parser.add_argument("--conf-json-file", type=Path, help="Path to config JSON file used to define pipeline parameters and modules to run")
+    parser.add_argument("--refdata-dir", type=Path, help="Path to reference data directory")
+    parser.add_argument("--opaver-web-dir", type=Path, help="Path to OPAVER web directory")
+    parser.add_argument("--template-file", type=Path, help="Path to Nextflow config template file")
     parser.add_argument("--nextflow-config-file", type=Path, help="Path to Nextflow config file (if not provided, it will be rendered from the template and config JSON file)")
 
     args = parser.parse_args()
