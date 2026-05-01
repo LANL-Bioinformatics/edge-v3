@@ -91,7 +91,7 @@ def create_render_dict(conf_dict:dict, output_template_dict:dict, module_run_inp
     render_dict = {'inputFastq':conf_dict['rawReads']['inputFiles']}
     render_dict['refdata'] = refdata_dir
     render_dict['project'] = project_name
-    render_dict['fastqSource'] = "Illumina"
+    render_dict['seqPlatform'] = conf_dict['rawReads']['seqPlatform']
     render_dict['keggViewerDir'] = opaver_web_dir
     render_dict.update(output_template_dict)
     render_dict.update(module_run_input_dict)
