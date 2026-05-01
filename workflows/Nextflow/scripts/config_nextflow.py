@@ -88,7 +88,7 @@ def create_render_dict(conf_dict:dict, output_template_dict:dict, module_run_inp
     """
     Creates a dictionary for rendering the Nextflow config template.
     """
-    render_dict = {'inputFastq':[conf_dict['rawReads']['inputFiles']]}
+    render_dict = {'inputFastq':conf_dict['rawReads']['inputFiles']}
     render_dict['refdata'] = refdata_dir
     render_dict['project'] = project_name
     render_dict['fastqSource'] = "Illumina"
