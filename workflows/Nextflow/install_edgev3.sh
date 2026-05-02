@@ -138,6 +138,7 @@ for var in PROJECTS_DIR NEXTFLOW_OUT_DIR REFDATA_DIR OPAVER_WEB_DIR TEMPLATE_FIL
         echo "✓ ${var}: Directory exists"
     else
         echo "✗ ${var}: Directory not found (will be created if needed)"
+        mkdir -p "$path"
     fi
 done
 if [ -f "$TEMPLATE_FILE" ]; then
