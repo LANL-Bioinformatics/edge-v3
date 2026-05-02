@@ -148,7 +148,7 @@ fi
 
 # Optional: Save to a file for persistence
 echo ""
-read -p "Save these variables to .env file? (y/n): " SAVE_ENV
+read -p "Save these variables to .bash_profile? (y/n): " SAVE_ENV
 
 if [[ $SAVE_ENV == "y" || $SAVE_ENV == "Y" ]]; then
     cat  <<EOF >> ~/.bash_profile
