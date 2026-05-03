@@ -120,12 +120,12 @@ read -p "Enter path to reference data: " REFDATA_DIR
 export REFDATA_DIR
 
 # Prompt for path to OPAVER web directory
-read -p "Enter path to OPAVER web directory: " OPAVER_WEB_DIR
-export OPAVER_WEB_DIR
+# read -p "Enter path to OPAVER web directory: " OPAVER_WEB_DIR
+export OPAVER_WEB_DIR="~/edge-v3/io/opaver_web"
 
 # Prompt for path to template file used to render Nextflow config file
-read -p "Enter path to template file used to render Nextflow config file: " TEMPLATE_FILE
-export TEMPLATE_FILE
+# read -p "Enter path to template file used to render Nextflow config file: " TEMPLATE_FILE
+export TEMPLATE_FILE="~/edge-v3/workflows/Nextflow/scripts/nextflow_config.tmpl"
 echo ""
 echo "=== Environment Variables Set ==="
 echo "PROJECTS_DIR: $PROJECTS_DIR"
