@@ -37,8 +37,14 @@ get_java_major_version() {
     echo "$major_version"
 }
 
-# ---- 2. Check Java Version ------------------------------------------------
-# Get the current Java major version
+if command -v java &> /dev/null; then
+    log "Java is installed. Checking version..."
+else
+    log "Java is not installed. Installing Java 17..."
+    sudo dnf install -y java-21-openjdk
+    echo 'export PATH=/usr/lib/jvm/java-17-openjdk-17.0.18.0.8-1.el9.x86_64/bin/:$PATH' >> ~/.bashrc
+    log "Java 17 installed."
+fi
 CURRENT_JAVA_VERSION=$(get_java_major_version)
 
 # Check if the version is a number
