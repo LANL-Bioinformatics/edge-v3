@@ -88,15 +88,14 @@ log "Installing Apptainer..."
 sudo dnf install -y epel-release
 sudo dnf install -y apptainer
 
-# git clone https://github.com/LANL-Bioinformatics/edge-v3.git
-
 log "Installing Python packages"
 sudo dnf install python3-pip -y
 python3 -m venv edgev3_env
 source edgev3_env/bin/activate
 pip install jinja2 
-
-
+cat  <<EOF >> ~/.bash_profile
+source ~/edge-v3/workflows/Nextflow/edgev3_env/bin/activate
+EOF
 # prompt user for file paths and store as environment variables
 
 echo "=== File Path Configuration ==="
@@ -132,7 +131,7 @@ echo ""
 
 # Optional: Validate that files exist
 echo "=== Validating Paths ==="
-for var in PROJECTS_DIR NEXTFLOW_OUT_DIR REFDATA_DIR OPAVER_WEB_DIR TEMPLATE_FILE; do
+for var in PROJECTS_DIR NEXTFLOW_OUT_DIR REFDATA_DIR OPAVER_WEB_DIR; do
     path="${!var}"
     if [ -d "$path" ]; then
         echo "✓ ${var}: Directory exists"
