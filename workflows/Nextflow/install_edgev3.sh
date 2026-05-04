@@ -107,6 +107,7 @@ EOF
 echo "=== File Path Configuration ==="
 echo ""
 
+export NXF_SYNTAX_PARSER=v1
 # Prompt for path to root of projects directory
 read -p "Enter path to projects directory: " PROJECTS_DIR
 export PROJECTS_DIR
