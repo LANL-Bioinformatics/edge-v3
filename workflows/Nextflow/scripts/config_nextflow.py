@@ -107,7 +107,7 @@ def create_render_dict(conf_dict:dict, output_template_dict:dict, module_run_inp
 
 def render_nextflow_config(projects_dir:Path, conf_json_file:Path, 
                            project_name:str, nextflowOutDir:Path, 
-                           refdata_dir:Path, opaver_web_dir:Path, template_file: Path) -> None:
+                           refdata_dir:Path, opaver_web_dir:Path, template_file: Path) -> str:
     """
     Renders the Nextflow configuration file. 
     Uses the utils.js and conf.json files to create a dictionary with the necessary parameters and output 
@@ -133,6 +133,7 @@ def render_nextflow_config(projects_dir:Path, conf_json_file:Path,
     config_path.write_text(rendered_config)
 
     print(f"Nextflow config file created at: {config_path}")
+    return project_code
 
 
 if __name__ == "__main__":
