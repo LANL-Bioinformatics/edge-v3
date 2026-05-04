@@ -7,6 +7,7 @@ import re
 import argparse
 import random
 import string
+from itertools import batched
 
 def create_output_directory_dict(projects_dir:Path, project_code:str) -> dict:
     """Create dict with output directories for pipeline_params template 
@@ -114,7 +115,7 @@ def create_render_dict(conf_dict:dict, output_template_dict:dict, module_run_inp
 
 def render_nextflow_config(projects_dir:Path, conf_json_file:Path, 
                            project_name:str, nextflowOutDir:Path, 
-                           refdata_dir:Path, opaver_web_dir:Path, template_file: Path) -> str:
+                           refdata_dir:Path, opaver_web_dir:Path, template_file: Path, paired=None, fastq_files=None) -> str:
     """
     Renders the Nextflow configuration file. 
     Uses the utils.js and conf.json files to create a dictionary with the necessary parameters and output 
@@ -123,6 +124,18 @@ def render_nextflow_config(projects_dir:Path, conf_json_file:Path,
     """
     project_code = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
     conf_dict = json.loads(conf_json_file.read_text())
+    
+    # If fastq_files are provided as input, add them to the conf_dict for rendering the template. 
+    # If paired is True, expect fastq_files to be a list of paths in the format R1_path,R2_path 
+    # and convert to list of dicts with keys 'R1' and 'R2' for rendering the template.
+    if fastq_files and not paired:
+        conf_dict['inputFiles'] = fastq_files
+    elif fastq_files:
+        paired_fq = []
+        for pair in batched(fastq_files, 2):
+            paired_fq.append({'R1': pair[0], 'R2': pair[1]})
+        conf_dict['inputFiles'] = paired_fq      
+
     output_template_dict = create_output_directory_dict(projects_dir, project_code)
 
     # create dict for input to modules template
@@ -147,6 +160,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Render Nextflow config")
     parser.add_argument("--project-name", type=str, help="Project name chosen by user")
     parser.add_argument("--conf-json-file", type=Path, help="Path to config JSON file used to define pipeline parameters and modules to run")
+    parser.add_argument("--paired", action="store_true", help="Indicates if the input files are paired-end")
+    parser.add_argument("--fastq-files", type=str, help="Comma-separated list of paths to FASTQ files containing raw reads to be processed "
+    "(if paired-end, provide pairs as R1_path,R2_path; separate multiple pairs with a comma)")
     parser.add_argument("--projects-dir", type=Path, help="Path to directory for storing all project output directories", default=os.environ.get('PROJECTS_DIR'))
     parser.add_argument("--nextflow-out-dir", type=Path, help="Path to output directory for Nextflow intermediate files", default=os.environ.get('NEXTFLOW_OUT_DIR'))
     parser.add_argument("--refdata-dir", type=Path, help="Path to reference data directory", default=os.environ.get('REFDATA_DIR'))
@@ -165,5 +181,7 @@ if __name__ == "__main__":
 
     render_nextflow_config(projects_dir, conf_json_file, project_name, 
                            nextflowOutDir, refdata_dir, 
-                           opaver_web_dir, template_file)
+                           opaver_web_dir, template_file, 
+                           paired=None if args.paired is None else args.paired, 
+                           fastq_files=None if args.fastq_files is None else args.fastq_files.split(','))
     
