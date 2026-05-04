@@ -88,7 +88,14 @@ def create_render_dict(conf_dict:dict, output_template_dict:dict, module_run_inp
     """
     Creates a dictionary for rendering the Nextflow config template.
     """
-    render_dict = {'inputFastq':conf_dict['rawReads']['inputFiles']}
+    if not conf_dict['rawReads']['paired']:
+        render_dict = {'inputFastq':conf_dict['rawReads']['inputFiles']}
+    else:
+        fq1, fq2 = [], []
+        for pair in conf_dict['rawReads']['inputFiles']:
+            fq1.append(pair['R1'])
+            fq2.append(pair['R2'])
+        render_dict = {'inputFastq': fq1, 'inputFastq2': fq2}
     render_dict['refdata'] = refdata_dir
     render_dict['project'] = project_name
     render_dict['seqPlatform'] = conf_dict['rawReads']['seqPlatform']
