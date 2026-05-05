@@ -140,8 +140,8 @@ def render_nextflow_config(projects_dir:Path, conf_json_file:Path,
         paired_fq = []
         for pair in batched(fastq_files, 2):
             paired_fq.append({'R1': pair[0], 'R2': pair[1]})
-        conf_dict['inputFiles'] = paired_fq      
-    logging.debug(f"Configuration dictionary for rendering template: {pprint.pformat(conf_dict['inputFiles'])}")
+        conf_dict['rawReads']['inputFiles'] = paired_fq
+    logging.debug(f"Configuration dictionary for rendering template: {pprint.pformat(conf_dict['rawReads']['inputFiles'])}")
     output_template_dict = create_output_directory_dict(projects_dir, project_code)
 
     # create dict for input to modules template
