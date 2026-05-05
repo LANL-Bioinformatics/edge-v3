@@ -95,7 +95,7 @@ sudo dnf install -y epel-release
 sudo dnf install -y apptainer
 
 log "Installing Python packages"
-sudo dnf install python3-pip -y
+sudo dnf install python3.12-pip -y
 python3 -m venv edgev3_env
 source edgev3_env/bin/activate
 pip install jinja2 
