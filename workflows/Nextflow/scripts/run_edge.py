@@ -6,12 +6,13 @@ import os
 from config_nextflow import render_nextflow_config
 
 def run_nextflow_pipeline(projects_dir:Path, conf_json_file:Path, project_name:str, 
-                          nextflowOutDir:Path, refdata_dir:Path, opaver_web_dir:Path, template_file: Path) -> None:
+                          nextflowOutDir:Path, refdata_dir:Path, opaver_web_dir:Path, template_file: Path, 
+                          paired=None, fastq_files=None) -> None:
     """
     Renders the Nextflow config file and runs the Nextflow pipeline.
     """
     project_code = render_nextflow_config(projects_dir, conf_json_file, project_name, nextflowOutDir,
-                           refdata_dir, opaver_web_dir, template_file)
+                           refdata_dir, opaver_web_dir, template_file, paired, fastq_files)
     config_path = projects_dir / project_code / 'nextflow.config'
     call_nextflow_run(config_path)
 
@@ -30,6 +31,9 @@ if __name__ == "__main__":
     parser.add_argument("--project-name", type=str, help="Project name chosen by user")
     parser.add_argument("--fastq-file", type=str, help="Path to FASTQ file containing raw reads to be processed")
     parser.add_argument("--conf-json-file", type=Path, help="Path to config JSON file used to define pipeline parameters and modules to run")
+    parser.add_argument("--paired", action="store_true", help="Indicates if the input files are paired-end")
+    parser.add_argument("--fastq-files", type=str, help="Comma-separated list of paths to FASTQ files containing raw reads to be processed "
+    "(if paired-end, provide pairs as R1_path,R2_path; separate multiple pairs with a comma)")
     parser.add_argument("--projects-dir", type=Path, help="Path to directory for storing all project output directories", default=os.environ.get('PROJECTS_DIR'))
     parser.add_argument("--nextflow-out-dir", type=Path, help="Path to output directory for Nextflow intermediate files", default=os.environ.get('NEXTFLOW_OUT_DIR'))
     parser.add_argument("--refdata-dir", type=Path, help="Path to reference data directory", default=os.environ.get('REFDATA_DIR'))
@@ -52,4 +56,6 @@ if __name__ == "__main__":
         call_nextflow_run(args.nextflow_config_file)
     else:
         run_nextflow_pipeline(projects_dir, conf_json_file, project_name, nextflowOutDir,
-                               refdata_dir, opaver_web_dir, template_file)
+                               refdata_dir, opaver_web_dir, template_file, 
+                               paired=None if args.paired is None else args.paired, 
+                               fastq_files=None if args.fastq_files is None else args.fastq_files.split(','))

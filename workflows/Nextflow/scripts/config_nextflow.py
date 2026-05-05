@@ -10,6 +10,8 @@ import string
 from itertools import batched
 import logging
 
+from detect_fastx_platform import detect_platform
+
 logging.basicConfig(filename='workflow_config.log',
                     format='%(asctime)s.%(msecs)03d %(levelname)s {%(module)s} [%(funcName)s] %(message)s',
                     datefmt='%Y-%m-%d,%H:%M:%S', level=logging.DEBUG)
@@ -135,8 +137,9 @@ def render_nextflow_config(projects_dir:Path, conf_json_file:Path,
     # If paired is True, expect fastq_files to be a list of paths in the format R1_path,R2_path 
     # and convert to list of dicts with keys 'R1' and 'R2' for rendering the template.
     if fastq_files and not paired:
-        conf_dict['inputFiles'] = fastq_files
+        conf_dict['rawReads']['inputFiles'] = fastq_files
     elif fastq_files:
+        conf_dict['rawReads']['paired'] = True
         paired_fq = []
         for pair in batched(fastq_files, 2):
             paired_fq.append({'R1': pair[0], 'R2': pair[1]})
