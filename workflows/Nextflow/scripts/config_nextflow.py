@@ -8,6 +8,11 @@ import argparse
 import random
 import string
 from itertools import batched
+import logging
+
+logging.basicConfig(filename='workflow_config.log',
+                    format='%(asctime)s.%(msecs)03d %(levelname)s {%(module)s} [%(funcName)s] %(message)s',
+                    datefmt='%Y-%m-%d,%H:%M:%S', level=logging.DEBUG)
 
 def create_output_directory_dict(projects_dir:Path, project_code:str) -> dict:
     """Create dict with output directories for pipeline_params template 
@@ -122,6 +127,7 @@ def render_nextflow_config(projects_dir:Path, conf_json_file:Path,
     directories for the Nextflow config template. Then renders the template and writes the Nextflow 
     config file to the project directory.
     """
+    logging.debug(f"fastq_files input: {fastq_files}, paired input: {paired}")
     project_code = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
     conf_dict = json.loads(conf_json_file.read_text())
     
@@ -135,7 +141,7 @@ def render_nextflow_config(projects_dir:Path, conf_json_file:Path,
         for pair in batched(fastq_files, 2):
             paired_fq.append({'R1': pair[0], 'R2': pair[1]})
         conf_dict['inputFiles'] = paired_fq      
-
+    logging.debug(f"Configuration dictionary for rendering template: {pprint.pformat(conf_dict['inputFiles'])}")
     output_template_dict = create_output_directory_dict(projects_dir, project_code)
 
     # create dict for input to modules template
@@ -152,7 +158,7 @@ def render_nextflow_config(projects_dir:Path, conf_json_file:Path,
     config_path = path / 'nextflow.config'
     config_path.write_text(rendered_config)
 
-    print(f"Nextflow config file created at: {config_path}")
+    logging.info(f"Nextflow config file created at: {config_path}")
     return project_code
 
 
