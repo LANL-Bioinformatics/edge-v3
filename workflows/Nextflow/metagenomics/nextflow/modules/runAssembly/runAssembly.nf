@@ -355,7 +355,7 @@ process unicyclerPrep {
 //assembly using lrasm
 process lrasm {
     label "assembly"
-    label "small"
+    label "medium"
 
     publishDir (
         path: "${settings["assemblyOutDir"]}", 
@@ -429,7 +429,8 @@ process lrasm {
     }
     
     def errorCorrection = (settings["lrasm"]["ec"] != null && settings["lrasm"]["ec"]) ? "-e " : ""
-    def algorithm = settings["lrasm"]["algorithm"] != null ? "-a ${settings["lrasm"]["algorithm"]} " : ""
+    algorithm = settings["lrasm"]["algorithm"] != null ? "-a ${settings["lrasm"]["algorithm"]} " : ""
+    algorithm = settings["lrasm"]["algorithm"] == "metaFlye" ? "-a flye" : algorithm
     def minLenOpt = ""
     if (settings["lrasm"]["algorithm"] == "miniasm") {
         minLenOpt = "--ao \'-s 400\' "
@@ -437,7 +438,7 @@ process lrasm {
     else if (settings["lrasm"]["algorithm"] == "wtdbg2") {
         minLenOpt = "--wo \'-L 400\' "
     }
-    def flyeOpt = settings["lrasm"]["algorithm"] == "metaflye" ? "--fo '--meta' ": ""
+    def flyeOpt = settings["lrasm"]["algorithm"] == "metaFlye" ? "--fo '--meta' ": ""
 
     """
     lrasm -o \$PWD -t ${task.cpus} \

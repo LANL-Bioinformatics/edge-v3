@@ -160,9 +160,9 @@ process keggPlots {
         mode: 'copy'
     )
     publishDir(
-        path: "${settings["keggViewerDir"]}",
-        mode: 'copy',
-        pattern: "kegg_map/*"
+        path: "${settings["keggViewerDir"]}/${settings["projectCode"]}",
+        pattern: "*.{json,txt,png,xml}",
+	mode: 'copy'
     )
 
     input:
@@ -170,13 +170,14 @@ process keggPlots {
     val settings
     
     output:
-    path "kegg_map/*"
+    path "*.{json,txt,png,xml}"
     path "kegg_map.log"
     
     script:
     """
     check_server_up.pl --url "http://rest.kegg.jp" && \
     opaver_anno.pl -g $gff -o ./kegg_map -p ${settings["projName"]} > kegg_map.log 2>&1
+    cp kegg_map/* .
     """
     }
 

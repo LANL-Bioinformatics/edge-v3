@@ -111,7 +111,7 @@ process virulenceFactorReads {
     containerOptions "--bind=\$PWD:/tmp"
 
     publishDir(
-        path: "${settings["geneFamilyOutDir"]}/MetaVF_Toolkit",
+        path: "${settings["geneFamilyOutDir"]}/VF_MetaVF_Toolkit",
         mode: 'copy',
         saveAs: {
             f -> if(f.endsWith("VF_info.summary")) {"${settings["projName"]}.VF_info.summary"}
@@ -178,7 +178,7 @@ process virulenceFactorPF2 {
     label 'gfa'
     label 'medium'
 
-    containerOptions "--bind=${settings["pf2DB"]}:/bin/PathoFact2 --bind=${settings["genomadDB"]}:/bin/genomad"
+    containerOptions "--bind=${settings["pf2DB"]}:/bin/PathoFact2 --bind=${settings["genomadDB"]}:/bin/genomad/genomad_db"
 
     publishDir(
         path: "${settings["geneFamilyOutDir"]}/VF_PathoFact2",

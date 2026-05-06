@@ -1,6 +1,7 @@
     //module parameters -- passed directly into subworkflows according to best practices
     //these are the default values
     shared {
+        projectCode = "${"<%= nextflowOutDir %>".dropRight(9).takeRight(16)}"
         inputFastq = <% if(typeof inputFastq !== 'undefined') { %><%- JSON.stringify(inputFastq) %><% } else { %>[]<%} %>
         inputFastq2 = <% if(typeof inputFastq2 !== 'undefined') { %><%- JSON.stringify(inputFastq2) %><% } else { %>[]<%} %>
         pairedFile = <% if(typeof paired !== 'undefined') { %><%= paired %><% } else { %>false<%} %>
