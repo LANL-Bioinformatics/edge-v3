@@ -78,18 +78,21 @@ export const components = {
     validForm: false,
     fileInput: null,
     fileInput_display: null,
+    fileInput_source: null,
   },
   fileInputArray: {
     validForm: false,
     fileInput: [],
     fileInput_display: [],
     fileInput_isValid: [],
+    fileInput_source: [],
   },
   pairedFileInputArray: {
     validForm: false,
     fileInput: [],
     fileInput_display: [],
     fileInput_isValid: [],
+    fileInput_source: [],
   },
   optionSelector: {
     validForm: true,
@@ -124,6 +127,8 @@ export const components = {
       platform_display: 'Illumina',
       fileInput: [],
       fileInput_display: [],
+      fileInput_source: [],
+      fastqInspection: null,
     },
   },
   project: {
@@ -135,7 +140,7 @@ export const components = {
         isOptional: false,
         showErrorTooltip: true,
         errMessage:
-          'Required, at 3 but less than 30 characters. <br/>Only alphabets, numbers, dashs, dots and underscore are allowed in the name.',
+          'Required, at 3 but less than 30 characters. <br/>Only alphabets, numbers, dashs, dot and underscore are allowed in the name.',
       },
       projectDesc: {
         text: 'Description',
