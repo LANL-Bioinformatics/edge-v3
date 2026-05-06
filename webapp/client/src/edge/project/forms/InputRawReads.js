@@ -35,7 +35,6 @@ export const InputRawReads = (props) => {
     form.inputs['paired'].value = inForm.paired
     form.inputs[name].value = inForm.fileInput
     form.inputs[name].display = inForm.fileInput_display
-    form.fastqInspection = inForm.fastqInspection
     if (validInputs[name]) {
       validInputs[name].isValid = inForm.validForm
     }

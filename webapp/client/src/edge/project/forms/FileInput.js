@@ -10,10 +10,9 @@ export const FileInput = (props) => {
   const [form, setState] = useState({ ...components[componentName] })
   const [doValidation, setDoValidation] = useState(0)
 
-  const handleFileSelection = (filename, type, index, key, source) => {
+  const handleFileSelection = (filename, type, index, key) => {
     form.fileInput = filename
     form.fileInput_display = key
-    form.fileInput_source = source
     if ((props.isOptional && !key) || props.isValidFileInput(key, filename)) {
       form.validForm = true
     } else {
