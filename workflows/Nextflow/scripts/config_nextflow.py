@@ -164,9 +164,8 @@ def render_nextflow_config(projects_dir:Path, conf_json_file:Path,
     logging.info(f"Nextflow config file created at: {config_path}")
     return project_code
 
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Render Nextflow config")
+def main():
+    parser = argparse.ArgumentParser(description="Create Nextflow config file for EDGEv3 Nextflow pipeline based on user input and config JSON file")
     parser.add_argument("--project-name", type=str, help="Project name chosen by user")
     parser.add_argument("--conf-json-file", type=Path, help="Path to config JSON file used to define pipeline parameters and modules to run")
     parser.add_argument("--paired", action="store_true", help="Indicates if the input files are paired-end")
@@ -193,4 +192,9 @@ if __name__ == "__main__":
                            opaver_web_dir, template_file, 
                            paired=None if args.paired is None else args.paired, 
                            fastq_files=None if args.fastq_files is None else args.fastq_files.split(','))
+    logging.info("Nextflow config file created successfully.")
+
+if __name__ == "__main__":
+    main()
+
     

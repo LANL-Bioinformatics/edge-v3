@@ -26,7 +26,7 @@ def call_nextflow_run(config_path:Path) -> None:
     run(["nextflow", "-C", str(config_path), "run", main_nf_path], check=True)
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description="run EDGE Nextflow pipeline")
     parser.add_argument("--project-name", type=str, help="Project name chosen by user")
     parser.add_argument("--fastq-file", type=str, help="Path to FASTQ file containing raw reads to be processed")
@@ -59,3 +59,6 @@ if __name__ == "__main__":
                                refdata_dir, opaver_web_dir, template_file, 
                                paired=None if args.paired is None else args.paired, 
                                fastq_files=None if args.fastq_files is None else args.fastq_files.split(','))
+
+if __name__ == "__main__":
+       main()
