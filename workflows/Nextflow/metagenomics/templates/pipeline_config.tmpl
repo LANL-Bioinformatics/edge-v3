@@ -1,4 +1,5 @@
 workDir="<%= nextflowOutDir %>/work"
+cleanup = true
 params {
     //which modules are run
     modules {
@@ -7,7 +8,7 @@ params {
         hostRemoval = false
         runAssembly = <% if(typeof assembly !== 'undefined') { %><%= assembly %><% } else { %>false<%} %>
         annotation = <% if(typeof annotation !== 'undefined') { %><%= annotation %><% } else { %>false<%} %>
-        readsBinning = <% if(typeof binning !== 'undefined') { %><%= binning %><% } else { %>false<%} %>
+        binning = <% if(typeof binning !== 'undefined') { %><%= binning %><% } else { %>false<%} %>
         phageFinder = true //true by default -- will run if non-viral reads are annotated
         readsTaxonomyAssignment = <% if(typeof readTax !== 'undefined') { %><%= readTax %><% } else { %>false<%} %>
         contigsTaxonomyAssignment = <% if(typeof contigTax !== 'undefined') { %><%= contigTax %><% } else { %>false<%} %>
@@ -27,7 +28,7 @@ params {
         assemblyOutDir ="<%= assemblyOutdir %>"
         contigsTaxonomyOutDir ="<%= taxonomyOutdir %>"
         phageFinderOutDir = "<%= annotationOutdir %>"
-        readBinningOutDir = "<%= binningOutdir %>"
+        binningOutDir = "<%= binningOutdir %>"
         readsTaxonomyOutDir = "<%= taxonomyOutdir %>"
         annotationOutDir = "<%= annotationOutdir %>"
         smaOutDir = "<%= antiSmashOutdir %>"
