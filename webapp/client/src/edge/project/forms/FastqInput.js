@@ -1,8 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import { MyTooltip } from '../../common/MyTooltip'
-import { MessageDialog } from '../../common/Dialogs'
 import { defaults, capitalizeFirstLetter } from '../../common/util'
-import { inspectFastqFiles, FASTQ_PLATFORM, FASTQ_LAYOUT } from '../../common/fastqInspector'
 import { Switcher } from './Switcher'
 import { FileInputArray } from './FileInputArray'
 import { PairedFileInputArray } from './PairedFileInputArray'
@@ -16,14 +14,8 @@ export const FastqInput = (props) => {
     platform: props.seqPlatformDefaultValue,
   })
   const [doValidation, setDoValidation] = useState(0)
-  const [inspectionNotice, setInspectionNotice] = useState({
-    isOpen: false,
-    message: '',
-  })
-  const inspectionRun = useRef(0)
 
   const setNewState2 = (name, value) => {
-    inspectionRun.current += 1
     setState({
       ...form,
       [name]: value,
@@ -34,202 +26,31 @@ export const FastqInput = (props) => {
     setNewState2(name, inForm.isTrue)
   }
   const setPlatform = (inForm, name) => {
-    inspectionRun.current += 1
-    let paired = form.paired
     if (inForm.option.toLowerCase() !== 'illumina') {
-      paired = false
+      form.paired = false
     } else if (props.isPaired != null) {
-      paired = props.isPaired
+      form.paired = props.isPaired
     }
-    setState({
-      ...form,
-      paired,
-      platform: inForm.option,
-      platform_display: inForm.display ? inForm.display : inForm.option,
-    })
-    setDoValidation((value) => value + 1)
-  }
-  const getPlatformOption = (platform) => {
-    const match = props.seqPlatformOptions?.find(
-      (item) =>
-        item.value.toLowerCase() === platform.toLowerCase() ||
-        item.text.toLowerCase() === platform.toLowerCase(),
-    )
-
-    return {
-      value: match ? match.value : platform,
-      display: match ? match.text : platform,
-    }
-  }
-  const hasPairingProblem = (result) =>
-    result.mismatch || (result.reason || '').includes('missing an R')
-  const getDetectedPaired = (result) => {
-    if (hasPairingProblem(result)) {
-      return false
-    }
-    if (result.layout === FASTQ_LAYOUT.TWO_FILE || result.layout === FASTQ_LAYOUT.INTERLEAVED) {
-      return true
-    }
-    if (result.layout === FASTQ_LAYOUT.SINGLE) {
-      return false
-    }
-    return null
-  }
-  const getLayoutDisplay = (result) => {
-    if (result.mismatch) {
-      return 'Not paired (R1/R2 names mismatch)'
-    }
-    if ((result.reason || '').includes('missing an R')) {
-      return 'Not paired (missing mate record)'
-    }
-    if (result.layout === FASTQ_LAYOUT.TWO_FILE) {
-      return 'Paired-end (R1/R2 files)'
-    }
-    if (result.layout === FASTQ_LAYOUT.INTERLEAVED) {
-      return 'Paired-end (interleaved FASTQ)'
-    }
-    if (result.layout === FASTQ_LAYOUT.SINGLE) {
-      return result.longReadDetected ? 'Single-end or long-read' : 'Single-end'
-    }
-    return 'Unknown'
-  }
-  const getPlatformDisplay = (fastqForm) =>
-    fastqForm.platform_display || fastqForm.platform || FASTQ_PLATFORM.UNKNOWN
-  const getNoticeAction = (interleavedChanged, pairingProblem) => {
-    if (interleavedChanged) {
-      return 'Interleaved paired FASTQ was detected; the selected file remains in the single-file input.'
-    }
-    if (pairingProblem) {
-      return 'The form was not changed; please review the selected R1/R2 FASTQ files.'
-    }
-    return 'The form was updated to match the detected FASTQ sample.'
-  }
-  const getInspectionNotice = (result, selectedForm) => {
-    const detectedPaired = getDetectedPaired(result)
-    const detectedPlatform = getPlatformOption(result.platform)
-    const selectedPlatform = getPlatformDisplay(selectedForm)
-    const interleavedChanged = result.layout === FASTQ_LAYOUT.INTERLEAVED && !selectedForm.paired
-    const pairingProblem = hasPairingProblem(result)
-    const platformChanged =
-      result.platform !== FASTQ_PLATFORM.UNKNOWN &&
-      detectedPlatform.value.toLowerCase() !== (selectedForm.platform || '').toLowerCase()
-    const pairedChanged =
-      result.layout !== FASTQ_LAYOUT.INTERLEAVED &&
-      detectedPaired !== null &&
-      detectedPaired !== selectedForm.paired
-
-    if (!platformChanged && !pairedChanged && !interleavedChanged) {
-      return null
-    }
-
-    const platformText =
-      result.platform === FASTQ_PLATFORM.UNKNOWN
-        ? `${FASTQ_PLATFORM.UNKNOWN} (kept ${selectedPlatform})`
-        : detectedPlatform.display
-
-    return [
-      'Detected FASTQ settings differ from your current selection.',
-      '<br/><br/>',
-      `Detected platform: ${platformText}`,
-      '<br/>',
-      `Detected read format: ${getLayoutDisplay(result)}`,
-      '<br/><br/>',
-      getNoticeAction(interleavedChanged, pairingProblem),
-    ].join('')
-  }
-  const getInspectionSources = (fastqForm) => {
-    if (!fastqForm.validForm) {
-      return []
-    }
-
-    if (fastqForm.paired) {
-      const pair = (fastqForm.fileInput_source || []).find((item) => item?.R1 && item?.R2)
-      return pair ? [pair.R1, pair.R2] : []
-    }
-
-    const source = (fastqForm.fileInput_source || []).find(Boolean)
-    return source ? [source] : []
-  }
-  const inspectSelectedFastq = (fastqForm) => {
-    const sources = getInspectionSources(fastqForm)
-    if (sources.length === 0) {
-      return
-    }
-
-    const runId = inspectionRun.current + 1
-    inspectionRun.current = runId
-
-    inspectFastqFiles(sources, props.fastqInspectionOptions)
-      .then((result) => {
-        if (inspectionRun.current !== runId) {
-          return
-        }
-        const notice = getInspectionNotice(result, fastqForm)
-
-        setState((current) => {
-          const next = {
-            ...current,
-            fastqInspection: result,
-          }
-
-          if (result.layout === FASTQ_LAYOUT.TWO_FILE) {
-            next.paired = true
-          } else if (result.layout === FASTQ_LAYOUT.SINGLE) {
-            next.paired = false
-          }
-
-          if (result.platform !== FASTQ_PLATFORM.UNKNOWN) {
-            const platform = getPlatformOption(result.platform)
-            next.platform = platform.value
-            next.platform_display = platform.display
-            if (result.platform !== FASTQ_PLATFORM.ILLUMINA) {
-              next.paired = false
-            }
-          }
-
-          return next
-        })
-        if (notice) {
-          setInspectionNotice({
-            isOpen: true,
-            message: notice,
-          })
-        }
-        setDoValidation((value) => value + 1)
-      })
-      .catch((error) => {
-        if (inspectionRun.current !== runId) {
-          return
-        }
-        setState((current) => ({
-          ...current,
-          fastqInspection: {
-            ok: false,
-            reason: error.message,
-          },
-        }))
-        setDoValidation((value) => value + 1)
-      })
+    form['platform'] = inForm.option
+    form['platform_display'] = inForm.display ? inForm.display : inForm.option
+    setDoValidation(doValidation + 1)
   }
   const setFileInput = (inForm, name) => {
-    const nextForm = {
-      ...form,
-      validForm: inForm.validForm,
-      fastqInspection: null,
-    }
+    form.validForm = inForm.validForm
     if (inForm.validForm) {
-      nextForm.fileInput = inForm.fileInput
-      nextForm.fileInput_display = inForm.fileInput_display
-      nextForm.fileInput_source = inForm.fileInput_source
+      setState({
+        ...form,
+        fileInput: inForm.fileInput,
+        fileInput_display: inForm.fileInput_display,
+      })
     } else {
-      inspectionRun.current += 1
-      nextForm.fileInput = []
-      nextForm.fileInput_display = []
-      nextForm.fileInput_source = []
+      setState({
+        ...form,
+        fileInput: [],
+        fileInput_display: [],
+      })
     }
-    setState(nextForm)
-    setDoValidation((value) => value + 1)
-    inspectSelectedFastq(nextForm)
+    setDoValidation(doValidation + 1)
   }
 
   useEffect(() => {
@@ -247,18 +68,6 @@ export const FastqInput = (props) => {
 
   return (
     <>
-      <MessageDialog
-        isOpen={inspectionNotice.isOpen}
-        title="FASTQ detected settings"
-        html={true}
-        message={inspectionNotice.message}
-        handleClickClose={() =>
-          setInspectionNotice({
-            isOpen: false,
-            message: '',
-          })
-        }
-      />
       {props.text && (
         <MyTooltip
           id={`fileInputTooltip-${props.name}`}
@@ -277,8 +86,7 @@ export const FastqInput = (props) => {
             setParams={setPlatform}
             text={props.seqPlatformText}
             options={props.seqPlatformOptions}
-            defaultValue={form.platform}
-            display={form.platform_display}
+            defaultValue={props.seqPlatformDefaultValue}
             tooltip={props.seqPlatformTooltip}
           />
           <br></br>
@@ -293,7 +101,7 @@ export const FastqInput = (props) => {
             text={
               props.pairedText ? props.pairedText : components[componentName].params['paired'].text
             }
-            defaultValue={form.paired}
+            defaultValue={components[componentName].params['paired'].defaultValue}
             trueText={components[componentName].params['paired'].trueText}
             falseText={components[componentName].params['paired'].falseText}
           />
