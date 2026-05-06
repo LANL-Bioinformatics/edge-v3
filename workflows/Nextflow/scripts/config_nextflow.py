@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 import json
 import jinja2
@@ -96,17 +97,12 @@ def create_render_dict(conf_dict:dict, output_template_dict:dict, module_run_inp
     """
     Creates a dictionary for rendering the Nextflow config template.
     """
-    if not conf_dict['rawReads']['paired']:
-        render_dict = {'inputFastq':conf_dict['rawReads']['inputFiles']}
-    else:
-        fq1, fq2 = [], []
-        for pair in conf_dict['rawReads']['inputFiles']:
-            fq1.append(pair['R1'])
-            fq2.append(pair['R2'])
-        render_dict = {'inputFastq': fq1, 'inputFastq2': fq2}
+
+    render_dict = get_input_fastq_files(conf_dict)
+
     render_dict['refdata'] = refdata_dir
     render_dict['project'] = project_name
-    render_dict['seqPlatform'] = conf_dict['rawReads']['seqPlatform']
+    render_dict['seqPlatform'] = get_sequencing_platform(render_dict)
     render_dict['keggViewerDir'] = opaver_web_dir
     render_dict.update(output_template_dict)
     render_dict.update(module_run_input_dict)
@@ -119,31 +115,55 @@ def create_render_dict(conf_dict:dict, output_template_dict:dict, module_run_inp
     render_dict = {k: (str(v).lower() if isinstance(v, bool) else v) for k, v in render_dict.items()}
     return render_dict
 
+def get_input_fastq_files(conf_dict:dict) -> dict:
+    """
+    Gets the input fastq files from the conf_dict and returns them as a list.
+    """
+    if not conf_dict['rawReads']['paired']:
+        return conf_dict['rawReads']['inputFiles']
+    else:
+        fq1, fq2 = [], []
+        for pair in conf_dict['rawReads']['inputFiles']:
+            fq1.append(pair['R1'])
+            fq2.append(pair['R2'])
+        return {'inputFastq': fq1, 'inputFastq2': fq2}
+    
+
+def get_sequencing_platform(render_dict):
+    """
+    Detects the sequencing platform from the input files using the detect_platform function.
+    """
+    fq1_platform_list = [detect_platform(f)['platform'] for f in render_dict['inputFastq']]
+    fq2_platform_list = [detect_platform(f)['platform'] for f in render_dict['inputFastq2']] if 'inputFastq2' in render_dict.keys() else []
+    fq1_platform_list.extend(fq2_platform_list)
+    if len(set(fq1_platform_list)) != 1:
+        sys.exit('Not all of the fastq files are from the same sequencing platform. Please check the input files and try again.')
+    return list(set(fq1_platform_list))[0]
+
 
 def render_nextflow_config(projects_dir:Path, conf_json_file:Path, 
                            project_name:str, nextflowOutDir:Path, 
-                           refdata_dir:Path, opaver_web_dir:Path, template_file: Path, paired=None, fastq_files=None) -> str:
+                           refdata_dir:Path, opaver_web_dir:Path, template_file: Path, paired=None, input_files=None) -> str:
     """
     Renders the Nextflow configuration file. 
     Uses the utils.js and conf.json files to create a dictionary with the necessary parameters and output 
     directories for the Nextflow config template. Then renders the template and writes the Nextflow 
     config file to the project directory.
+    First, checks the format of the input files using the detect_platform function. 
+    If the input files are in fastq format, adds them to the conf_dict for rendering the template. 
     """
-    logging.debug(f"fastq_files input: {fastq_files}, paired input: {paired}")
+    logging.debug(f"fastq_files input: {input_files}, paired input: {paired}")
     project_code = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
     conf_dict = json.loads(conf_json_file.read_text())
-    
-    # If fastq_files are provided as input, add them to the conf_dict for rendering the template. 
-    # If paired is True, expect fastq_files to be a list of paths in the format R1_path,R2_path 
-    # and convert to list of dicts with keys 'R1' and 'R2' for rendering the template.
-    if fastq_files and not paired:
-        conf_dict['rawReads']['inputFiles'] = fastq_files
-    elif fastq_files:
-        conf_dict['rawReads']['paired'] = True
-        paired_fq = []
-        for pair in batched(fastq_files, 2):
-            paired_fq.append({'R1': pair[0], 'R2': pair[1]})
-        conf_dict['rawReads']['inputFiles'] = paired_fq
+    if input_files:
+        file_format = list(set([detect_platform(f)['file_format'] for f in input_files]))[0]
+        if file_format == 'fasta':
+            sys.exit('Fasta format not supported yet.')
+        if file_format == 'fastq':
+            conf_dict = set_fastq_files(conf_dict, input_files, paired)
+        else:
+            sys.exit('Unsupported file format. Please provide input files in fastq or fasta format.')
+            
     logging.debug(f"Configuration dictionary for rendering template: {pprint.pformat(conf_dict['rawReads']['inputFiles'])}")
     output_template_dict = create_output_directory_dict(projects_dir, project_code)
 
@@ -163,6 +183,24 @@ def render_nextflow_config(projects_dir:Path, conf_json_file:Path,
 
     logging.info(f"Nextflow config file created at: {config_path}")
     return project_code
+
+
+def set_fastq_files(conf_dict:dict, input_files:list, paired:bool) -> dict:
+    """
+    Sets the input fastq files in the conf_dict for rendering the template. 
+    If paired is True, expects input_files to be a list of paths in the format R1_path,R2_path 
+    and converts to list of dicts with keys 'R1' and 'R2' for rendering the template.
+    """
+    if not paired:
+        conf_dict['rawReads']['inputFiles'] = input_files
+    else:
+        conf_dict['rawReads']['paired'] = True
+        paired_fq = []
+        for pair in batched(input_files, 2):
+            paired_fq.append({'R1': pair[0], 'R2': pair[1]})
+        conf_dict['rawReads']['inputFiles'] = paired_fq
+    return conf_dict
+
 
 def main():
     parser = argparse.ArgumentParser(description="Create Nextflow config file for EDGEv3 Nextflow pipeline based on user input and config JSON file")
