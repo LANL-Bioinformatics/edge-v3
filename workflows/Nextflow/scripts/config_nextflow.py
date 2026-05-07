@@ -93,7 +93,7 @@ def get_module_run_input_dict(conf_dict:dict) -> dict:
 
 
 def create_render_dict(conf_dict:dict, output_template_dict:dict, module_run_input_dict:dict, 
-                       nextflowOutDir:Path, refdata_dir:Path, opaver_web_dir:Path, project_name, project_code) -> dict:
+                       nextflowOutDir:Path, refdata_dir:Path, opaver_web_dir:Path, project_name, project_code, platform) -> dict:
     """
     Creates a dictionary for rendering the Nextflow config template.
     """
@@ -102,7 +102,7 @@ def create_render_dict(conf_dict:dict, output_template_dict:dict, module_run_inp
 
     render_dict['refdata'] = refdata_dir
     render_dict['project'] = project_name
-    render_dict['seqPlatform'] = get_sequencing_platform(render_dict)
+    render_dict['seqPlatform'] = platform
     render_dict['keggViewerDir'] = opaver_web_dir
     render_dict.update(output_template_dict)
     render_dict.update(module_run_input_dict)
@@ -120,7 +120,7 @@ def get_input_fastq_files(conf_dict:dict) -> dict:
     Gets the input fastq files from the conf_dict and returns them as a list.
     """
     if not conf_dict['rawReads']['paired']:
-        return conf_dict['rawReads']['inputFiles']
+        return {'inputFastq': conf_dict['rawReads']['inputFiles']}
     else:
         fq1, fq2 = [], []
         for pair in conf_dict['rawReads']['inputFiles']:
@@ -157,6 +157,7 @@ def render_nextflow_config(projects_dir:Path, conf_json_file:Path,
     conf_dict = json.loads(conf_json_file.read_text())
     if input_files:
         file_format = list(set([detect_platform(f)['file_format'] for f in input_files]))[0]
+        platform = list(set([detect_platform(f)['platform'] for f in input_files]))[0]
         if file_format == 'fasta':
             sys.exit('Fasta format not supported yet.')
         if file_format == 'fastq':
@@ -166,12 +167,14 @@ def render_nextflow_config(projects_dir:Path, conf_json_file:Path,
             
     logging.debug(f"Configuration dictionary for rendering template: {pprint.pformat(conf_dict['rawReads']['inputFiles'])}")
     output_template_dict = create_output_directory_dict(projects_dir, project_code)
+    if platform in ['nanopore', 'pacbio']:
+        conf_dict = set_long_reads_assembler(conf_dict)
 
     # create dict for input to modules template
     module_run_input_dict = get_module_run_input_dict(conf_dict)
 
     render_dict = create_render_dict(conf_dict, output_template_dict, module_run_input_dict, 
-                                     nextflowOutDir, refdata_dir, opaver_web_dir, project_name, project_code)
+                                     nextflowOutDir, refdata_dir, opaver_web_dir, project_name, project_code, platform)
     # Render nextflow config template with output directories
     environment = jinja2.Environment()
     template = environment.from_string(template_file.read_text())
@@ -201,6 +204,21 @@ def set_fastq_files(conf_dict:dict, input_files:list, paired:bool) -> dict:
         conf_dict['rawReads']['inputFiles'] = paired_fq
     return conf_dict
 
+def set_long_reads_assembler(conf_dict:dict) -> dict:
+    long_reads_assembler_input = {
+                "assembler": "LRASM",
+                "minContigSize": 200,
+                "aligner": "minimap2",
+                "aligner_options": "",
+                "extractUnmapped": False,
+                "Lrasm_algorithm": "flye",
+                "Lrasm_ec": False,
+                "Lrasm_preset": "nanopore",
+                "Lrasm_numConsensus": 3
+            }
+    [p for p in conf_dict['pipeline'] if p['name'] == 'assembly'][0]['input'] = long_reads_assembler_input
+
+    return conf_dict
 
 def main():
     parser = argparse.ArgumentParser(description="Create Nextflow config file for EDGEv3 Nextflow pipeline based on user input and config JSON file")
