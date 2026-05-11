@@ -333,12 +333,14 @@ const linkCopyFile = async (file, dir, action, uploadOnly) => {
 }
 
 // The output zip file is in the io/tmp/<random> dir, and the zip file name is <project_name>_outputs.tgz
-const zipFiles = async (name, filePath, files) => {
-  //const cmd = `tar -czf ${name}.tgz -C ${filePath} ${files.join(' ')}`
-  const cmd = `cd ${filePath} && zip -r ${name}.zip ${files.join(' ')}`
+const zipFiles = async (outdir, name, filePath, files) => {
+  // const zipFile = `${name}.tgz`
+  // const cmd = `tar -czf ${outdir}/${zipFile} -C ${filePath} ${files.join(' ')}`
+  const zipFile = `${name}.zip`
+  const cmd = `cd ${filePath} && zip -r ${outdir}/${zipFile} ${files.join(' ')}`
   await execCmd(cmd)
-  if (fs.existsSync(name)) {
-    return name
+  if (fs.existsSync(`${outdir}/${zipFile}`)) {
+    return zipFile
   }
   return null
 }
