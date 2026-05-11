@@ -191,7 +191,7 @@ const zipProjectOutputs = async (code, type, req) => {
     }
     fs.mkdirSync(outDir)
 
-    const zipName = `${proj.name.replaceAll(' ', '_')}_${proj.type.replaceAll(' ', '_')}_${new Date().toISOString().split('.')[0].replace(/:/g, '-')}.tgz`
+    const zipName = `${proj.name.replaceAll(' ', '_')}_${proj.type.replaceAll(' ', '_')}_${new Date().toISOString().split('.')[0].replace(/:/g, '-')}`
     await zipFiles(
       `${outDir}/${zipName}`,
       `${config.IO.PROJECT_BASE_DIR}/${proj.code}/output`,
