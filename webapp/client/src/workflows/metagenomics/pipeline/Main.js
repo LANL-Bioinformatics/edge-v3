@@ -407,7 +407,7 @@ const Main = (props) => {
             errMessage={
               selectedWorkflows['assembly'] ? selectedWorkflows['assembly'].errMessage : null
             }
-            seqPlatform={'rawDataParams.inputs.seqPlatform.value'}
+            seqPlatform={rawDataParams.inputs.seqPlatform.value}
             allExpand={allExpand}
             allClosed={allClosed}
             onoff={true}
