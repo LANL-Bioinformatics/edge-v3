@@ -48,7 +48,7 @@ const _nav = [
       },
       {
         component: CNavItem,
-        name: 'Run Multiple Workflow',
+        name: 'Run Multiple Workflows',
         to: '/workflow/metagenomics/pipeline',
       },
     ],
