@@ -132,6 +132,7 @@ def get_input_fastq_files(conf_dict:dict) -> dict:
 def get_sequencing_platform(input_files) -> tuple:
     """
     Detects the sequencing platform from the input files using the detect_platform function.
+    Exit if the input files are not all from the same platform or if the file format is not supported (not fastq or fasta).
     """
     file_formats = list(set([detect_platform(f)['file_format'] for f in input_files]))
     platforms = list(set([detect_platform(f)['platform'] for f in input_files]))

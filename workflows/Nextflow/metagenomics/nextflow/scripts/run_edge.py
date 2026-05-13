@@ -5,6 +5,7 @@ from pathlib import Path
 import os
 
 from config_nextflow import render_nextflow_config
+from nf_functions import start_job
 
 def run_nextflow_pipeline(projects_dir:Path, conf_json_file:Path, project_name:str, 
                           nextflowOutDir:Path, refdata_dir:Path, opaver_web_dir:Path, template_file: Path, 
@@ -18,13 +19,13 @@ def run_nextflow_pipeline(projects_dir:Path, conf_json_file:Path, project_name:s
     call_nextflow_run(config_path)
 
 
-def call_nextflow_run(config_path:Path) -> None:
+def call_nextflow_run(config_path:Path, project_code) -> None:
     """
     Calls the Nextflow pipeline with the provided config file path.
     """
     root_dir = Path.cwd().parent.parent.parent
     main_nf_path = str(root_dir / 'workflows/Nextflow/metagenomics/nextflow/main.nf')
-    run(["nextflow", "-C", str(config_path), "run", main_nf_path], check=True)
+    start_job(job_name=project_code, project_path=main_nf_path, run_dir=root_dir)
 
 
 def main():
