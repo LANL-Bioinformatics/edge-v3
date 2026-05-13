@@ -650,7 +650,11 @@ const Main = (props) => {
                   selectedWorkflows[workflow] ? selectedWorkflows[workflow].errMessage : null
                 }
                 source={rawDataParams.inputs.source.value}
-                pairedReads={rawDataParams.inputs.paired.value}
+                pairedReads={
+                  rawDataParams.inputs.source.value === 'fastq'
+                    ? rawDataParams.inputs.paired.value
+                    : false
+                }
                 allExpand={allExpand}
                 allClosed={allClosed}
               />

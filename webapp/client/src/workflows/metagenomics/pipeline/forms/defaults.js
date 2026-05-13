@@ -1877,10 +1877,7 @@ export const workflows = {
     },
     // only for input with validation method
     validInputs: {
-      contigsInputs: {
-        inputFAA: { isValid: false, error: 'Input FAA File error. Required' },
-        inputGFF: { isValid: false, error: 'Input GFF File error. Required' },
-      },
+      contigsInputs: {},
     },
   },
 }

@@ -19,7 +19,7 @@ import { AntiSmash } from '../forms/AntiSmash'
 import { Taxonomy } from '../forms/Taxonomy'
 import { Phylogeny } from '../forms/Phylogeny'
 import { RefBased } from '../forms/RefBased'
-import { GeneFamily } from '../forms/GeneFamily'
+import { GeneFamily } from './forms/GeneFamily'
 import { workflows } from './forms/defaults'
 
 const Main = (props) => {
@@ -177,7 +177,8 @@ const Main = (props) => {
           // eslint-disable-next-line prettier/prettier
           ...selectedWorkflows['geneFamily'].readsInputs
         }
-      } else {
+      }
+      if (selectedWorkflows['geneFamily'].inputs['contigsGeneFamily'].value) {
         selectedWorkflows['geneFamily'].inputs = {
           ...selectedWorkflows['geneFamily'].inputs,
           // eslint-disable-next-line prettier/prettier
@@ -250,6 +251,20 @@ const Main = (props) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rawDataParams.inputs.source.value])
+
+  useEffect(() => {
+    //disable gene family workflow if annotation is not selected
+    if (
+      rawDataParams.inputs.source.value === 'fasta' &&
+      !selectedWorkflows['annotation'].paramsOn
+    ) {
+      selectedWorkflows['geneFamily'].disabled = true
+    } else {
+      selectedWorkflows['geneFamily'].disabled = false
+    }
+    selectedWorkflows['geneFamily'].paramsOn = false
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rawDataParams.inputs.source.value, selectedWorkflows['annotation'].paramsOn])
 
   useEffect(() => {
     updateBinning()
@@ -539,7 +554,7 @@ const Main = (props) => {
             errMessage={
               selectedWorkflows['geneFamily'] ? selectedWorkflows['geneFamily'].errMessage : null
             }
-            source={rawDataParams?.inputs.source.value}
+            source={rawDataParams?.source.value}
             pairedReads={rawDataParams?.inputs.paired.value}
             allExpand={allExpand}
             allClosed={allClosed}
