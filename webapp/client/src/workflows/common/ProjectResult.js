@@ -12,6 +12,7 @@ import { Phylogeny } from '../metagenomics/results/Phylogeny'
 import { AntiSmash } from '../metagenomics/results/AntiSmash'
 import { Taxonomy } from '../metagenomics/results/Taxonomy'
 import { RefBased } from '../metagenomics/results/RefBased'
+import { GeneFamily } from '../metagenomics/results/GeneFamily'
 import { MetaG } from '../metagenomics/pipeline/results/MetaG'
 
 const ProjectResult = (props) => {
@@ -313,6 +314,15 @@ const ProjectResult = (props) => {
               )}
               {project.type === 'refBased' && (
                 <RefBased
+                  result={result}
+                  project={project}
+                  userType={type}
+                  allExpand={allExpand}
+                  allClosed={allClosed}
+                />
+              )}
+              {project.type === 'geneFamily' && (
+                <GeneFamily
                   result={result}
                   project={project}
                   userType={type}

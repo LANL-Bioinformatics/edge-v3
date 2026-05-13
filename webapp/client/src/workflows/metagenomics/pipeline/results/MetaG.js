@@ -6,6 +6,7 @@ import { AntiSmash } from '../../results/AntiSmash'
 import { Taxonomy } from '../../results/Taxonomy'
 import { Phylogeny } from '../../results/Phylogeny'
 import { RefBased } from '../../results/RefBased'
+import { GeneFamily } from '../../results/GeneFamily'
 import { workflows } from '../../defaults'
 
 export const MetaG = (props) => {
@@ -99,6 +100,18 @@ export const MetaG = (props) => {
         } else if (workflow === 'refBased') {
           return (
             <RefBased
+              key={index}
+              result={props.result[workflow]}
+              project={props.project}
+              title={workflows[workflow].title + ' Result'}
+              userType={props.type}
+              allExpand={props.allExpand}
+              allClosed={props.allClosed}
+            />
+          )
+        } else if (workflow === 'geneFamily') {
+          return (
+            <GeneFamily
               key={index}
               result={props.result[workflow]}
               project={props.project}

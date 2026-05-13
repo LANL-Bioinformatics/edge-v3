@@ -155,8 +155,8 @@ const generateNextflowWorkflowParams = async (projHome, projectConf, proj) => {
   return params
 }
 
-const metaGWorkflowResult = (outdir, workflow, projCode) => {
-  const pattern = new RegExp(`^.+${projCode}/`)
+const metaGWorkflowResult = (outdir, workflow, proj) => {
+  const pattern = new RegExp(`^.+${proj.code}/`)
   const result = {}
   result[workflow] = {}
 
@@ -203,7 +203,7 @@ const metaGWorkflowResult = (outdir, workflow, projCode) => {
       result[workflow].stats = statsFile.replace(pattern, '')
     }
     result[workflow].opaver_web =
-      `opaver_web/pathway_anno.html?data=${projCode}`
+      `opaver_web/pathway_anno.html?data=${proj.code}`
   } else if (workflow === 'binning') {
     const statsFile = `${outdir}/contigs_stats.txt`
     if (fs.existsSync(statsFile)) {
@@ -366,6 +366,32 @@ const metaGWorkflowResult = (outdir, workflow, projCode) => {
         fs.readFileSync(jbrowseUrlFile),
       ).jbrowse2_path
     }
+  } else if (workflow === 'geneFamily') {
+    // gene family summary table
+    // GeneFamily/VF_MetaVF_Toolkit/<project name>.VF_info.summary
+    const summaryFile = `${outdir}/VF_MetaVF_Toolkit/${proj.name.replace(/\s/g, '_')}.VF_info.summary`
+    if (fs.existsSync(summaryFile)) {
+      result[workflow].summary = Papa.parse(
+        fs.readFileSync(summaryFile).toString(),
+        {
+          delimiter: '\t',
+          header: true,
+          skipEmptyLines: true,
+        },
+      ).data
+    }
+    // GeneFamily/VF_PathoFact2/summary/<project name>_contigs/VF_hits_rep_prot_with_MGE.tsv
+    const pathoFactFile = `${outdir}/VF_PathoFact2/summary/${proj.name.replace(/\s/g, '_')}_contigs/VF_hits_rep_prot_with_MGE.tsv`
+    if (fs.existsSync(pathoFactFile)) {
+      result[workflow].summary = Papa.parse(
+        fs.readFileSync(pathoFactFile).toString(),
+        {
+          delimiter: '\t',
+          header: true,
+          skipEmptyLines: true,
+        },
+      ).data
+    }
   }
 
   return result
@@ -390,49 +416,54 @@ const generateWorkflowResult = proj => {
     } else if (projectConf.workflow.name === 'runFaQCs') {
       result = {
         ...result,
-        ...metaGWorkflowResult(outdir, 'runFaQCs', proj.code).runFaQCs,
+        ...metaGWorkflowResult(outdir, 'runFaQCs', proj).runFaQCs,
       }
     } else if (projectConf.workflow.name === 'assembly') {
       result = {
         ...result,
-        ...metaGWorkflowResult(outdir, 'assembly', proj.code).assembly,
+        ...metaGWorkflowResult(outdir, 'assembly', proj).assembly,
       }
     } else if (projectConf.workflow.name === 'annotation') {
       result = {
         ...result,
-        ...metaGWorkflowResult(outdir, 'annotation', proj.code).annotation,
+        ...metaGWorkflowResult(outdir, 'annotation', proj).annotation,
       }
     } else if (projectConf.workflow.name === 'binning') {
       result = {
         ...result,
-        ...metaGWorkflowResult(outdir, 'binning', proj.code).binning,
+        ...metaGWorkflowResult(outdir, 'binning', proj).binning,
       }
     } else if (projectConf.workflow.name === 'antiSmash') {
       result = {
         ...result,
-        ...metaGWorkflowResult(outdir, 'antiSmash', proj.code).antiSmash,
+        ...metaGWorkflowResult(outdir, 'antiSmash', proj).antiSmash,
       }
     } else if (projectConf.workflow.name === 'taxonomy') {
       result = {
         ...result,
-        ...metaGWorkflowResult(outdir, 'taxonomy', proj.code).taxonomy,
+        ...metaGWorkflowResult(outdir, 'taxonomy', proj).taxonomy,
       }
     } else if (projectConf.workflow.name === 'phylogeny') {
       result = {
         ...result,
-        ...metaGWorkflowResult(outdir, 'phylogeny', proj.code).phylogeny,
+        ...metaGWorkflowResult(outdir, 'phylogeny', proj).phylogeny,
       }
     } else if (projectConf.workflow.name === 'refBased') {
       result = {
         ...result,
-        ...metaGWorkflowResult(outdir, 'refBased', proj.code).refBased,
+        ...metaGWorkflowResult(outdir, 'refBased', proj).refBased,
+      }
+    } else if (projectConf.workflow.name === 'geneFamily') {
+      result = {
+        ...result,
+        ...metaGWorkflowResult(outdir, 'geneFamily', proj).geneFamily,
       }
     } else if (projectConf.workflow.name === 'metagenomics') {
       projectConf.pipeline.forEach(workflow => {
         const workflowResult = metaGWorkflowResult(
           `${outdir}/${path.basename(workflowList[workflow.name].outdir)}`,
           workflow.name,
-          proj.code,
+          proj,
         )
         if (Object.keys(workflowResult[workflow.name]).length > 0) {
           result = {
