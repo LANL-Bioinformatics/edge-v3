@@ -1809,11 +1809,11 @@ export const workflows = {
       },
       contigsGeneFamily: {
         text: 'Contigs Gene Family Analysis',
-        value: false,
+        value: true,
         switcher: {
           trueText: 'Yes',
           falseText: 'No',
-          defaultValue: false,
+          defaultValue: true,
         },
       },
     },
@@ -1831,38 +1831,6 @@ export const workflows = {
       },
     },
     contigsInputs: {
-      inputFAA: {
-        text: 'Input FAA File',
-        value: null,
-        display: null,
-        fileInput: {
-          enableInput: true,
-          placeholder: '(Required) Select a file or enter a file http(s) url',
-          dataSources: ['upload', 'public', 'project'],
-          fileTypes: ['faa'],
-          projectTypes: ['annotation'],
-          projectScope: ['self+shared'],
-          viewFile: false,
-          isOptional: false,
-          cleanupInput: true,
-        },
-      },
-      inputGFF: {
-        text: 'Input GFF File',
-        value: null,
-        display: null,
-        fileInput: {
-          enableInput: true,
-          placeholder: '(Required) Select a file or enter a file http(s) url',
-          dataSources: ['upload', 'public', 'project'],
-          fileTypes: ['gff'],
-          projectTypes: ['annotation'],
-          projectScope: ['self+shared'],
-          viewFile: false,
-          isOptional: false,
-          cleanupInput: true,
-        },
-      },
       virulenceFactorTool: {
         text: 'Virulence Factor (VF) Detection Tool',
         tooltip: `MetaVF Toolkit will identify VFs in contigs through sequence similarity search using
@@ -1877,10 +1845,7 @@ export const workflows = {
     },
     // only for input with validation method
     validInputs: {
-      contigsInputs: {
-        inputFAA: { isValid: false, error: 'Input FAA File error. Required' },
-        inputGFF: { isValid: false, error: 'Input GFF File error. Required' },
-      },
+      contigsInputs: {},
     },
   },
 }

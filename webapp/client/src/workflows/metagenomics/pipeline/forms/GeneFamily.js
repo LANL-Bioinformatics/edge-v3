@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { Card, CardBody, Collapse } from 'reactstrap'
-import { isValidFileInput } from 'src/edge/common/util'
 import { Header } from 'src/edge/project/forms/SectionHeader'
-import { FileInput } from 'src/edge/project/forms/FileInput'
 import { OptionSelector } from 'src/edge/project/forms/OptionSelector'
 import { Switcher } from 'src/edge/project/forms/Switcher'
-import { workflows } from '../defaults'
+import { workflows } from './defaults'
 
 export const GeneFamily = (props) => {
   const workflowName = 'geneFamily'
@@ -44,15 +42,6 @@ export const GeneFamily = (props) => {
     setDoValidation(doValidation + 1)
   }
 
-  const setFileInput = (inForm, name) => {
-    form.contigsInputs[name].value = inForm.fileInput
-    form.contigsInputs[name].display = inForm.fileInput_display
-    if (validInputs.contigsInputs[name]) {
-      validInputs.contigsInputs[name].isValid = inForm.validForm
-    }
-    setDoValidation(doValidation + 1)
-  }
-
   useEffect(() => {
     if (props.allExpand > 0) {
       setCollapseParms(false)
@@ -66,15 +55,22 @@ export const GeneFamily = (props) => {
   }, [props.allClosed])
 
   useEffect(() => {
-    if (props.source !== 'fasta') {
-      form.inputs['readsGeneFamily'].value = true
-      form.inputs['contigsGeneFamily'].value = false
-    } else {
+    if (props.source === 'fasta') {
       form.inputs['readsGeneFamily'].value = false
-      form.inputs['contigsGeneFamily'].value = true
+    } else {
+      form.inputs['readsGeneFamily'].value = true
     }
     setDoValidation(doValidation + 1)
   }, [props.source]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (props.annotationOn) {
+      form.inputs['contigsGeneFamily'].value = true
+    } else {
+      form.inputs['contigsGeneFamily'].value = false
+    }
+    setDoValidation(doValidation + 1)
+  }, [props.annotationOn]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     form.paramsOn = props.paramsOn !== undefined ? props.paramsOn : true
@@ -96,12 +92,6 @@ export const GeneFamily = (props) => {
     if (errors === '') {
       //files for server to caculate total input size
       let inputFiles = []
-      if (form.contigsInputs['inputFAA'].value) {
-        inputFiles.push(form.contigsInputs['inputFAA'].value)
-      }
-      if (form.contigsInputs['inputGFF'].value) {
-        inputFiles.push(form.contigsInputs['inputGFF'].value)
-      }
       form.files = inputFiles
       form.errMessage = null
       form.validForm = true
@@ -155,13 +145,10 @@ export const GeneFamily = (props) => {
               name={'readsGeneFamily'}
               setParams={setSwitcher}
               text={workflows[workflowName].inputs['readsGeneFamily'].text}
-              defaultValue={
-                workflows[workflowName].inputs['readsGeneFamily']['switcher'].defaultValue
-              }
+              defaultValue={form.inputs['readsGeneFamily'].value}
               trueText={workflows[workflowName].inputs['readsGeneFamily']['switcher'].trueText}
               falseText={workflows[workflowName].inputs['readsGeneFamily']['switcher'].falseText}
               disableTrue={props.source === 'fasta'}
-              disableFalse={props.source !== 'fasta'}
             />
             <br></br>
             {props.pairedReads && props.source === 'fastq' && (
@@ -188,71 +175,14 @@ export const GeneFamily = (props) => {
               name={'contigsGeneFamily'}
               setParams={setSwitcher}
               text={workflows[workflowName].inputs['contigsGeneFamily'].text}
-              defaultValue={
-                workflows[workflowName].inputs['contigsGeneFamily']['switcher'].defaultValue
-              }
+              defaultValue={form.inputs['contigsGeneFamily'].value}
               trueText={workflows[workflowName].inputs['contigsGeneFamily']['switcher'].trueText}
               falseText={workflows[workflowName].inputs['contigsGeneFamily']['switcher'].falseText}
-              disableTrue={props.source !== 'fasta'}
-              disableFalse={props.source === 'fasta'}
+              disableTrue={!props.annotationOn}
             />
             <br></br>
             {form.inputs['contigsGeneFamily'].value && (
               <>
-                <FileInput
-                  name={'inputFAA'}
-                  setParams={setFileInput}
-                  isValidFileInput={isValidFileInput}
-                  text={workflows[workflowName].contigsInputs['inputFAA'].text}
-                  tooltip={workflows[workflowName].contigsInputs['inputFAA'].tooltip}
-                  enableInput={
-                    workflows[workflowName].contigsInputs['inputFAA']['fileInput'].enableInput
-                  }
-                  placeholder={
-                    workflows[workflowName].contigsInputs['inputFAA']['fileInput'].placeholder
-                  }
-                  dataSources={
-                    workflows[workflowName].contigsInputs['inputFAA']['fileInput'].dataSources
-                  }
-                  fileTypes={
-                    workflows[workflowName].contigsInputs['inputFAA']['fileInput'].fileTypes
-                  }
-                  viewFile={workflows[workflowName].contigsInputs['inputFAA']['fileInput'].viewFile}
-                  isOptional={
-                    workflows[workflowName].contigsInputs['inputFAA']['fileInput'].isOptional
-                  }
-                  cleanupInput={
-                    workflows[workflowName].contigsInputs['inputFAA']['fileInput'].cleanupInput
-                  }
-                />
-                <br></br>
-                <FileInput
-                  name={'inputGFF'}
-                  setParams={setFileInput}
-                  isValidFileInput={isValidFileInput}
-                  text={workflows[workflowName].contigsInputs['inputGFF'].text}
-                  tooltip={workflows[workflowName].contigsInputs['inputGFF'].tooltip}
-                  enableInput={
-                    workflows[workflowName].contigsInputs['inputGFF']['fileInput'].enableInput
-                  }
-                  placeholder={
-                    workflows[workflowName].contigsInputs['inputGFF']['fileInput'].placeholder
-                  }
-                  dataSources={
-                    workflows[workflowName].contigsInputs['inputGFF']['fileInput'].dataSources
-                  }
-                  fileTypes={
-                    workflows[workflowName].contigsInputs['inputGFF']['fileInput'].fileTypes
-                  }
-                  viewFile={workflows[workflowName].contigsInputs['inputGFF']['fileInput'].viewFile}
-                  isOptional={
-                    workflows[workflowName].contigsInputs['inputGFF']['fileInput'].isOptional
-                  }
-                  cleanupInput={
-                    workflows[workflowName].contigsInputs['inputGFF']['fileInput'].cleanupInput
-                  }
-                />
-                <br></br>
                 <OptionSelector
                   name={'virulenceFactorTool'}
                   setParams={setContigsOption}
