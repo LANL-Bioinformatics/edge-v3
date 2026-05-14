@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 FROM continuumio/miniconda3:v25.11.1 AS build
-ENV version=1.6.3
+ENV version=1.6.4
 
 ENV container=docker
 
@@ -17,9 +17,9 @@ RUN conda init bash \
 
 #dependencies for illumina_fastq_QC.pl
 RUN conda install -n runFaQCs -c bioconda perl-parallel-forkmanager=2.04 perl-string-approx=3.27 faqcs=2.12 porechop=0.2.4 nanoplot=1.43.0
-RUN conda install -n runFaQCs -c conda-forge r-base=4.4.3
+RUN conda install -n runFaQCs -c conda-forge r-base=4.4.3 python-kaleido=1.2.0
 
-RUN conda install -c conda-forge conda-pack=0.8.1 python-kaleido=1.2.0
+RUN conda install -c conda-forge conda-pack=0.8.1 
 
 
 RUN conda-pack -n runFaQCs -o /tmp/env.tar && \
