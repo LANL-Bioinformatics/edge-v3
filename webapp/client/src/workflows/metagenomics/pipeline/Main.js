@@ -554,7 +554,7 @@ const Main = (props) => {
             errMessage={
               selectedWorkflows['geneFamily'] ? selectedWorkflows['geneFamily'].errMessage : null
             }
-            source={rawDataParams?.source.value}
+            source={rawDataParams?.inputs.source.value}
             pairedReads={rawDataParams?.inputs.paired.value}
             allExpand={allExpand}
             allClosed={allClosed}
