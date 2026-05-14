@@ -74,6 +74,7 @@ const config = {
     VERSION: process.env.EDGE_WEB_APP_VERSION || 'v3.0.0-default',
     API_ERROR: process.env.API_ERROR || 'system error',
     SYSTEM_MESSAGE: process.env.SYSTEM_MESSAGE || null,
+    ANNOUNCEMENT: process.env.ANNOUNCEMENT || null,
   },
   AUTH: {
     // A secret string with which the web server will sign JWTs (JSON Web Tokens).
