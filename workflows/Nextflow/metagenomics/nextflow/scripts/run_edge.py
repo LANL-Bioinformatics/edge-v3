@@ -5,7 +5,7 @@ from pathlib import Path
 import os
 
 from config_nextflow import render_nextflow_config
-from nf_functions import start_job, query_job_status
+from nf_functions import start_job, status_check_job
 
 def run_nextflow_pipeline(projects_dir:Path, conf_json_file:Path, project_name:str, 
                           nextflowOutDir:Path, refdata_dir:Path, opaver_web_dir:Path, template_file: Path, 
@@ -37,7 +37,7 @@ def query_job_status(projects_dir:Path, project_code:str) -> str:
     str
         Status of the Nextflow job, which can be "running", "completed", or "not found".
     """
-    status = query_job_status(projects_dir, project_code)
+    status = status_check_job(project_code, projects_dir)
     return status
 
 
