@@ -24,7 +24,7 @@ def create_output_directory_dict(projects_dir:Path, project_code:str) -> dict:
     'qcOutdir': '/path/to/projects_dir/project_code/output/ReadsQC/',
      etc.}
     """
-    root_dir = Path.cwd().parent.parent.parent
+    root_dir = Path.cwd().parent.parent.parent.parent.parent
     utils_path = root_dir / 'webapp/server/workflow/util.js'
     # utils_path = Path('edge-v3/webapp/server/workflow/util.js')
     cwd = os.getcwd()
