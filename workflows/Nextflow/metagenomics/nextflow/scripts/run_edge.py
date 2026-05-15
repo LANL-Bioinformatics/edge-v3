@@ -17,7 +17,7 @@ def run_nextflow_pipeline(projects_dir:Path, conf_json_file:Path, project_name:s
         project_code = render_nextflow_config(projects_dir, conf_json_file, project_name, nextflowOutDir,
                            refdata_dir, opaver_web_dir, template_file, paired, fastq_files)
     
-    root_dir = Path.cwd().parent.parent.parent
+    root_dir = Path.cwd().parent.parent.parent.parent.parent
     main_nf_path = str(root_dir / 'workflows/Nextflow/metagenomics/nextflow/main.nf')
     start_job(job_name=project_code, project_path=main_nf_path, run_dir=projects_dir / project_code, temp_dir=nextflowOutDir / project_code)
 
