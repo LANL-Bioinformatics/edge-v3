@@ -87,7 +87,7 @@ def main():
 
         if args.project_code is None:
             sys.exit("To query the status of an existing Nextflow job, please provide the project code using the --project-code argument.")
-        status = query_job_status(projects_dir, args.project_code)
+        status = query_job_status(projects_dir / args.project_code, args.project_code)
         logging.info(f"Status of Nextflow job with project code {args.project_code}: {status}")
         sys.exit(0)
     run_nextflow_pipeline(projects_dir, conf_json_file, project_name, nextflowOutDir,
