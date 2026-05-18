@@ -254,7 +254,7 @@ params {
 //container settings
 apptainer {
     enabled = true
-    cacheDir = "/media/volume/edgev3-refdata/refdata/nextflow/.apptainer"
+    cacheDir = "{{ nextflowOutDir }}.apptainer"
     pullTimeout = "1 hour"
     runOptions = "--compat"
 }
