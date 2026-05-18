@@ -23,6 +23,22 @@ export const RunFaQCs = (props) => {
     }
   }
 
+  const getDetectedPlatformDefaults = (platform) => {
+    if (platform === 'Nanopore' || platform === 'PacBio') {
+      return {
+        trimQual: 7,
+        minLen: 500,
+      }
+    }
+    if (platform === 'Illumina') {
+      return {
+        trimQual: 20,
+        minLen: 50,
+      }
+    }
+    return null
+  }
+
   const setOnoff = (onoff) => {
     form.paramsOn = onoff
     setDoValidation(doValidation + 1)
@@ -59,6 +75,18 @@ export const RunFaQCs = (props) => {
     form.paramsOn = props.paramsOn !== undefined ? props.paramsOn : true
     setDoValidation(doValidation + 1)
   }, [props.paramsOn]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    const detectedDefaults = getDetectedPlatformDefaults(props.seqPlatform)
+
+    if (!detectedDefaults) {
+      return
+    }
+
+    form.inputs['trimQual'].value = detectedDefaults.trimQual
+    form.inputs['minLen'].value = detectedDefaults.minLen
+    setDoValidation((value) => value + 1)
+  }, [props.seqPlatform]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (props.allExpand > 0) {
@@ -124,7 +152,7 @@ export const RunFaQCs = (props) => {
             setParams={setRangeInput}
             text={workflows[workflowName].inputs['trimQual'].text}
             tooltip={workflows[workflowName].inputs['trimQual'].tooltip}
-            defaultValue={workflows[workflowName].inputs['trimQual']['rangeInput'].defaultValue}
+            defaultValue={form.inputs['trimQual'].value}
             min={workflows[workflowName].inputs['trimQual']['rangeInput'].min}
             max={workflows[workflowName].inputs['trimQual']['rangeInput'].max}
             step={workflows[workflowName].inputs['trimQual']['rangeInput'].step}
@@ -205,7 +233,7 @@ export const RunFaQCs = (props) => {
             setParams={setIntegerInput}
             text={workflows[workflowName].inputs['minLen'].text}
             tooltip={workflows[workflowName].inputs['minLen'].tooltip}
-            defaultValue={workflows[workflowName].inputs['minLen']['integerInput'].defaultValue}
+            defaultValue={form.inputs['minLen'].value}
             min={workflows[workflowName].inputs['minLen']['integerInput'].min}
             max={workflows[workflowName].inputs['minLen']['integerInput'].max}
           />
