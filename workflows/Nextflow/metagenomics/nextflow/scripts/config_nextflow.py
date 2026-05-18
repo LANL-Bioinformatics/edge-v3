@@ -146,7 +146,8 @@ def get_sequencing_platform(input_files) -> tuple:
 
 def render_nextflow_config(projects_dir:Path, conf_json_file:Path, 
                            project_name:str, nextflowOutDir:Path, 
-                           refdata_dir:Path, opaver_web_dir:Path, template_file: Path, paired=None, input_files=None) -> str:
+                           refdata_dir:Path, opaver_web_dir:Path, template_file: Path, paired=None, input_files=None, 
+                           sra_accessions=None, platform=None) -> str:
     """
     Renders the Nextflow configuration file. 
     Uses the utils.js and conf.json files to create a dictionary with the necessary parameters and output 
@@ -169,6 +170,8 @@ def render_nextflow_config(projects_dir:Path, conf_json_file:Path,
             conf_dict = set_fastq_files(conf_dict, input_files, paired)
         else:
             sys.exit('Unsupported file format. Please provide input files in fastq or fasta format.')
+    elif sra_accessions:
+        conf_dict = set_sra_options(conf_dict, sra_accessions)
     else:
         platform = conf_dict['rawReads']['platform']        
     logging.debug(f"Configuration dictionary for rendering template: {pprint.pformat(conf_dict['rawReads']['inputFiles'])}")
@@ -210,6 +213,12 @@ def set_fastq_files(conf_dict:dict, input_files:list, paired:bool) -> dict:
         conf_dict['rawReads']['inputFiles'] = paired_fq
     return conf_dict
 
+
+def set_sra_options(conf_dict:dict, sra_accessions:list) -> dict:
+    conf_dict['rawReads']['sraAccessions'] = sra_accessions
+    conf_dict['source'] = 'sra'
+    return conf_dict
+
 def set_long_reads_options(conf_dict:dict) -> dict:
     long_reads_assembler_input = {
                 "assembler": "LRASM",
@@ -245,6 +254,8 @@ def parse_args(args):
     parser.add_argument("--paired", action="store_true", help="Indicates if the input files are paired-end")
     parser.add_argument("--fastq-files", type=str, help="Comma-separated list of paths to FASTQ files containing raw reads to be processed "
     "(if paired-end, provide pairs as R1_path,R2_path; separate multiple pairs with a comma)")
+    parser.add_argument('--sra-accessions', type=str, default=None, help='SRA Accession numbers')
+    parser.add_argument('--platform', type=str, default=None, help='Explitly specify sequencing platform (e.g. illumina, nanopore, pacbio) instead of relying on detect_platform function to determine platform from input files')
     parser.add_argument("--projects-dir", type=Path, help="Path to directory for storing all project output directories", default=os.environ.get('PROJECTS_DIR'))
     parser.add_argument("--nextflow-out-dir", type=Path, help="Path to output directory for Nextflow intermediate files", default=os.environ.get('NEXTFLOW_OUT_DIR'))
     parser.add_argument("--refdata-dir", type=Path, help="Path to reference data directory", default=os.environ.get('REFDATA_DIR'))
@@ -264,11 +275,22 @@ def main():
     opaver_web_dir = args.opaver_web_dir
     template_file = args.template_file
 
+    if args.fastq_files and args.sra_accessions:
+        sys.exit("Cannot provide both FASTQ files and SRA accessions as input. Please choose one input type and try again.")
+        logging.info(f"Input FASTQ files provided: {args.fastq_files}")
+    
+    if args.sra_accessions and not args.platform:
+        sys.exit("When providing SRA accessions as input, the sequencing platform must also be specified using the --platform argument. Please provide the platform and try again.")
+        logging.info(f"Input SRA accessions provided: {args.sra_accessions}")
+
     render_nextflow_config(projects_dir, conf_json_file, project_name, 
                            nextflowOutDir, refdata_dir, 
                            opaver_web_dir, template_file, 
                            paired=None if args.paired is None else args.paired, 
-                           fastq_files=None if args.fastq_files is None else args.fastq_files.split(','))
+                           fastq_files=None if args.fastq_files is None else args.fastq_files.split(','),
+                           sra_accessions=None if args.sra_accessions is None else args.sra_accessions.split(','),
+                           platform=args.platform
+                           )
     logging.info("Nextflow config file created successfully.")
 
 if __name__ == "__main__":
