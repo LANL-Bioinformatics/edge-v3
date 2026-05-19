@@ -45,6 +45,7 @@ def query_job_status(projects_dir:Path, project_code:str) -> str:
         Status of the Nextflow job, which can be "running", "completed", or "not found".
     """
     status = status_check_job(project_code, projects_dir)
+    print(status)
     return status
 
 
@@ -89,6 +90,7 @@ def main():
             sys.exit("To query the status of an existing Nextflow job, please provide the project code using the --project-code argument.")
         status = query_job_status(projects_dir / args.project_code, args.project_code)
         logging.info(f"Status of Nextflow job with project code {args.project_code}: {status}")
+        print(status)
         sys.exit(0)
     run_nextflow_pipeline(projects_dir, conf_json_file, project_name, nextflowOutDir,
                                refdata_dir, opaver_web_dir, template_file, 
