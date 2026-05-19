@@ -188,7 +188,7 @@ def render_nextflow_config(projects_dir:Path, conf_json_file:Path,
     module_run_input_dict = get_module_run_input_dict(conf_dict)
 
     render_dict = create_render_dict(conf_dict, output_template_dict, module_run_input_dict, 
-                                     nextflowOutDir, refdata_dir, opaver_web_dir, project_name, project_code, platform)
+                                     nextflowOutDir, refdata_dir, opaver_web_dir, project_name, project_code, platform, sra_accessions)
     # Render nextflow config template with output directories
     environment = jinja2.Environment()
     template = environment.from_string(template_file.read_text())
