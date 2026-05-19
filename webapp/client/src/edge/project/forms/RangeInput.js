@@ -21,10 +21,6 @@ export const RangeInput = (props) => {
 
   useEffect(() => {
     form.rangeInput = props.defaultValue
-    setState({
-      ...form,
-      rangeInput: props.defaultValue,
-    })
   }, [props.defaultValue]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {

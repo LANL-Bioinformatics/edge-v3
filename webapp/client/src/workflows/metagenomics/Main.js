@@ -95,13 +95,9 @@ const Main = (props) => {
     let inputDisplay = { 'Raw Reads': {} }
     inputDisplay[workflowList[workflow].label] = {}
     if (rawDataParams.inputs.source.value === 'sra') {
-      const pairedDisplay = rawDataParams.inputs['paired'].value ? 'Yes' : 'No'
       inputDisplay['Raw Reads'][rawDataParams.inputs['source'].text] =
         rawDataParams.inputs['source'].display
       inputDisplay['Raw Reads']['SRA Accession(s)'] = rawDataParams.inputs['inputFiles'].display
-      inputDisplay['Raw Reads'][rawDataParams.inputs['seqPlatform'].text] =
-        rawDataParams.inputs['seqPlatform'].display
-      inputDisplay['Raw Reads'][rawDataParams.inputs['paired'].text] = pairedDisplay
     } else if (rawDataParams.inputs.source.value === 'fasta') {
       inputDisplay['Raw Reads'][rawDataParams.inputs['source'].text] =
         rawDataParams.inputs['source'].display
@@ -383,7 +379,6 @@ const Main = (props) => {
                 }
                 allExpand={allExpand}
                 allClosed={allClosed}
-                seqPlatform={rawDataParams?.inputs.seqPlatform.value}
               />
             </>
           )}
@@ -416,7 +411,7 @@ const Main = (props) => {
                 errMessage={
                   selectedWorkflows[workflow] ? selectedWorkflows[workflow].errMessage : null
                 }
-                seqPlatform={rawDataParams?.inputs.seqPlatform.value}
+                seqPlatform={rawDataParams.inputs.seqPlatform.value}
                 allExpand={allExpand}
                 allClosed={allClosed}
               />

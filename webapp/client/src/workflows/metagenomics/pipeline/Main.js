@@ -19,7 +19,7 @@ import { AntiSmash } from '../forms/AntiSmash'
 import { Taxonomy } from '../forms/Taxonomy'
 import { Phylogeny } from '../forms/Phylogeny'
 import { RefBased } from '../forms/RefBased'
-import { GeneFamily } from '../forms/GeneFamily'
+import { GeneFamily } from './forms/GeneFamily'
 import { workflows } from './forms/defaults'
 
 const Main = (props) => {
@@ -104,13 +104,9 @@ const Main = (props) => {
     // set workflow input display
     let inputDisplay = { 'Raw Reads': {} }
     if (rawDataParams.inputs.source.value === 'sra') {
-      const pairedDisplay = rawDataParams.inputs['paired'].value ? 'Yes' : 'No'
       inputDisplay['Raw Reads'][rawDataParams.inputs['source'].text] =
         rawDataParams.inputs['source'].display
       inputDisplay['Raw Reads']['SRA Accession(s)'] = rawDataParams.inputs['inputFiles'].display
-      inputDisplay['Raw Reads'][rawDataParams.inputs['seqPlatform'].text] =
-        rawDataParams.inputs['seqPlatform'].display
-      inputDisplay['Raw Reads'][rawDataParams.inputs['paired'].text] = pairedDisplay
     } else if (rawDataParams.inputs.source.value === 'fasta') {
       inputDisplay['Raw Reads'][rawDataParams.inputs['source'].text] =
         rawDataParams.inputs['source'].display
@@ -181,7 +177,8 @@ const Main = (props) => {
           // eslint-disable-next-line prettier/prettier
           ...selectedWorkflows['geneFamily'].readsInputs
         }
-      } else {
+      }
+      if (selectedWorkflows['geneFamily'].inputs['contigsGeneFamily'].value) {
         selectedWorkflows['geneFamily'].inputs = {
           ...selectedWorkflows['geneFamily'].inputs,
           // eslint-disable-next-line prettier/prettier
@@ -256,22 +253,18 @@ const Main = (props) => {
   }, [rawDataParams.inputs.source.value])
 
   useEffect(() => {
-    updateBinning()
-    setRequestSubmit(true)
-
-    if (projectParams && !projectParams.validForm) {
-      setRequestSubmit(false)
+    //disable gene family workflow if input source is fasta and annotation is not selected
+    if (
+      rawDataParams.inputs.source.value === 'fasta' &&
+      !selectedWorkflows['annotation'].paramsOn
+    ) {
+      selectedWorkflows['geneFamily'].disabled = true
+    } else {
+      selectedWorkflows['geneFamily'].disabled = false
     }
-    if (rawDataParams && !rawDataParams.validForm) {
-      setRequestSubmit(false)
-    }
-
-    Object.keys(selectedWorkflows).forEach((workflow) => {
-      if (selectedWorkflows[workflow].paramsOn && !selectedWorkflows[workflow].validForm) {
-        setRequestSubmit(false)
-      }
-    })
-  }, [doValidation]) // eslint-disable-line react-hooks/exhaustive-deps
+    selectedWorkflows['geneFamily'].paramsOn = false
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rawDataParams.inputs.source.value, selectedWorkflows['annotation'].paramsOn])
 
   useEffect(() => {
     updateBinning()
@@ -402,7 +395,6 @@ const Main = (props) => {
             disabled={
               selectedWorkflows['runFaQCs'] ? selectedWorkflows['runFaQCs'].disabled : false
             }
-            seqPlatform={rawDataParams?.inputs.seqPlatform.value}
           />
           <Assembly
             name={'assembly'}
@@ -412,7 +404,7 @@ const Main = (props) => {
             errMessage={
               selectedWorkflows['assembly'] ? selectedWorkflows['assembly'].errMessage : null
             }
-            seqPlatform={rawDataParams?.inputs.seqPlatform.value}
+            seqPlatform={rawDataParams.inputs.seqPlatform.value}
             allExpand={allExpand}
             allClosed={allClosed}
             onoff={true}
@@ -546,6 +538,7 @@ const Main = (props) => {
             }
             source={rawDataParams?.inputs.source.value}
             pairedReads={rawDataParams?.inputs.paired.value}
+            annotationOn={selectedWorkflows['annotation'].paramsOn}
             allExpand={allExpand}
             allClosed={allClosed}
             onoff={true}

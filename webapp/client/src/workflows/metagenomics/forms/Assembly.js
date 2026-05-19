@@ -43,12 +43,6 @@ export const Assembly = (props) => {
     setDoValidation(doValidation + 1)
   }
 
-  const setMainOptionValue = (name, value) => {
-    const option = form.inputs[name].options.find((item) => item.value === value)
-    form.inputs[name].value = value
-    form.inputs[name].display = option ? option.text : value
-  }
-
   const setOption = (inForm, name) => {
     form.assemblerInputs[form.inputs['assembler'].value][name].value = inForm.option
     form.assemblerInputs[form.inputs['assembler'].value][name].display = inForm.display
@@ -117,26 +111,24 @@ export const Assembly = (props) => {
   useEffect(() => {
     if (form.inputs['assembler'].value === 'LRASM') {
       //set aligner to Minimap2
-      setMainOptionValue('aligner', 'minimap2')
+      form.inputs['aligner'].value = 'minimap2'
     } else {
-      setMainOptionValue('aligner', 'bwa')
+      form.inputs['aligner'].value = 'bwa'
     }
     setDoValidation(doValidation + 1)
   }, [form.inputs['assembler'].value]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (props.seqPlatform === 'Illumina') {
-      setMainOptionValue('assembler', 'IDBA_UD')
-      setMainOptionValue('aligner', 'bwa')
+      form.inputs['assembler'].value = 'IDBA_UD'
+      form.inputs['aligner'].value = 'bwa'
       form.inputs['aligner']['options'][0]['disabled'] = false
     } else if (props.seqPlatform === 'Nanopore') {
-      setMainOptionValue('assembler', 'LRASM')
-      setMainOptionValue('aligner', 'minimap2')
+      form.inputs['assembler'].value = 'LRASM'
       form.assemblerInputs[form.inputs['assembler'].value]['Lrasm_preset'].value = 'nanopore'
       form.inputs['aligner']['options'][0]['disabled'] = true
     } else if (props.seqPlatform === 'PacBio') {
-      setMainOptionValue('assembler', 'LRASM')
-      setMainOptionValue('aligner', 'minimap2')
+      form.inputs['assembler'].value = 'LRASM'
       form.assemblerInputs[form.inputs['assembler'].value]['Lrasm_preset'].value = 'pacbio'
       form.inputs['aligner']['options'][0]['disabled'] = true
     }

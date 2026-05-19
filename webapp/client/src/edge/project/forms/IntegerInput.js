@@ -14,7 +14,6 @@ export const IntegerInput = (props) => {
     register,
     formState: { errors },
     trigger,
-    reset,
   } = useForm({
     mode: defaults['form_mode'],
   })
@@ -40,13 +39,7 @@ export const IntegerInput = (props) => {
 
   useEffect(() => {
     form.integerInput = props.defaultValue
-    reset({ integerInput: props.defaultValue })
-    setState({
-      ...form,
-      integerInput: props.defaultValue,
-    })
-    setDoValidation((value) => value + 1)
-  }, [props.defaultValue]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     //validate form
