@@ -96,12 +96,15 @@ def get_module_run_input_dict(conf_dict:dict) -> dict:
 
 
 def create_render_dict(conf_dict:dict, output_template_dict:dict, module_run_input_dict:dict, 
-                       nextflowOutDir:Path, refdata_dir:Path, opaver_web_dir:Path, project_name, project_code, platform) -> dict:
+                       nextflowOutDir:Path, refdata_dir:Path, opaver_web_dir:Path, project_name, project_code, platform, sra_accessions=None) -> dict:
     """
     Creates a dictionary for rendering the Nextflow config template.
     """
 
-    render_dict = get_input_fastq_files(conf_dict)
+    if not sra_accessions:
+        render_dict = get_input_fastq_files(conf_dict)
+    else:
+        render_dict = {'inputFastq':[], 'inputFastq2':[], 'accessions': sra_accessions, 'source': 'sra'}
 
     render_dict['refdata'] = refdata_dir
     render_dict['project'] = project_name
