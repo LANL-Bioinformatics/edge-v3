@@ -24,10 +24,9 @@ def create_output_directory_dict(projects_dir:Path, project_code:str) -> dict:
     'qcOutdir': '/path/to/projects_dir/project_code/output/ReadsQC/',
      etc.}
     """
-    root_dir = Path.cwd().parent.parent.parent.parent.parent
+    root_dir = get_project_root()
     utils_path = root_dir / 'webapp/server/workflow/util.js'
     # utils_path = Path('edge-v3/webapp/server/workflow/util.js')
-    cwd = os.getcwd()
     utils_js = utils_path.read_text()
     
     workflow_list = get_workflow_list(utils_js)
@@ -40,6 +39,10 @@ def create_output_directory_dict(projects_dir:Path, project_code:str) -> dict:
     for k,v in workflow_params_dict.items():
         output_template_dict.update({v: workflow_output_dict[k]})
     return output_template_dict
+
+
+def get_project_root():
+    return next(p for p in Path(__file__).resolve().parents if (p / '.git').exists())
 
 
 def get_workflow_list(utils_js:str):

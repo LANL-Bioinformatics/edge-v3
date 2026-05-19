@@ -6,7 +6,7 @@ from subprocess import run
 import argparse
 from pathlib import Path
 
-from config_nextflow import render_nextflow_config
+from config_nextflow import render_nextflow_config, get_project_root
 from nf_functions import start_job, status_check_job
 
 logging.basicConfig(level=logging.INFO)
@@ -23,7 +23,7 @@ def run_nextflow_pipeline(projects_dir:Path, conf_json_file:Path, project_name:s
         project_code = render_nextflow_config(projects_dir, conf_json_file, project_name, nextflowOutDir,
                            refdata_dir, opaver_web_dir, template_file, paired, fastq_files, sra_accessions, platform)
 
-    root_dir = Path.cwd().parent.parent.parent.parent.parent
+    root_dir = get_project_root()
     main_nf_path = str(root_dir / 'workflows/Nextflow/metagenomics/nextflow/main.nf')
     job = start_job(job_name=project_code, project_path=main_nf_path, run_dir=projects_dir / project_code, temp_dir=nextflowOutDir / project_code)
     logging.info(f"Started Nextflow pipeline with project code {project_code}. Job details: {job}")
