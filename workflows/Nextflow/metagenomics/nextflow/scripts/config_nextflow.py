@@ -160,9 +160,11 @@ def render_nextflow_config(projects_dir:Path, conf_json_file:Path,
     input_files = input_files if input_files else conf_dict['rawReads']['inputFiles']
     paired = paired if paired is not None else conf_dict['rawReads'].get('paired', False)   
     logging.debug(f"fastq_files input: {input_files}, paired input: {paired}")
-    project_code = get_sample_name(Path(input_files[0]), paired) if input_files else ''.join(random.choices(string.ascii_letters + string.digits, k=16))
-
-    if input_files:
+    if sra_accessions:
+        conf_dict = set_sra_options(conf_dict, sra_accessions)
+        project_code = get_sample_name(Path(sra_accessions[0]), paired)
+    else:
+        project_code = get_sample_name(Path(input_files[0]), paired)
         file_format, platform = get_sequencing_platform(input_files)
         if file_format == 'fasta':
             sys.exit('Fasta format not supported yet.')
@@ -170,11 +172,8 @@ def render_nextflow_config(projects_dir:Path, conf_json_file:Path,
             conf_dict = set_fastq_files(conf_dict, input_files, paired)
         else:
             sys.exit('Unsupported file format. Please provide input files in fastq or fasta format.')
-    elif sra_accessions:
-        conf_dict = set_sra_options(conf_dict, sra_accessions)
-    else:
-        platform = conf_dict['rawReads']['platform']        
-    logging.debug(f"Configuration dictionary for rendering template: {pprint.pformat(conf_dict['rawReads']['inputFiles'])}")
+    
+    logging.debug(f"Configuration dictionary for rendering template: {pprint.pformat(conf_dict['rawReads'])}")
     output_template_dict = create_output_directory_dict(projects_dir, project_code)
     if platform in ['nanopore', 'pacbio']:
         conf_dict = set_long_reads_options(conf_dict)
@@ -215,8 +214,7 @@ def set_fastq_files(conf_dict:dict, input_files:list, paired:bool) -> dict:
 
 
 def set_sra_options(conf_dict:dict, sra_accessions:list) -> dict:
-    conf_dict['rawReads']['sraAccessions'] = sra_accessions
-    conf_dict['source'] = 'sra'
+    conf_dict['rawReads'] = {'source': 'sra', 'accessions': sra_accessions, 'inputFiles': []}
     return conf_dict
 
 def set_long_reads_options(conf_dict:dict) -> dict:
