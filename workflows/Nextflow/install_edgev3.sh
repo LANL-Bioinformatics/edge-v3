@@ -124,7 +124,7 @@ export REFDATA_DIR
 export OPAVER_WEB_DIR="$HOME/edge-v3/io/opaver_web"
 
 # Prompt for path to template file used to render Nextflow config file
-export TEMPLATE_FILE="$HOME/edge-v3/workflows/Nextflow/scripts/nextflow_config.tmpl"
+export TEMPLATE_FILE="$HOME/edge-v3/workflows/Nextflow/metagenomics/nextflow/scripts/nextflow_config.tmpl"
 echo ""
 echo "=== Environment Variables Set ==="
 echo "PROJECTS_DIR: $PROJECTS_DIR"
