@@ -75,7 +75,7 @@ CHECKSUM_URL="https://github.com/nextflow-io/nextflow/releases/latest/download/n
 
 log "Downloading Nextflow..."
 curl -fsSL -o "$TMP_DIR/nextflow" "$NEXTFLOW_URL"
-
+sudo dnf install -y jq
 log "Verifying checksum..."
 pushd "$TMP_DIR" >/dev/null
 echo "$(curl -fsSL   -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2026-03-10"   https://api.github.com/repos/nextflow-io/nextflow/releases/latest | jq '.assets[0].digest' | sed 's/sha256://' | sed 's/"//g')  $TMP_DIR/nextflow"  | sha256sum -c
