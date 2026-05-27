@@ -384,6 +384,24 @@ const oauthLogin = async (req, res) => {
   }
 }
 
+// Get system announcement from .env and return to client
+const getAnnouncement = async (req, res) => {
+  try {
+    const announcement = config.APP.ANNOUNCEMENT
+    return res.json({
+      announcement,
+      message: 'Action successful',
+      success: true,
+    })
+  } catch (err) {
+    logger.error(`Get system announcement failed: ${err}`)
+    return res.status(500).json({
+      message: sysError,
+      success: false,
+    })
+  }
+}
+
 module.exports = {
   register,
   activate,
@@ -392,4 +410,5 @@ module.exports = {
   getResetPasswordLink,
   login,
   oauthLogin,
+  getAnnouncement,
 }
