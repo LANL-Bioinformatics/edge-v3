@@ -94,6 +94,39 @@ log "Installing Apptainer..."
 sudo dnf install -y epel-release
 sudo dnf install -y apptainer
 
+#!/bin/bash
+
+# Define the minimum expected Python version
+REQUIRED_MAJOR=3
+REQUIRED_MINOR=12
+
+# 1. Check current default Python version
+if command -v python3 &> /dev/null; then
+    CURRENT_VERSION=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
+    echo "Current default Python version: $CURRENT_VERSION"
+else
+    echo "Python 3 is not installed."
+    CURRENT_VERSION="0.0"
+fi
+
+# 2. Compare versions
+CURRENT_MAJOR=$(echo "$CURRENT_VERSION" | cut -d. -f1)
+CURRENT_MINOR=$(echo "$CURRENT_VERSION" | cut -d. -f2)
+
+if [ "$CURRENT_MAJOR" -lt "$REQUIRED_MAJOR" ] || ([ "$CURRENT_MAJOR" -eq "$REQUIRED_MAJOR" ] && [ "$CURRENT_MINOR" -lt "$REQUIRED_MINOR" ]); then
+    echo "Current version is older than required ($REQUIRED_MAJOR.$REQUIRED_MINOR)."
+    
+    # 3. Check for and install newer Python versions via DNF
+    echo "Checking available Python package updates via dnf..."
+    # Enable EPEL or CRB if looking for non-standard or newer module streams 
+    sudo dnf check-update python3
+    
+    echo "To install or switch to newer module streams (e.g., python3.11 or python3.12), run:"
+    echo "sudo dnf module install python3.11"
+else
+    echo "Your Python version is up to date or newer."
+fi
+
 log "Installing Python packages"
 sudo dnf install python3.12-pip -y
 python3 -m venv edgev3_env
