@@ -169,6 +169,7 @@ if [ -n "$PROJECTS_DIR" ]; then
     else
         read -p "Enter new path to projects directory: " PROJECTS_DIR
         export PROJECTS_DIR
+        log "INFO" "PROJECTS_DIR set to: $PROJECTS_DIR"
     fi
 else
     read -p "Enter path to projects directory: " PROJECTS_DIR
