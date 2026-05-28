@@ -168,12 +168,16 @@ if [ -n "$PROJECTS_DIR" ]; then
         log "INFO" "Keeping existing PROJECTS_DIR: $PROJECTS_DIR"
     else
         read -p "Enter new path to projects directory: " PROJECTS_DIR
+        sed -i "s/^export PROJECTS_DIR=.*/export PROJECTS_DIR=\"$PROJECTS_DIR\"/" ~/.bash_profile
         export PROJECTS_DIR
         log "INFO" "PROJECTS_DIR set to: $PROJECTS_DIR"
     fi
 else
     read -p "Enter path to projects directory: " PROJECTS_DIR
     export PROJECTS_DIR
+    cat  <<EOF >> ~/.bash_profile
+    export PROJECTS_DIR="$PROJECTS_DIR"
+EOF
 fi
 
 # Prompt for path to directory for Nextflow intermediate files
@@ -189,6 +193,9 @@ if [ -n "$NEXTFLOW_OUT_DIR" ]; then
 else
     read -p "Enter path to directory for Nextflow intermediate files: " NEXTFLOW_OUT_DIR
     export NEXTFLOW_OUT_DIR
+    cat  <<EOF >> ~/.bash_profile
+    export NEXTFLOW_OUT_DIR="$NEXTFLOW_OUT_DIR"
+EOF
 fi
 
 # Prompt for path to reference data
@@ -204,6 +211,9 @@ if [ -n "$REFDATA_DIR" ]; then
 else
     read -p "Enter path to reference data: " REFDATA_DIR
     export REFDATA_DIR
+    cat  <<EOF >> ~/.bash_profile
+    export REFDATA_DIR="$REFDATA_DIR"
+EOF
 fi
 
 # Prompt for path to OPAVER web directory
@@ -241,9 +251,6 @@ read -p "Save these variables to .bash_profile? (y/n): " SAVE_ENV
 
 if [[ $SAVE_ENV == "y" || $SAVE_ENV == "Y" ]]; then
     cat  <<EOF >> ~/.bash_profile
-export PROJECTS_DIR="$PROJECTS_DIR"
-export NEXTFLOW_OUT_DIR="$NEXTFLOW_OUT_DIR"
-export REFDATA_DIR="$REFDATA_DIR"
 export OPAVER_WEB_DIR="$OPAVER_WEB_DIR"
 export TEMPLATE_FILE="$TEMPLATE_FILE"
 alias run_edge='python $HOME/edge-v3/workflows/Nextflow/metagenomics/nextflow/scripts/run_edge.py'
