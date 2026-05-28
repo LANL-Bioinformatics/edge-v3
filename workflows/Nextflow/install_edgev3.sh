@@ -214,6 +214,7 @@ if [[ $SAVE_ENV == "y" || $SAVE_ENV == "Y" ]]; then
     cat  <<EOF >> ~/.bash_profile
 export PROJECTS_DIR="$PROJECTS_DIR"
 export NEXTFLOW_OUT_DIR="$NEXTFLOW_OUT_DIR"
+export APPTAINER_CACHEDIR="$NEXTFLOW_OUT_DIR/apptainer_cache"
 export REFDATA_DIR="$REFDATA_DIR"
 export OPAVER_WEB_DIR="$OPAVER_WEB_DIR"
 export TEMPLATE_FILE="$TEMPLATE_FILE"
