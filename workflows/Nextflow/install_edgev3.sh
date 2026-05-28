@@ -161,60 +161,21 @@ log "INFO" "=== File Path Configuration ==="
 
 export NXF_SYNTAX_PARSER=v1
 # Prompt for path to root of projects directory
-if [ -n "$PROJECTS_DIR" ]; then
-    log "INFO" "PROJECTS_DIR is already set to: $PROJECTS_DIR"
-    read -p "Do you want to change it? (y/n): " CHANGE_PROJECTS_DIR
-    if [[ $CHANGE_PROJECTS_DIR != "y" && $CHANGE_PROJECTS_DIR != "Y" ]]; then
-        log "INFO" "Keeping existing PROJECTS_DIR: $PROJECTS_DIR"
-    else
-        read -p "Enter new path to projects directory: " PROJECTS_DIR
-        sed -i "s/^export PROJECTS_DIR=.*/export PROJECTS_DIR=\"$PROJECTS_DIR\"/" ~/.bash_profile
-        export PROJECTS_DIR
-        log "INFO" "PROJECTS_DIR set to: $PROJECTS_DIR"
-    fi
-else
-    read -p "Enter path to projects directory: " PROJECTS_DIR
-    export PROJECTS_DIR
-    cat  <<EOF >> ~/.bash_profile
-    export PROJECTS_DIR="$PROJECTS_DIR"
-EOF
-fi
+
+read -p "Enter path to projects directory: " PROJECTS_DIR
+export PROJECTS_DIR
+
 
 # Prompt for path to directory for Nextflow intermediate files
-if [ -n "$NEXTFLOW_OUT_DIR" ]; then
-    log "INFO" "NEXTFLOW_OUT_DIR is already set to: $NEXTFLOW_OUT_DIR"
-    read -p "Do you want to change it? (y/n): " CHANGE_NEXTFLOW_OUT_DIR
-    if [[ $CHANGE_NEXTFLOW_OUT_DIR != "y" && $CHANGE_NEXTFLOW_OUT_DIR != "Y" ]]; then
-        log "INFO" "Keeping existing NEXTFLOW_OUT_DIR: $NEXTFLOW_OUT_DIR"
-    else
-        read -p "Enter new path to directory for Nextflow intermediate files: " NEXTFLOW_OUT_DIR
-        export NEXTFLOW_OUT_DIR
-    fi
-else
-    read -p "Enter path to directory for Nextflow intermediate files: " NEXTFLOW_OUT_DIR
-    export NEXTFLOW_OUT_DIR
-    cat  <<EOF >> ~/.bash_profile
-    export NEXTFLOW_OUT_DIR="$NEXTFLOW_OUT_DIR"
-EOF
-fi
+
+read -p "Enter path to directory for Nextflow intermediate files: " NEXTFLOW_OUT_DIR
+export NEXTFLOW_OUT_DIR
+
 
 # Prompt for path to reference data
-if [ -n "$REFDATA_DIR" ]; then
-    log "INFO" "REFDATA_DIR is already set to: $REFDATA_DIR"
-    read -p "Do you want to change it? (y/n): " CHANGE_REFDATA_DIR
-    if [[ $CHANGE_REFDATA_DIR != "y" && $CHANGE_REFDATA_DIR != "Y" ]]; then
-        log "INFO" "Keeping existing REFDATA_DIR: $REFDATA_DIR"
-    else
-        read -p "Enter new path to reference data: " REFDATA_DIR
-        export REFDATA_DIR
-    fi
-else
-    read -p "Enter path to reference data: " REFDATA_DIR
-    export REFDATA_DIR
-    cat  <<EOF >> ~/.bash_profile
-    export REFDATA_DIR="$REFDATA_DIR"
-EOF
-fi
+read -p "Enter path to reference data: " REFDATA_DIR
+export REFDATA_DIR
+
 
 # Prompt for path to OPAVER web directory
 export OPAVER_WEB_DIR="$HOME/edge-v3/io/opaver_web"
@@ -251,6 +212,9 @@ read -p "Save these variables to .bash_profile? (y/n): " SAVE_ENV
 
 if [[ $SAVE_ENV == "y" || $SAVE_ENV == "Y" ]]; then
     cat  <<EOF >> ~/.bash_profile
+export PROJECTS_DIR="$PROJECTS_DIR"
+export NEXTFLOW_OUT_DIR="$NEXTFLOW_OUT_DIR"
+export REFDATA_DIR="$REFDATA_DIR"
 export OPAVER_WEB_DIR="$OPAVER_WEB_DIR"
 export TEMPLATE_FILE="$TEMPLATE_FILE"
 alias run_edge='python $HOME/edge-v3/workflows/Nextflow/metagenomics/nextflow/scripts/run_edge.py'
