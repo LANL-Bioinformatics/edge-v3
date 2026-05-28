@@ -40,7 +40,7 @@ get_java_major_version() {
 }
 log "INFO" "Starting EDGEv3 installation script."
 if command -v java &> /dev/null; then
-    log "INFO""Java is installed. Checking version..."
+    log "INFO" "Java is installed. Checking version..."
 else
     log "INFO" "Java is not installed. Installing Java 17..."
     sudo dnf install -y java-21-openjdk
@@ -105,9 +105,9 @@ REQUIRED_MINOR=12
 # 1. Check current default Python version
 if command -v python3 &> /dev/null; then
     CURRENT_VERSION=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
-    echo "Current default Python version: $CURRENT_VERSION"
+    log "INFO" "Current default Python version: $CURRENT_VERSION"
 else
-    echo "Python 3 is not installed."
+    log "INFO" "Python 3 is not installed."
     CURRENT_VERSION="0.0"
 fi
 
