@@ -132,14 +132,14 @@ TARGET_BINARY="/usr/bin/python${TARGET_VERSION}"
 
 # 1. Register the original system python3 if not already registered (usually priority 1)
 if [ -f /usr/bin/"$CURRENT_VERSION" ]; then
-    alternatives --install /usr/bin/python3 python3 /usr/bin/"$CURRENT_VERSION" 1
+    sudo alternatives --install /usr/bin/python3 python3 /usr/bin/"$CURRENT_VERSION" 1
 fi
 
 # 2. Register the new target version with a higher priority (e.g., 10)
-alternatives --install /usr/bin/python3 python3 "$TARGET_BINARY" 10
+sudo alternatives --install /usr/bin/python3 python3 "$TARGET_BINARY" 10
 
 # 3. Explicitly set the target version as the default provider for python3
-alternatives --set python3 "$TARGET_BINARY"
+sudo alternatives --set python3 "$TARGET_BINARY"
 
 # 4. Verify the change
 echo "Success! New default version details:"
