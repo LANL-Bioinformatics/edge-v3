@@ -11,9 +11,11 @@
 set -euo pipefail
 
 # ---- Helper Functions -------------------------------------------------
-
+LOG_FILE="edgev3_install.log"
 log() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
+    local TYPE="$1"
+    local MSG="$2"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') [$TYPE] - $MSG" | tee -a "$LOG_FILE"
 }
 
 #!/bin/bash
@@ -36,32 +38,32 @@ get_java_major_version() {
     fi
     echo "$major_version"
 }
-
+log "INFO" "Starting EDGEv3 installation script."
 if command -v java &> /dev/null; then
-    log "Java is installed. Checking version..."
+    log "INFO""Java is installed. Checking version..."
 else
-    log "Java is not installed. Installing Java 17..."
+    log "INFO" "Java is not installed. Installing Java 17..."
     sudo dnf install -y java-21-openjdk
     echo 'export PATH=/usr/lib/jvm/java-17-openjdk-17.0.18.0.8-1.el9.x86_64/bin/:$PATH' >> ~/.bashrc
-    log "Java 17 installed."
+    log "INFO" "Java 17 installed."
 fi
 CURRENT_JAVA_VERSION=$(get_java_major_version)
 
 # Check if the version is a number
 if ! [[ "$CURRENT_JAVA_VERSION" =~ ^[0-9]+$ ]]; then
-    echo "Error: Could not determine Java version or Java is not installed."
+    log "ERROR" "Could not determine Java version or Java is not installed."
     exit 1
 fi
 
 # Compare the version using numeric comparison operators (-gt for "greater than")
 if [ "$CURRENT_JAVA_VERSION" -gt 17 ]; then
-    echo "Java version $CURRENT_JAVA_VERSION is greater than 17. Proceeding..."
+    log "INFO" "Java version $CURRENT_JAVA_VERSION is greater than 17. Proceeding..."
     # Add the rest of your script logic here
 else
 
     sudo dnf install -y java-17-openjdk
     echo 'export PATH=/usr/lib/jvm/java-17-openjdk-17.0.18.0.8-1.el9.x86_64/bin/:$PATH' >> ~/.bashrc
-    log "Java 17 installed."
+    log "INFO" "Java 17 installed."
 fi
 
 
@@ -73,24 +75,24 @@ TMP_DIR=$(mktemp -d)
 NEXTFLOW_URL="https://github.com/nextflow-io/nextflow/releases/latest/download/nextflow"
 CHECKSUM_URL="https://github.com/nextflow-io/nextflow/releases/latest/download/nextflow.sha256"
 
-log "Downloading Nextflow..."
+log "INFO" "Downloading Nextflow..."
 curl -fsSL -o "$TMP_DIR/nextflow" "$NEXTFLOW_URL"
 sudo dnf install -y jq
-log "Verifying checksum..."
+log "INFO" "Verifying checksum..."
 pushd "$TMP_DIR" >/dev/null
 echo "$(curl -fsSL   -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2026-03-10"   https://api.github.com/repos/nextflow-io/nextflow/releases/latest | jq '.assets[0].digest' | sed 's/sha256://' | sed 's/"//g')  $TMP_DIR/nextflow"  | sha256sum -c
 popd >/dev/null
 
-log "Installing Nextflow to $NEXTFLOW_BIN..."
+log "INFO" "Installing Nextflow to $NEXTFLOW_BIN..."
 sudo install -m 0755 "$TMP_DIR/nextflow" "$NEXTFLOW_BIN"
-log "Nextflow installed successfully."
+log "INFO" "Nextflow installed successfully."
 
 # Cleanup
 rm -rf "$TMP_DIR"
 
-log "Installation complete. Test with: nextflow -version"
+log "INFO" "Installation complete. Test with: nextflow -version"
 
-log "Installing Apptainer..."
+log "INFO" "Installing Apptainer..."
 sudo dnf install -y epel-release
 sudo dnf install -y apptainer
 
@@ -114,19 +116,19 @@ CURRENT_MAJOR=$(echo "$CURRENT_VERSION" | cut -d. -f1)
 CURRENT_MINOR=$(echo "$CURRENT_VERSION" | cut -d. -f2)
 
 if [ "$CURRENT_MAJOR" -lt "$REQUIRED_MAJOR" ] || ([ "$CURRENT_MAJOR" -eq "$REQUIRED_MAJOR" ] && [ "$CURRENT_MINOR" -lt "$REQUIRED_MINOR" ]); then
-    echo "Current version is older than required ($REQUIRED_MAJOR.$REQUIRED_MINOR)."
+    log "INFO" "Current version is older than required ($REQUIRED_MAJOR.$REQUIRED_MINOR)."
     
     # 3. Check for and install newer Python versions via DNF
-    echo "Checking available Python package updates via dnf..."
-    # Enable EPEL or CRB if looking for non-standard or newer module streams 
+    log "INFO" "Checking available Python package updates via dnf..."
+    # Enable EPEL or CRB if looking for non-standard or newer module streams
     sudo dnf check-update python3
-    
-    echo "To install or switch to newer module streams (e.g., python3.11 or python3.12), run:"
-    echo "sudo dnf module install python3.11"
+
+    log "INFO" "To install or switch to newer module streams (e.g., python3.11 or python3.12), run:"
+    log "INFO" "sudo dnf module install python3.11"
 else
-    echo "Your Python version is up to date or newer."
+    log "INFO" "Your Python version is up to date or newer."
 fi
-echo "Configuring alternatives for python3..."
+log "INFO" "Configuring alternatives for python3..."
 TARGET_VERSION="3.12"
 TARGET_BINARY="/usr/bin/python${TARGET_VERSION}"
 
@@ -142,10 +144,10 @@ sudo alternatives --install /usr/bin/python3 python3 "$TARGET_BINARY" 10
 sudo alternatives --set python3 "$TARGET_BINARY"
 
 # 4. Verify the change
-echo "Success! New default version details:"
+log "Success! New default version details:"
 python3 --version
 
-log "Installing Python packages"
+log "INFO" "Installing Python packages"
 sudo dnf install python3.12-pip -y
 python3 -m venv edgev3_env
 source edgev3_env/bin/activate
@@ -155,55 +157,85 @@ source ~/edge-v3/workflows/Nextflow/edgev3_env/bin/activate
 EOF
 # prompt user for file paths and store as environment variables
 
-echo "=== File Path Configuration ==="
-echo ""
+log "INFO" "=== File Path Configuration ==="
 
 export NXF_SYNTAX_PARSER=v1
 # Prompt for path to root of projects directory
-read -p "Enter path to projects directory: " PROJECTS_DIR
-export PROJECTS_DIR
+if [ -n "$PROJECTS_DIR" ]; then
+    log "INFO" "PROJECTS_DIR is already set to: $PROJECTS_DIR"
+    read -p "Do you want to change it? (y/n): " CHANGE_PROJECTS_DIR
+    if [[ $CHANGE_PROJECTS_DIR != "y" && $CHANGE_PROJECTS_DIR != "Y" ]]; then
+        log "INFO" "Keeping existing PROJECTS_DIR: $PROJECTS_DIR"
+    else
+        read -p "Enter new path to projects directory: " PROJECTS_DIR
+        export PROJECTS_DIR
+    fi
+else
+    read -p "Enter path to projects directory: " PROJECTS_DIR
+    export PROJECTS_DIR
+fi
 
 # Prompt for path to directory for Nextflow intermediate files
-read -p "Enter path to directory for Nextflow intermediate files: " NEXTFLOW_OUT_DIR
-export NEXTFLOW_OUT_DIR
+if [ -n "$NEXTFLOW_OUT_DIR" ]; then
+    log "INFO" "NEXTFLOW_OUT_DIR is already set to: $NEXTFLOW_OUT_DIR"
+    read -p "Do you want to change it? (y/n): " CHANGE_NEXTFLOW_OUT_DIR
+    if [[ $CHANGE_NEXTFLOW_OUT_DIR != "y" && $CHANGE_NEXTFLOW_OUT_DIR != "Y" ]]; then
+        log "INFO" "Keeping existing NEXTFLOW_OUT_DIR: $NEXTFLOW_OUT_DIR"
+    else
+        read -p "Enter new path to directory for Nextflow intermediate files: " NEXTFLOW_OUT_DIR
+        export NEXTFLOW_OUT_DIR
+    fi
+else
+    read -p "Enter path to directory for Nextflow intermediate files: " NEXTFLOW_OUT_DIR
+    export NEXTFLOW_OUT_DIR
+fi
 
 # Prompt for path to reference data
-read -p "Enter path to reference data: " REFDATA_DIR
-export REFDATA_DIR
+if [ -n "$REFDATA_DIR" ]; then
+    log "INFO" "REFDATA_DIR is already set to: $REFDATA_DIR"
+    read -p "Do you want to change it? (y/n): " CHANGE_REFDATA_DIR
+    if [[ $CHANGE_REFDATA_DIR != "y" && $CHANGE_REFDATA_DIR != "Y" ]]; then
+        log "INFO" "Keeping existing REFDATA_DIR: $REFDATA_DIR"
+    else
+        read -p "Enter new path to reference data: " REFDATA_DIR
+        export REFDATA_DIR
+    fi
+else
+    read -p "Enter path to reference data: " REFDATA_DIR
+    export REFDATA_DIR
+fi
 
 # Prompt for path to OPAVER web directory
 export OPAVER_WEB_DIR="$HOME/edge-v3/io/opaver_web"
 
 # Prompt for path to template file used to render Nextflow config file
 export TEMPLATE_FILE="$HOME/edge-v3/workflows/Nextflow/metagenomics/nextflow/scripts/nextflow_config.tmpl"
-echo ""
-echo "=== Environment Variables Set ==="
-echo "PROJECTS_DIR: $PROJECTS_DIR"
-echo "NEXTFLOW_OUT_DIR: $NEXTFLOW_OUT_DIR"
-echo "REFDATA_DIR: $REFDATA_DIR"
-echo "OPAVER_WEB_DIR: $OPAVER_WEB_DIR"
-echo "TEMPLATE_FILE: $TEMPLATE_FILE"
-echo ""
+log "INFO" "=== Environment Variables Set ==="
+log "INFO" "PROJECTS_DIR: $PROJECTS_DIR"
+log "INFO" "NEXTFLOW_OUT_DIR: $NEXTFLOW_OUT_DIR"
+log "INFO" "REFDATA_DIR: $REFDATA_DIR"
+log "INFO" "OPAVER_WEB_DIR: $OPAVER_WEB_DIR"
+log "INFO" "TEMPLATE_FILE: $TEMPLATE_FILE"
 
 # Optional: Validate that files exist
-echo "=== Validating Paths ==="
+log "INFO" "=== Validating Paths ==="
 for var in PROJECTS_DIR NEXTFLOW_OUT_DIR REFDATA_DIR OPAVER_WEB_DIR; do
     path="${!var}"
     if [ -d "$path" ]; then
-        echo "✓ ${var}: Directory exists"
+        log "INFO" "✓ ${var}: Directory exists"
     else
-        echo "✗ ${var}: Directory not found (will be created if needed)"
+        log "INFO" "✗ ${var}: Directory not found (will be created if needed)"
         mkdir -p "$path"
     fi
 done
 if [ -f "$TEMPLATE_FILE" ]; then
-    echo "✓ TEMPLATE_FILE: File exists"
+    log "INFO" "✓ TEMPLATE_FILE: File exists"
 else
-    echo "✗ TEMPLATE_FILE: File not found (please check the path)"
+    log "INFO" "✗ TEMPLATE_FILE: File not found (please check the path)"
 fi
 
 # Optional: Save to a file for persistence
-echo ""
+log "INFO" "=== Save Environment Variables ==="
 read -p "Save these variables to .bash_profile? (y/n): " SAVE_ENV
 
 if [[ $SAVE_ENV == "y" || $SAVE_ENV == "Y" ]]; then
