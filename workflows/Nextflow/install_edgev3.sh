@@ -247,8 +247,8 @@ export OPAVER_WEB_DIR="$OPAVER_WEB_DIR"
 export TEMPLATE_FILE="$TEMPLATE_FILE"
 alias run_edge='python $HOME/edge-v3/workflows/Nextflow/metagenomics/nextflow/scripts/run_edge.py'
 EOF
-    echo "Variables saved to .bash_profile"
-    echo "Source it later with: source ~/.bash_profile"
+    log "INFO" "Variables saved to .bash_profile"
+    log "INFO" "Source it later with: source ~/.bash_profile"
 fi
 
 exit 0
