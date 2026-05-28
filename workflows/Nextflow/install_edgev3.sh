@@ -144,7 +144,7 @@ sudo alternatives --install /usr/bin/python3 python3 "$TARGET_BINARY" 10
 sudo alternatives --set python3 "$TARGET_BINARY"
 
 # 4. Verify the change
-log "Success! New default version details:"
+log "INFO" "Success! New default version details:"
 python3 --version
 
 log "INFO" "Installing Python packages"
