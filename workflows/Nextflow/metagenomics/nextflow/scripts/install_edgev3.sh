@@ -224,5 +224,5 @@ EOF
     log "INFO" "Variables saved to .bash_profile"
     log "INFO" "Source it later with: source ~/.bash_profile"
 fi
-
+source ~/.bash_profile
 exit 0
