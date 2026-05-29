@@ -68,5 +68,6 @@ To check the status of a run:
 
 ## Note
 
-- 
+- The conf.json file has all the parameters used by `run_edge`; which workflows are run and the set of parameters that are used by each workflow. The ReadsQC trim quality score and the assembler used will change based on the sequencing platform detected. The `PLATFORM` must be specified at the command-line when using SRA
+- `run_edge` uses the conf.json file to create the config file used by Nextflow to run the workflows.
     
