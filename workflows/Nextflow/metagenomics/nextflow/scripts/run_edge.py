@@ -9,7 +9,7 @@ from pathlib import Path
 from config_nextflow import render_nextflow_config, get_project_root
 from nf_functions import start_job, status_check_job
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(filename='edge_run.log',level=logging.INFO)
 
 def run_nextflow_pipeline(projects_dir:Path, conf_json_file:Path, project_name:str, 
                           nextflowOutDir:Path, refdata_dir:Path, opaver_web_dir:Path, template_file: Path, 

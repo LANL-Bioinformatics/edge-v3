@@ -13,8 +13,7 @@ import logging
 
 from detect_fastx_platform import detect_platform
 
-logging.basicConfig(filename='workflow_config.log',
-                    format='%(asctime)s.%(msecs)03d %(levelname)s {%(module)s} [%(funcName)s] %(message)s',
+logging.basicConfig(format='%(asctime)s.%(msecs)03d %(levelname)s {%(module)s} [%(funcName)s] %(message)s',
                     datefmt='%Y-%m-%d,%H:%M:%S', level=logging.DEBUG)
 
 def create_output_directory_dict(projects_dir:Path, project_code:str) -> dict:
