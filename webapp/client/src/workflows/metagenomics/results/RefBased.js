@@ -104,7 +104,7 @@ export const RefBased = (props) => {
         toggleParms={() => {
           setCollapseCard(!collapseCard)
         }}
-        title={props.title || 'Reference-Based Analysis Result'}
+        title={'Reference-Based Analysis Result'}
         collapseParms={collapseCard}
       />
       <Collapse isOpen={!collapseCard}>

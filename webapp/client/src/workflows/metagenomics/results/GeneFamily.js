@@ -42,7 +42,7 @@ export const GeneFamily = (props) => {
         toggleParms={() => {
           setCollapseCard(!collapseCard)
         }}
-        title={props.title || 'Gene Family Result'}
+        title={'Gene Family Result'}
         collapseParms={collapseCard}
       />
       <Collapse isOpen={!collapseCard}>

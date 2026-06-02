@@ -135,7 +135,7 @@ export const Taxonomy = (props) => {
         toggleParms={() => {
           setCollapseCard(!collapseCard)
         }}
-        title={props.title || 'Taxonomy Result'}
+        title={'Taxonomy Result'}
         collapseParms={collapseCard}
       />
       <Collapse isOpen={!collapseCard}>

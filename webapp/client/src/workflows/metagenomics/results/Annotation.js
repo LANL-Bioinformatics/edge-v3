@@ -27,7 +27,7 @@ export const Annotation = (props) => {
         toggleParms={() => {
           setCollapseCard(!collapseCard)
         }}
-        title={props.title || 'Annotation Result'}
+        title={'Annotation Result'}
         collapseParms={collapseCard}
       />
       <Collapse isOpen={!collapseCard}>

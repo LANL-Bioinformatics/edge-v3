@@ -7,22 +7,7 @@ import { Taxonomy } from '../../results/Taxonomy'
 import { Phylogeny } from '../../results/Phylogeny'
 import { RefBased } from '../../results/RefBased'
 import { GeneFamily } from '../../results/GeneFamily'
-import { workflowList } from 'src/util'
-
-const resultTitles = {
-  runFaQCs: 'ReadsQC Result',
-  assembly: 'Assembly Result',
-  annotation: 'Annotation Result',
-  binning: 'Binning Result',
-  antiSmash: 'AntiSmash Result',
-  taxonomy: 'Taxonomy Result',
-  phylogeny: 'Phylogeny Analysis Result',
-  refBased: 'Reference-Based Analysis Result',
-  geneFamily: 'Gene Family Result',
-}
-
-const getResultTitle = (workflow) =>
-  resultTitles[workflow] || `${workflowList[workflow]?.label || workflow} Result`
+import { workflows } from '../../defaults'
 
 export const MetaG = (props) => {
   return (
@@ -34,8 +19,8 @@ export const MetaG = (props) => {
               key={index}
               result={props.result[workflow]}
               project={props.project}
-              title={getResultTitle(workflow)}
-              userType={props.userType}
+              title={workflows[workflow].title + ' Result'}
+              userType={props.type}
               allExpand={props.allExpand}
               allClosed={props.allClosed}
             />
@@ -46,8 +31,8 @@ export const MetaG = (props) => {
               key={index}
               result={props.result[workflow]}
               project={props.project}
-              title={getResultTitle(workflow)}
-              userType={props.userType}
+              title={workflows[workflow].title + ' Result'}
+              userType={props.type}
               allExpand={props.allExpand}
               allClosed={props.allClosed}
             />
@@ -58,8 +43,8 @@ export const MetaG = (props) => {
               key={index}
               result={props.result[workflow]}
               project={props.project}
-              title={getResultTitle(workflow)}
-              userType={props.userType}
+              title={workflows[workflow].title + ' Result'}
+              userType={props.type}
               allExpand={props.allExpand}
               allClosed={props.allClosed}
             />
@@ -70,8 +55,8 @@ export const MetaG = (props) => {
               key={index}
               result={props.result[workflow]}
               project={props.project}
-              title={getResultTitle(workflow)}
-              userType={props.userType}
+              title={workflows[workflow].title + ' Result'}
+              userType={props.type}
               allExpand={props.allExpand}
               allClosed={props.allClosed}
             />
@@ -82,8 +67,8 @@ export const MetaG = (props) => {
               key={index}
               result={props.result[workflow]}
               project={props.project}
-              title={getResultTitle(workflow)}
-              userType={props.userType}
+              title={workflows[workflow].title + ' Result'}
+              userType={props.type}
               allExpand={props.allExpand}
               allClosed={props.allClosed}
             />
@@ -94,8 +79,8 @@ export const MetaG = (props) => {
               key={index}
               result={props.result[workflow]}
               project={props.project}
-              title={getResultTitle(workflow)}
-              userType={props.userType}
+              title={workflows[workflow].title + ' Result'}
+              userType={props.type}
               allExpand={props.allExpand}
               allClosed={props.allClosed}
             />
@@ -106,8 +91,8 @@ export const MetaG = (props) => {
               key={index}
               result={props.result[workflow]}
               project={props.project}
-              title={getResultTitle(workflow)}
-              userType={props.userType}
+              title={workflows[workflow].title + ' Result'}
+              userType={props.type}
               allExpand={props.allExpand}
               allClosed={props.allClosed}
             />
@@ -118,8 +103,8 @@ export const MetaG = (props) => {
               key={index}
               result={props.result[workflow]}
               project={props.project}
-              title={getResultTitle(workflow)}
-              userType={props.userType}
+              title={workflows[workflow].title + ' Result'}
+              userType={props.type}
               allExpand={props.allExpand}
               allClosed={props.allClosed}
             />
@@ -130,8 +115,8 @@ export const MetaG = (props) => {
               key={index}
               result={props.result[workflow]}
               project={props.project}
-              title={getResultTitle(workflow)}
-              userType={props.userType}
+              title={workflows[workflow].title + ' Result'}
+              userType={props.type}
               allExpand={props.allExpand}
               allClosed={props.allClosed}
             />

@@ -27,7 +27,7 @@ export const Assembly = (props) => {
         toggleParms={() => {
           setCollapseCard(!collapseCard)
         }}
-        title={props.title || 'Assembly Result'}
+        title={'Assembly Result'}
         collapseParms={collapseCard}
       />
       <Collapse isOpen={!collapseCard}>

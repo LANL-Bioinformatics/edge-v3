@@ -30,7 +30,7 @@ export const Phylogeny = (props) => {
           setIframeKey(iframeKey + 1) // Force re-render of iframes when toggling
           setIframeKey2(iframeKey2 + 1) // Force re-render of iframes when toggling
         }}
-        title={props.title || 'Phylogeny Analysis Result'}
+        title={'Phylogeny Analysis Result'}
         collapseParms={collapseCard}
       />
       <Collapse isOpen={!collapseCard}>
