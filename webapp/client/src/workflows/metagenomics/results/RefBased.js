@@ -9,6 +9,7 @@ import config from 'src/config'
 export const RefBased = (props) => {
   const [collapseCard, setCollapseCard] = useState(true)
   const url = config.APP.BASE_URI + '/projects/' + props.project.code + '/'
+  const title = props.title || 'Reference-Based Analysis Result'
   const summaryData = props.result.summary
   const [coveragePlots, setCoveragePlots] = useState([])
   const snpsData = props.result.snps
@@ -104,8 +105,14 @@ export const RefBased = (props) => {
         toggleParms={() => {
           setCollapseCard(!collapseCard)
         }}
-        title={'Reference-Based Analysis Result'}
+        title={title}
         collapseParms={collapseCard}
+        aiSummary={{
+          sectionKey: 'refBased',
+          title,
+          project: props.project,
+          userType: props.userType,
+        }}
       />
       <Collapse isOpen={!collapseCard}>
         <CardBody>

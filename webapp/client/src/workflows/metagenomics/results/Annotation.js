@@ -7,6 +7,7 @@ import config from 'src/config'
 export const Annotation = (props) => {
   const [collapseCard, setCollapseCard] = useState(true)
   const url = config.APP.BASE_URI + '/projects/' + props.project.code + '/'
+  const title = props.title || 'Annotation Result'
 
   useEffect(() => {
     if (props.allExpand > 0) {
@@ -27,8 +28,14 @@ export const Annotation = (props) => {
         toggleParms={() => {
           setCollapseCard(!collapseCard)
         }}
-        title={'Annotation Result'}
+        title={title}
         collapseParms={collapseCard}
+        aiSummary={{
+          sectionKey: 'annotation',
+          title,
+          project: props.project,
+          userType: props.userType,
+        }}
       />
       <Collapse isOpen={!collapseCard}>
         <CardBody>

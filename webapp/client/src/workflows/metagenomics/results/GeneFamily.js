@@ -4,11 +4,10 @@ import { MaterialReactTable } from 'material-react-table'
 import { ThemeProvider } from '@mui/material'
 import { theme } from 'src/edge/um/common/tableUtil'
 import { Header } from 'src/edge/project/results/CardHeader'
-import config from 'src/config'
 
 export const GeneFamily = (props) => {
   const [collapseCard, setCollapseCard] = useState(true)
-  const url = config.APP.BASE_URI + '/projects/' + props.project.code + '/'
+  const title = props.title || 'Gene Family Result'
   const summaryData = props.result.summary
   //create columns from data
   const summaryColumns = useMemo(
@@ -42,8 +41,14 @@ export const GeneFamily = (props) => {
         toggleParms={() => {
           setCollapseCard(!collapseCard)
         }}
-        title={'Gene Family Result'}
+        title={title}
         collapseParms={collapseCard}
+        aiSummary={{
+          sectionKey: 'geneFamily',
+          title,
+          project: props.project,
+          userType: props.userType,
+        }}
       />
       <Collapse isOpen={!collapseCard}>
         <CardBody>

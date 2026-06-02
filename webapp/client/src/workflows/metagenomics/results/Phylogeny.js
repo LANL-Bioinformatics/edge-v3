@@ -8,6 +8,7 @@ export const Phylogeny = (props) => {
   const [iframeKey, setIframeKey] = useState(0)
   const [iframeKey2, setIframeKey2] = useState(0)
   const url = config.APP.BASE_URI + '/projects/' + props.project.code + '/'
+  const title = props.title || 'Phylogeny Analysis Result'
 
   useEffect(() => {
     if (props.allExpand > 0) {
@@ -30,8 +31,14 @@ export const Phylogeny = (props) => {
           setIframeKey(iframeKey + 1) // Force re-render of iframes when toggling
           setIframeKey2(iframeKey2 + 1) // Force re-render of iframes when toggling
         }}
-        title={'Phylogeny Analysis Result'}
+        title={title}
         collapseParms={collapseCard}
+        aiSummary={{
+          sectionKey: 'phylogeny',
+          title,
+          project: props.project,
+          userType: props.userType,
+        }}
       />
       <Collapse isOpen={!collapseCard}>
         <CardBody>
