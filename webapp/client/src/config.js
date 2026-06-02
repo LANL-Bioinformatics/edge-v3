@@ -125,6 +125,9 @@ const config = {
     // Note: You can get the ORCiD Client ID value from: https://orcid.org/developer-tools
     AUTH_URI: makeOrcidAuthUri(makeLocalUri('/oauth'), import.meta.env.VITE_ORCID_CLIENT_ID),
   },
+  AI_SUMMARY: {
+    IS_ENABLED: makeBoolean(import.meta.env.VITE_AI_SUMMARY_ENABLED),
+  },
   UM: {
     REGISTER_MSG: 'Congratulations! Your account has been created successfully.',
     REGISTER_MSG_EMAIL:
