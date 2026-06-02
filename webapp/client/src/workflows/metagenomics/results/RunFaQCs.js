@@ -7,6 +7,7 @@ import config from 'src/config'
 export const RunFaQCs = (props) => {
   const [collapseCard, setCollapseCard] = useState(true)
   const url = config.APP.BASE_URI + '/projects/' + props.project.code + '/'
+  const title = props.title || 'ReadsQC Result'
 
   useEffect(() => {
     if (props.allExpand > 0) {
@@ -27,8 +28,14 @@ export const RunFaQCs = (props) => {
         toggleParms={() => {
           setCollapseCard(!collapseCard)
         }}
-        title={'ReadsQC Result'}
+        title={title}
         collapseParms={collapseCard}
+        aiSummary={{
+          sectionKey: 'runFaQCs',
+          title,
+          project: props.project,
+          userType: props.userType,
+        }}
       />
       <Collapse isOpen={!collapseCard}>
         <CardBody>

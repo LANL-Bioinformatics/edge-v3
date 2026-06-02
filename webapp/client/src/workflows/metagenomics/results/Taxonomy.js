@@ -26,6 +26,7 @@ import { taxClassificationOptions } from '../defaults'
 export const Taxonomy = (props) => {
   const [collapseCard, setCollapseCard] = useState(true)
   const url = config.APP.BASE_URI + '/projects/' + props.project.code + '/'
+  const title = props.title || 'Taxonomy Result'
   const tabs = {
     Summary: 'table and krona',
     'Classification Tools': 'table and tree/krona',
@@ -135,8 +136,14 @@ export const Taxonomy = (props) => {
         toggleParms={() => {
           setCollapseCard(!collapseCard)
         }}
-        title={'Taxonomy Result'}
+        title={title}
         collapseParms={collapseCard}
+        aiSummary={{
+          sectionKey: 'taxonomy',
+          title,
+          project: props.project,
+          userType: props.userType,
+        }}
       />
       <Collapse isOpen={!collapseCard}>
         <CardBody>

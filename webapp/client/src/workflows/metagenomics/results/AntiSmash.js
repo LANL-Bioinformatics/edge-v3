@@ -7,6 +7,7 @@ import config from 'src/config'
 export const AntiSmash = (props) => {
   const [collapseCard, setCollapseCard] = useState(true)
   const url = config.APP.BASE_URI + '/projects/' + props.project.code + '/'
+  const title = props.title || 'AntiSmash Result'
 
   useEffect(() => {
     if (props.allExpand > 0) {
@@ -27,8 +28,14 @@ export const AntiSmash = (props) => {
         toggleParms={() => {
           setCollapseCard(!collapseCard)
         }}
-        title={'AntiSmash Result'}
+        title={title}
         collapseParms={collapseCard}
+        aiSummary={{
+          sectionKey: 'antiSmash',
+          title,
+          project: props.project,
+          userType: props.userType,
+        }}
       />
       <Collapse isOpen={!collapseCard}>
         <CardBody>
