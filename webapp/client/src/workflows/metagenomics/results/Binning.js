@@ -27,7 +27,7 @@ export const Binning = (props) => {
         toggleParms={() => {
           setCollapseCard(!collapseCard)
         }}
-        title={'Binning Result'}
+        title={props.title || 'Binning Result'}
         collapseParms={collapseCard}
       />
       <Collapse isOpen={!collapseCard}>

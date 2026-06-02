@@ -27,7 +27,7 @@ export const RunFaQCs = (props) => {
         toggleParms={() => {
           setCollapseCard(!collapseCard)
         }}
-        title={'ReadsQC Result'}
+        title={props.title || 'ReadsQC Result'}
         collapseParms={collapseCard}
       />
       <Collapse isOpen={!collapseCard}>

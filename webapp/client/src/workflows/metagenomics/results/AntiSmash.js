@@ -27,7 +27,7 @@ export const AntiSmash = (props) => {
         toggleParms={() => {
           setCollapseCard(!collapseCard)
         }}
-        title={'AntiSmash Result'}
+        title={props.title || 'AntiSmash Result'}
         collapseParms={collapseCard}
       />
       <Collapse isOpen={!collapseCard}>
