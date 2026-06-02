@@ -32,4 +32,5 @@
 ## Note
 
 - Have to restart the api server when any changes made in webapp/server code or webapp/server/.env.
+- AI summary configuration is documented in [README-ai-summary.md](README-ai-summary.md).
     
