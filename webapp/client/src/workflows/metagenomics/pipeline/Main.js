@@ -267,24 +267,6 @@ const Main = (props) => {
     }
 
     Object.keys(selectedWorkflows).forEach((workflow) => {
-      if (selectedWorkflows[workflow].paramsOn && !selectedWorkflows[workflow].validForm) {
-        setRequestSubmit(false)
-      }
-    })
-  }, [doValidation]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    updateBinning()
-    setRequestSubmit(true)
-
-    if (projectParams && !projectParams.validForm) {
-      setRequestSubmit(false)
-    }
-    if (rawDataParams && !rawDataParams.validForm) {
-      setRequestSubmit(false)
-    }
-
-    Object.keys(selectedWorkflows).forEach((workflow) => {
       if (
         selectedWorkflows[workflow].paramsOn &&
         !selectedWorkflows[workflow].disabled &&
@@ -294,6 +276,29 @@ const Main = (props) => {
       }
     })
   }, [doValidation]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    function loadRefList() {
+      getData('/api/workflow/data/reflist')
+        .then((data) => {
+          return data.reflist.reduce(function (options, ref) {
+            options.push({ value: ref, label: ref.replaceAll('_', ' ') })
+            return options
+          }, [])
+        })
+        .then((options) => {
+          setRefGenomeOptions(options)
+        })
+        .catch((error) => {
+          alert(error)
+        })
+    }
+
+    if (!refGenomeOptions) {
+      loadRefList()
+    }
+    setDoValidation(doValidation + 1)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     let url = apis.userInfo
