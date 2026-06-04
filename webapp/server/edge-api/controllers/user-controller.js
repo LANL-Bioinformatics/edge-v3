@@ -338,7 +338,11 @@ const oauthLogin = async (req, res) => {
       logger.info(
         `Create account from oauth login: ${data.email} authenticated by ${data.oauth}`,
       )
-      const hashedPassword = await encodePassword(randomize('Aa0!', 12))
+
+      // encode password and add new user to DB
+      const hashedPassword = await encodePassword(
+        data.password ? data.password : randomize('Aa0!', 12),
+      )
       const code = randomize('0', 6)
       const newUser = new User({
         firstName: data.firstName,
