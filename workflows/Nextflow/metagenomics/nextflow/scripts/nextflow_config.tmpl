@@ -134,37 +134,37 @@ params {
         binningMarkerSet = {% if binningMarkerSet is defined %}{{ binningMarkerSet }}{% else %}107{% endif %}
         binningAbundFile = {% if binningAbundFile is defined and binningAbundFile %}"{{ binningAbundFile }}"{% else %}"${projectDir}/nf_assets/NO_FILE3"{% endif %}
         doCheckM = {% if doCheckM is defined %}{{ doCheckM }}{% else %}false{% endif %}
-        checkMdb = "/media/volume/edgev3-refdata/refdata/checkM_DB"
+        checkMdb = "{% refdata %}/checkM_DB"
     }
 
     readsTaxonomy {
         splitTrimMinQ = {% if splitTrimMinQ is defined %}{{ splitTrimMinQ }}{% else %}20{% endif %}
         //RTA tools: gottcha-genDB-b,gottcha-speDB-b,gottcha-strDB-b,gottcha-genDB-v,gottcha-speDB-v,gottcha-strDB-v,gottcha2-speDB-b,pangia,bwa,metaphlan4,kraken2,centrifuge,diamond
         enabledTools = {% if enabledTools is defined %}"{{ enabledTools }}"{% else %}"gottcha-genDB-b,gottcha-speDB-b,gottcha-strDB-b,gottcha-genDB-v,gottcha-speDB-v,gottcha-strDB-v,gottcha2-speDB-b,pangia,bwa,metaphlan4,kraken2,centrifuge,diamond"{% endif %}
-        baseDB = "/media/volume/edgev3-refdata/refdata"
-        custom_gottcha_genDB_b = {% if custom_gottcha_genDB_b is defined and custom_gottcha_genDB_b %}"{{ custom_gottcha_genDB_b }}"{% else %}"/media/volume/edgev3-refdata/refdata/nextflow/database/GOTTCHA/GOTTCHA_BACTERIA_c4937_k24_u30_xHUMAN3x.genus"{% endif %}
-        custom_gottcha_speDB_b = {% if custom_gottcha_speDB_b is defined and custom_gottcha_speDB_b %}"{{ custom_gottcha_speDB_b }}"{% else %}"/media/volume/edgev3-refdata/refdata/nextflow/database/GOTTCHA/GOTTCHA_BACTERIA_c4937_k24_u30_xHUMAN3x.species"{% endif %}
-        custom_gottcha_strDB_b = {% if custom_gottcha_strDB_b is defined and custom_gottcha_strDB_b %}"{{ custom_gottcha_strDB_b }}"{% else %}"/media/volume/edgev3-refdata/refdata/nextflow/database/GOTTCHA/GOTTCHA_BACTERIA_c4937_k24_u30_xHUMAN3x.strain"{% endif %}
-        custom_gottcha_genDB_v = {% if custom_gottcha_genDB_v is defined and custom_gottcha_genDB_v %}"{{ custom_gottcha_genDB_v }}"{% else %}"/media/volume/edgev3-refdata/refdata/nextflow/database/GOTTCHA/GOTTCHA_VIRUSES_c5900_k24_u30_xHUMAN3x.genus"{% endif %}
-        custom_gottcha_speDB_v = {% if custom_gottcha_speDB_v is defined and custom_gottcha_speDB_v %}"{{ custom_gottcha_speDB_v }}"{% else %}"/media/volume/edgev3-refdata/refdata/nextflow/database/GOTTCHA/GOTTCHA_VIRUSES_c5900_k24_u30_xHUMAN3x.species"{% endif %}
-        custom_gottcha_strDB_v = {% if custom_gottcha_strDB_v is defined and custom_gottcha_strDB_v %}"{{ custom_gottcha_strDB_v }}"{% else %}"/media/volume/edgev3-refdata/refdata/nextflow/database/GOTTCHA/GOTTCHA_VIRUSES_c5900_k24_u30_xHUMAN3x.strain"{% endif %}
-        custom_gottcha2_speDB_b = {% if custom_gottcha2_speDB_b is defined and custom_gottcha2_speDB_b %}"{{ custom_gottcha2_speDB_b }}"{% else %}"/media/volume/edgev3-refdata/refdata/GOTTCHA2/gottcha_db.species.fna"{% endif %}
-        custom_gottcha2_speDB_v = {% if custom_gottcha2_speDB_v is defined and custom_gottcha2_speDB_v %}"{{ custom_gottcha2_speDB_v }}"{% else %}"/media/volume/edgev3-refdata/refdata/GOTTCHA2/gottcha_db.species.fna"{% endif %}
-        custom_bwa_db= {% if custom_bwa_db is defined and custom_bwa_db %}"{{ custom_bwa_db }}"{% else %}"/media/volume/edgev3-refdata/refdata/bwa_index/NCBI-Bacteria-Virus.fna"{% endif %}
-        custom_metaphlan_db= {% if custom_metaphlan_db is defined and custom_metaphlan_db %}"{{ custom_metaphlan_db }}"{% else %}"/media/volume/edgev3-refdata/refdata/metaphlan4"{% endif %}
-        custom_kraken_db= {% if custom_kraken_db is defined and custom_kraken_db %}"{{ custom_kraken_db }}"{% else %}"/media/volume/edgev3-refdata/refdata/Kraken2"{% endif %}
-        custom_pangia_db= {% if custom_pangia_db is defined and custom_pangia_db %}"{{ custom_pangia_db }}"{% else %}"/media/volume/edgev3-refdata/refdata/PanGIA/NCBI_genomes_refseq86*.fa"{% endif %}
-        custom_diamond_db= {% if custom_diamond_db is defined and custom_diamond_db %}"{{ custom_diamond_db }}"{% else %}"/media/volume/edgev3-refdata/refdata/diamond/RefSeq_Release83.nr_protein_withRefSeq_viral_102317.protein.faa.dmnd"{% endif %}
-        custom_centrifuge_db = {% if custom_centrifuge_db is defined and custom_centrifuge_db %}"{{ custom_centrifuge_db }}"{% else %}"/media/volume/edgev3-refdata/refdata/Centrifuge/hpv.1.cf"{% endif %}
+        baseDB = "{% refdata %}"
+        custom_gottcha_genDB_b = {% if custom_gottcha_genDB_b is defined and custom_gottcha_genDB_b %}"{{ custom_gottcha_genDB_b }}"{% else %}"{% refdata %}/nextflow/database/GOTTCHA/GOTTCHA_BACTERIA_c4937_k24_u30_xHUMAN3x.genus"{% endif %}
+        custom_gottcha_speDB_b = {% if custom_gottcha_speDB_b is defined and custom_gottcha_speDB_b %}"{{ custom_gottcha_speDB_b }}"{% else %}"{% refdata %}/nextflow/database/GOTTCHA/GOTTCHA_BACTERIA_c4937_k24_u30_xHUMAN3x.species"{% endif %}
+        custom_gottcha_strDB_b = {% if custom_gottcha_strDB_b is defined and custom_gottcha_strDB_b %}"{{ custom_gottcha_strDB_b }}"{% else %}"{% refdata %}/nextflow/database/GOTTCHA/GOTTCHA_BACTERIA_c4937_k24_u30_xHUMAN3x.strain"{% endif %}
+        custom_gottcha_genDB_v = {% if custom_gottcha_genDB_v is defined and custom_gottcha_genDB_v %}"{{ custom_gottcha_genDB_v }}"{% else %}"{% refdata %}/nextflow/database/GOTTCHA/GOTTCHA_VIRUSES_c5900_k24_u30_xHUMAN3x.genus"{% endif %}
+        custom_gottcha_speDB_v = {% if custom_gottcha_speDB_v is defined and custom_gottcha_speDB_v %}"{{ custom_gottcha_speDB_v }}"{% else %}"{% refdata %}/nextflow/database/GOTTCHA/GOTTCHA_VIRUSES_c5900_k24_u30_xHUMAN3x.species"{% endif %}
+        custom_gottcha_strDB_v = {% if custom_gottcha_strDB_v is defined and custom_gottcha_strDB_v %}"{{ custom_gottcha_strDB_v }}"{% else %}"{% refdata %}/nextflow/database/GOTTCHA/GOTTCHA_VIRUSES_c5900_k24_u30_xHUMAN3x.strain"{% endif %}
+        custom_gottcha2_speDB_b = {% if custom_gottcha2_speDB_b is defined and custom_gottcha2_speDB_b %}"{{ custom_gottcha2_speDB_b }}"{% else %}"{% refdata %}/GOTTCHA2/gottcha_db.species.fna"{% endif %}
+        custom_gottcha2_speDB_v = {% if custom_gottcha2_speDB_v is defined and custom_gottcha2_speDB_v %}"{{ custom_gottcha2_speDB_v }}"{% else %}"{% refdata %}/GOTTCHA2/gottcha_db.species.fna"{% endif %}
+        custom_bwa_db= {% if custom_bwa_db is defined and custom_bwa_db %}"{{ custom_bwa_db }}"{% else %}"{% refdata %}/bwa_index/NCBI-Bacteria-Virus.fna"{% endif %}
+        custom_metaphlan_db= {% if custom_metaphlan_db is defined and custom_metaphlan_db %}"{{ custom_metaphlan_db }}"{% else %}"{% refdata %}/metaphlan4"{% endif %}
+        custom_kraken_db= {% if custom_kraken_db is defined and custom_kraken_db %}"{{ custom_kraken_db }}"{% else %}"{% refdata %}/Kraken2"{% endif %}
+        custom_pangia_db= {% if custom_pangia_db is defined and custom_pangia_db %}"{{ custom_pangia_db }}"{% else %}"{% refdata %}/PanGIA/NCBI_genomes_refseq86*.fa"{% endif %}
+        custom_diamond_db= {% if custom_diamond_db is defined and custom_diamond_db %}"{{ custom_diamond_db }}"{% else %}"{% refdata %}/diamond/RefSeq_Release83.nr_protein_withRefSeq_viral_102317.protein.faa.dmnd"{% endif %}
+        custom_centrifuge_db = {% if custom_centrifuge_db is defined and custom_centrifuge_db %}"{{ custom_centrifuge_db }}"{% else %}"{% refdata %}/Centrifuge/hpv.1.cf"{% endif %}
     }
 
     contigsTaxonomy {
-        miccrDB = "/media/volume/edgev3-refdata/refdata/miccrDB"
+        miccrDB = "{% refdata %}/miccrDB"
         rowLimit = 3000
     }
 
     SMA {
-        database = "/media/volume/edgev3-refdata/refdata/antismash" //path to downloaded database location (download-antismash-databases --database-dir <DBPATH>)
+        database = "{% refdata %}/antismash" //path to downloaded database location (download-antismash-databases --database-dir <DBPATH>)
         smaTaxon = {% if smaTaxon is defined %}"{{ smaTaxon }}"{% else %}"bacteria"{% endif %}
         clusterblast = {% if clusterblast is defined %}{{ clusterblast }}{% else %}false{% endif %}
         subclusterblast = {% if subclusterblast is defined %}{{ subclusterblast }}{% else %}true{% endif %}
@@ -183,8 +183,8 @@ params {
         selectGenomes = {% if selectGenomes is defined %}{{ selectGenomes | tojson }}{% else %}[]{% endif %}
         referenceGenomes = {% if referenceGenomes is defined %}{{ referenceGenomes | tojson }}{% else %}[]{% endif %}
         //expects id_mapping.txt in the same directory as refDB
-        refDB = "/media/volume/edgev3-refdata/refdata/bwa_index/NCBI-Bacteria-Virus.fna"
-        genomeLocation = "/media/volume/edgev3-refdata/refdata/NCBI_genomes"
+        refDB = "{% refdata %}/bwa_index/NCBI-Bacteria-Virus.fna"
+        genomeLocation = "{% refdata %}/NCBI_genomes"
         r2gAligner = {% if r2gAligner is defined %}"{{ r2gAligner }}"{% else %}"bwa"{% endif %} //bowtie2, bwa, minimap2
         r2gAlignerOptions = {% if r2gAlignerOptions is defined %}"{{ r2gAlignerOptions }}"{% else %}""{% endif %}
         r2gMinMapQual = {% if r2gMinMapQual is defined %}{{ r2gMinMapQual }}{% else %}60{% endif %}
@@ -216,14 +216,14 @@ params {
 
     contigsToRef {
         identity = 85
-        contigRefDB = "/media/volume/edgev3-refdata/refdata/miccrDB"
+        contigRefDB = "{% refdata %}/miccrDB"
         mapUnmappedContigs = {% if mapUnmappedContigs is defined %}{{ mapUnmappedContigs }}{% else %}false{% endif %}
     }
 
 
     snpTree {
         //SNP DB path. Should contain SNPdb, bwa_index, NCBI genomes
-        snpDBbase = "/media/volume/edgev3-refdata/refdata"
+        snpDBbase = "{% refdata %}"
         //SNP databases: Ecoli, Yersinia, Francisella, Brucella, Bacillus
         snpDBname = {% if snpDBname is defined and snpDBname %}"{{ snpDBname }}"{% else %}null{% endif %}
         //List of genome name from NCBI genomes see $EDGE/edge_ui/data/Ref_list.json
@@ -244,9 +244,9 @@ params {
         inputFAA = {% if inputFAA is defined and inputFAA %}"{{ inputFAA }}"{% else %}"${projectDir}/nf_assets/NO_FILE3"{% endif %} //input for contig-based single-workflow version--needs annotation output
         inputGFF = {% if inputGFF is defined and inputGFF %}"{{ inputGFF }}"{% else %}"${projectDir}/nf_assets/NO_FILE4"{% endif %} //input for contig-based single-workflow version--needs annotation output
         virulenceFactorTool = {% if virulenceFactorTool is defined %}"{{ virulenceFactorTool }}"{% else %}"MetaVF Toolkit"{% endif %} //"MetaVF Toolkit" or "PathoFact2" 
-        rgiDB = "/media/volume/edgev3-refdata/refdata/RGI"
-        pf2DB = "/media/volume/edgev3-refdata/refdata/PathoFact2"
-        genomadDB = "/media/volume/edgev3-refdata/refdata/genomad_db-v1.6"
+        rgiDB = "{% refdata %}/RGI"
+        pf2DB = "{% refdata %}/PathoFact2"
+        genomadDB = "{% refdata %}/genomad_db-v1.6"
         pf2Config = "${projectDir}/modules/geneFamilyAnalysis/resources/usr/bin/EDGE_PF2_Config.yaml"
     }
 }
