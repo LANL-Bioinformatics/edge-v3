@@ -159,7 +159,6 @@ EOF
 
 log "INFO" "=== File Path Configuration ==="
 
-export NXF_SYNTAX_PARSER=v1
 # Prompt for path to root of projects directory
 
 read -p "Enter path to projects directory: " PROJECTS_DIR
@@ -212,6 +211,7 @@ read -p "Save these variables to .bash_profile? (y/n): " SAVE_ENV
 
 if [[ $SAVE_ENV == "y" || $SAVE_ENV == "Y" ]]; then
     cat  <<EOF >> ~/.bash_profile
+export NXF_SYNTAX_PARSER=v1
 export PROJECTS_DIR="$PROJECTS_DIR"
 export NEXTFLOW_OUT_DIR="$NEXTFLOW_OUT_DIR"
 export APPTAINER_CACHEDIR="$NEXTFLOW_OUT_DIR/apptainer_cache"
