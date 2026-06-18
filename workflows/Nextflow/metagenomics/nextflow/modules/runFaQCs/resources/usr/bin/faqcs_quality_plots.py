@@ -6,51 +6,94 @@ import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 import argparse
 import os
+from functools import lru_cache
+
+
+@lru_cache(maxsize=8)
+def _read_quality_matrix(matrix_file):
+    return pd.read_csv(matrix_file, sep="\t", header=None, dtype=np.int64).to_numpy(copy=False)
+
+
+def _as_quality_matrix(matrix):
+    if isinstance(matrix, np.ndarray):
+        return matrix
+    return _read_quality_matrix(os.fspath(matrix))
+
+
+def _histogram_percentiles(counts, percentiles):
+    total = int(counts.sum())
+    if total == 0:
+        return np.full(len(percentiles), np.nan)
+
+    cumulative_counts = np.cumsum(counts)
+    positions = np.asarray(percentiles, dtype=float) / 100 * (total - 1)
+    lower_indexes = np.floor(positions).astype(np.int64)
+    upper_indexes = np.ceil(positions).astype(np.int64)
+
+    lower_scores = np.searchsorted(cumulative_counts, lower_indexes + 1)
+    upper_scores = np.searchsorted(cumulative_counts, upper_indexes + 1)
+    fractions = positions - lower_indexes
+    return lower_scores + (upper_scores - lower_scores) * fractions
+
+
+def _boxplot_stats_from_counts(counts):
+    if int(counts.sum()) == 0:
+        return None
+
+    q1, median, q3 = _histogram_percentiles(counts, [25, 50, 75])
+    nonzero_scores = np.flatnonzero(counts)
+    min_score = nonzero_scores[0]
+    max_score = nonzero_scores[-1]
+    iqr = q3 - q1
+    lower = max(min_score, q1 - 1.5 * iqr)
+    upper = min(max_score, q3 + 1.5 * iqr)
+    return float(q1), float(median), float(q3), float(lower), float(upper)
+
+
+def _subplot_shape(shape, xref, yref):
+    shape_dict = shape.to_plotly_json() if hasattr(shape, "to_plotly_json") else dict(shape)
+    shape_dict["xref"] = xref
+    shape_dict["yref"] = yref
+    return shape_dict
 
 
 def manual_quality_boxplot(matrix_file, total_reads, total_bases, xlab, ylab, xlab_adj=0):
-    z = pd.read_csv(matrix_file, sep="\t", header=None).values
+    z = _as_quality_matrix(matrix_file)
     x_pos = np.arange(1, z.shape[0] + 1)
-    y_scores = np.arange(z.shape[1])
-
+    shapes = []
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=[1], y=[1], mode="markers", marker=dict(opacity=0)))
-    for i in x_pos:
-        counts = z[i-1]
-        total = counts.sum()
-        if total == 0:
-            continue
-        values = np.repeat(y_scores, counts)
 
-        q1 = np.percentile(values, 25)
-        
-        med = np.percentile(values, 50)
-        q3 = np.percentile(values, 75)
-        iqr = q3 - q1
-        lower = max(values.min(), q1 - 1.5 * iqr)
-        upper = min(values.max(), q3 + 1.5 * iqr)
+    for i, counts in zip(x_pos, z):
+        stats = _boxplot_stats_from_counts(counts)
+        if stats is None:
+            continue
+        q1, med, q3, lower, upper = stats
+
         # Draw box (Q1 to Q3)
-        fig.add_shape(
-            type="rect",
-            x0=i - 0.4,
-            x1=i + 0.4,
-            y0=q1,
-            y1=q3,
-            line=dict(color="black"),
-            fillcolor="bisque"
+        shapes.append(
+            dict(
+                type="rect",
+                x0=i - 0.4,
+                x1=i + 0.4,
+                y0=q1,
+                y1=q3,
+                line=dict(color="black"),
+                fillcolor="bisque"
+            )
         )
 
         # Draw whiskers
-        fig.add_shape(type="line", x0=i, x1=i, y0=q3, y1=upper, line=dict(dash="dot"))
-        fig.add_shape(type="line", x0=i, x1=i, y0=lower, y1=q1, line=dict(dash="dot"))
-        fig.add_shape(type="line", x0=i - 0.4, x1=i + 0.4, y0=upper, y1=upper)
-        fig.add_shape(type="line", x0=i - 0.4, x1=i + 0.4, y0=lower, y1=lower)
+        shapes.append(dict(type="line", x0=i, x1=i, y0=q3, y1=upper, line=dict(dash="dot")))
+        shapes.append(dict(type="line", x0=i, x1=i, y0=lower, y1=q1, line=dict(dash="dot")))
+        shapes.append(dict(type="line", x0=i - 0.4, x1=i + 0.4, y0=upper, y1=upper))
+        shapes.append(dict(type="line", x0=i - 0.4, x1=i + 0.4, y0=lower, y1=lower))
 
         # Draw median line
-        fig.add_shape(type="line", x0=i - 0.4, x1=i + 0.4, y0=med, y1=med, line=dict(width=2))
+        shapes.append(dict(type="line", x0=i - 0.4, x1=i + 0.4, y0=med, y1=med, line=dict(width=2)))
 
     # Add horizontal reference line at Q20
-    fig.add_shape(type="line", x0=0.5, x1=z.shape[0] + 0.5, y0=20, y1=20, line=dict(color='gray', dash='dash'))
+    shapes.append(dict(type="line", x0=0.5, x1=z.shape[0] + 0.5, y0=20, y1=20, line=dict(color='gray', dash='dash')))
 
     # Axis config and annotation
     anno= f"# Reads: {total_reads:,}<br># Bases: {total_bases:,}"
@@ -67,32 +110,28 @@ def manual_quality_boxplot(matrix_file, total_reads, total_bases, xlab, ylab, xl
         showlegend=False,
         annotations=[
             dict(text=f"{anno}", x=15, y=1.15, xref="x1", yref="paper", showarrow=False, align="left", font=dict(size=12))
-        ] 
+        ],
+        shapes=shapes
     )
 
     return fig, anno
 
 def quality_boxplot(matrix_file, total_reads, total_bases, xlab, ylab, xlab_adj=0):
-    z = pd.read_csv(matrix_file, sep="\t", header=None).values
-    x = np.arange(1, z.shape[0] + 1)
-    y = np.arange(z.shape[1])
+    z = _as_quality_matrix(matrix_file)
 
     boxes = []
     for i in range(z.shape[0]):
-        total = z[i].sum()
-        values = np.repeat(y, z[i])
-        if total == 0:
+        stats = _boxplot_stats_from_counts(z[i])
+        if stats is None:
             continue
-
-        q1 = np.percentile(values, 25)
-        median = np.percentile(values, 50)
-        q3 = np.percentile(values, 75)
-        iqr = q3 - q1
-        lower = max(values.min(), q1 - 1.5 * iqr)
-        upper = min(values.max(), q3 + 1.5 * iqr)
+        q1, median, q3, lower, upper = stats
 
         boxes.append(go.Box(
-            y=values,
+            q1=[q1],
+            median=[median],
+            q3=[q3],
+            lowerfence=[lower],
+            upperfence=[upper],
             name=str(i + xlab_adj),
             boxpoints=False,
             line=dict(color="black"),
@@ -111,7 +150,7 @@ def quality_boxplot(matrix_file, total_reads, total_bases, xlab, ylab, xlab_adj=
     return fig, annotations_text
 
 def quality_3d_plot(matrix_file, xlab, ylab):
-    z = pd.read_csv(matrix_file, sep="\t", header=None).values / 1_000_000
+    z = _as_quality_matrix(matrix_file) / 1_000_000
     x = np.arange(1, z.shape[0] + 1)
     y = np.arange(z.shape[1])
     X, Y = np.meshgrid(x, y)
@@ -140,7 +179,7 @@ def quality_3d_plot(matrix_file, xlab, ylab):
     return fig
 
 def quality_count_histogram(matrix_file, highest_score, xlab, ylab):
-    z = pd.read_csv(matrix_file, sep="\t", header=None).values
+    z = _as_quality_matrix(matrix_file)
     col = z.sum(axis=0)
     score_range = np.arange(col.shape[0])
 
@@ -170,16 +209,10 @@ def quality_count_histogram(matrix_file, highest_score, xlab, ylab):
 
 def combine_boxplots(fig1, fig2, fig1_annotation, fig2_annotation):
     combined = make_subplots(rows=1, cols=2)
-    # Copy shapes from each individual figure into the subplot
-    for shape in fig1['layout']['shapes']:
-        shape['xref'] = 'x1'
-        shape['yref'] = 'y1'
-        combined.add_shape(shape, row=1, col=1)
-
-    for shape in fig2['layout']['shapes']:
-        shape['xref'] = 'x2'
-        shape['yref'] = 'y2'
-        combined.add_shape(shape, row=1, col=2)
+    shapes = [
+        *[_subplot_shape(shape, "x1", "y1") for shape in fig1['layout']['shapes']],
+        *[_subplot_shape(shape, "x2", "y2") for shape in fig2['layout']['shapes']]
+    ]
 
     # Add invisible scatter traces to establish axes
     combined.add_trace(fig1['data'][0], row=1, col=1)
@@ -198,6 +231,7 @@ def combine_boxplots(fig1, fig2, fig1_annotation, fig2_annotation):
             dict(text=f"{fig1_annotation}", x=15, y=1.12, xref="x1", yref="paper", showarrow=False, align="left", font=dict(size=12)),
             dict(text=f"{fig2_annotation}", x=15, y=1.12, xref="x2", yref="paper", showarrow=False, align="left", font=dict(size=12))
         ],
+        shapes=shapes,
         showlegend=False
     )
     
