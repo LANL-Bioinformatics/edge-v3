@@ -4,7 +4,7 @@ process processProvidedContigs {
     label "processContigs"
     label "tiny"
     publishDir(
-        path: "${settings["processProvidedContigsOutDir"]}",
+        path: { settings["processProvidedContigsOutDir"] },
 	    mode: 'copy'
     )
 

@@ -6,7 +6,7 @@
 process hostRemoval {
     label "hostRemoval"
     publishDir(
-        path: "${settings["hostRemovalOutDir"]}",
+        path: { settings["hostRemovalOutDir"] },
         mode: 'copy'
     )
     
@@ -36,7 +36,7 @@ process hostRemoval {
     def prefix = "-prefix ${ref.name.take(ref.name.lastIndexOf('.'))}.clean "
     def similarity = settings["similarity"] != null ? "-similarity ${settings["similarity"]} " : ""
     def minScore = settings["bwaMemOptions"] != null ? "${settings["bwaMemOptions"]} " : "-T 50 "
-    ontFlag = ""
+    def ontFlag = ""
     if(platform != null) {
         if(platform.contains("NANOPORE")) {
             ontFlag = "-x ont2d "
@@ -46,7 +46,7 @@ process hostRemoval {
         }
     }
     minScore = ontFlag != "" ? "-T ${settings["minLen"]} " : minScore
-    bwaMemOptions = "-bwaMemOptions \"${ontFlag} ${minScore}\" "
+    def bwaMemOptions = "-bwaMemOptions \"${ontFlag} ${minScore}\" "
     
     """
     host_reads_removal_by_mapping.pl\
@@ -69,7 +69,7 @@ process hostRemoval {
 process collectCleanPairedReads {
     label "hostRemoval"
     publishDir(
-        path: "${settings["hostRemovalOutDir"]}",
+        path: { settings["hostRemovalOutDir"] },
         mode: 'copy'
     )
 
@@ -95,7 +95,7 @@ process collectCleanPairedReads {
 process collectCleanPairedReadsOneHost {
     label "hostRemoval"
     publishDir(
-        path: "${settings["hostRemovalOutDir"]}",
+        path: { settings["hostRemovalOutDir"] },
         mode: 'copy'
     )
 
@@ -117,7 +117,7 @@ process collectCleanPairedReadsOneHost {
 process collectCleanSingleReads {
     label "hostRemoval"
     publishDir(
-        path: "${settings["hostRemovalOutDir"]}",
+        path: { settings["hostRemovalOutDir"] },
         mode: 'copy'
     )
     
@@ -137,7 +137,7 @@ process collectCleanSingleReads {
 
 process hostRemovalStats {
     label "hostRemoval"
-    publishDir "${settings["hostRemovalOutDir"]}", mode: 'copy'
+    publishDir { settings["hostRemovalOutDir"] }, mode: 'copy'
 
     input:
     val settings

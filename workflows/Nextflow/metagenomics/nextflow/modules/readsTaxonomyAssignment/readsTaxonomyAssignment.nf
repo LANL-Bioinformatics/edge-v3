@@ -1,6 +1,4 @@
 #!/usr/bin/env nextflow
-import java.nio.file.Path
-import java.nio.file.Paths
 
 //main RTA process
 process readsTaxonomy {
@@ -8,26 +6,26 @@ process readsTaxonomy {
     label 'large'
 
     //bind in base database directory and any custom DBs
-    containerOptions "--compat --cleanenv \
+    containerOptions { "--compat --cleanenv \
                         --bind=${settings["baseDB"]}:/venv/bin/../../../database \
                         --bind=${settings["baseDB"]}:/venv/opt/krona/taxonomy \
-                        ${settings["custom_bwa_db"] != null ? "--bind=${Paths.get(settings["custom_bwa_db"].toString()).getParent()}:/bwa_custom" : ""} \
-                        ${settings["custom_metaphlan_db"] != null ? "--bind=${Paths.get(settings["custom_metaphlan_db"].toString())}:/metaphlan_custom" : ""} \
-                        ${settings["custom_kraken_db"] != null ? "--bind=${Paths.get(settings["custom_kraken_db"].toString())}:/kraken_custom" : ""} \
-                        ${settings["custom_centrifuge_db"] != null ? "--bind=${Paths.get(settings["custom_centrifuge_db"].toString()).getParent()}:/centrifuge_custom" : ""} \
-                        ${settings["custom_pangia_db"] != null ? "--bind=${Paths.get(settings["custom_pangia_db"].toString()).getParent()}:/pangia_custom" : ""} \
-                        ${settings["custom_diamond_db"] != null ? "--bind=${Paths.get(settings["custom_diamond_db"].toString()).getParent()}:/diamond_custom" : ""} \
-                        ${settings["custom_gottcha_speDB_v"] != null ? "--bind=${Paths.get(settings["custom_gottcha_speDB_v"].toString()).getParent()}:/gottcha_speDBv_custom" : ""} \
-                        ${settings["custom_gottcha_speDB_b"] != null ? "--bind=${Paths.get(settings["custom_gottcha_speDB_b"].toString()).getParent()}:/gottcha_speDBb_custom" : ""} \
-                        ${settings["custom_gottcha_strDB_v"] != null ? "--bind=${Paths.get(settings["custom_gottcha_strDB_v"].toString()).getParent()}:/gottcha_strDBv_custom" : ""} \
-                        ${settings["custom_gottcha_strDB_b"] != null ? "--bind=${Paths.get(settings["custom_gottcha_strDB_b"].toString()).getParent()}:/gottcha_strDBb_custom" : ""} \
-                        ${settings["custom_gottcha_genDB_v"] != null ? "--bind=${Paths.get(settings["custom_gottcha_genDB_v"].toString()).getParent()}:/gottcha_genDBv_custom" : ""} \
-                        ${settings["custom_gottcha_genDB_b"] != null ? "--bind=${Paths.get(settings["custom_gottcha_genDB_b"].toString()).getParent()}:/gottcha_genDBb_custom" : ""} \
-                        ${settings["custom_gottcha2_speDB_v"] != null ? "--bind=${Paths.get(settings["custom_gottcha2_speDB_v"].toString()).getParent()}:/gottcha2_speDBv_custom" : ""} \
-                        ${settings["custom_gottcha2_speDB_b"] != null ? "--bind=${Paths.get(settings["custom_gottcha2_speDB_b"].toString()).getParent()}:/gottcha2_speDBb_custom" : ""}"
+                        ${settings["custom_bwa_db"] != null ? "--bind=${java.nio.file.Paths.get(settings["custom_bwa_db"].toString()).getParent()}:/bwa_custom" : ""} \
+                        ${settings["custom_metaphlan_db"] != null ? "--bind=${java.nio.file.Paths.get(settings["custom_metaphlan_db"].toString())}:/metaphlan_custom" : ""} \
+                        ${settings["custom_kraken_db"] != null ? "--bind=${java.nio.file.Paths.get(settings["custom_kraken_db"].toString())}:/kraken_custom" : ""} \
+                        ${settings["custom_centrifuge_db"] != null ? "--bind=${java.nio.file.Paths.get(settings["custom_centrifuge_db"].toString()).getParent()}:/centrifuge_custom" : ""} \
+                        ${settings["custom_pangia_db"] != null ? "--bind=${java.nio.file.Paths.get(settings["custom_pangia_db"].toString()).getParent()}:/pangia_custom" : ""} \
+                        ${settings["custom_diamond_db"] != null ? "--bind=${java.nio.file.Paths.get(settings["custom_diamond_db"].toString()).getParent()}:/diamond_custom" : ""} \
+                        ${settings["custom_gottcha_speDB_v"] != null ? "--bind=${java.nio.file.Paths.get(settings["custom_gottcha_speDB_v"].toString()).getParent()}:/gottcha_speDBv_custom" : ""} \
+                        ${settings["custom_gottcha_speDB_b"] != null ? "--bind=${java.nio.file.Paths.get(settings["custom_gottcha_speDB_b"].toString()).getParent()}:/gottcha_speDBb_custom" : ""} \
+                        ${settings["custom_gottcha_strDB_v"] != null ? "--bind=${java.nio.file.Paths.get(settings["custom_gottcha_strDB_v"].toString()).getParent()}:/gottcha_strDBv_custom" : ""} \
+                        ${settings["custom_gottcha_strDB_b"] != null ? "--bind=${java.nio.file.Paths.get(settings["custom_gottcha_strDB_b"].toString()).getParent()}:/gottcha_strDBb_custom" : ""} \
+                        ${settings["custom_gottcha_genDB_v"] != null ? "--bind=${java.nio.file.Paths.get(settings["custom_gottcha_genDB_v"].toString()).getParent()}:/gottcha_genDBv_custom" : ""} \
+                        ${settings["custom_gottcha_genDB_b"] != null ? "--bind=${java.nio.file.Paths.get(settings["custom_gottcha_genDB_b"].toString()).getParent()}:/gottcha_genDBb_custom" : ""} \
+                        ${settings["custom_gottcha2_speDB_v"] != null ? "--bind=${java.nio.file.Paths.get(settings["custom_gottcha2_speDB_v"].toString()).getParent()}:/gottcha2_speDBv_custom" : ""} \
+                        ${settings["custom_gottcha2_speDB_b"] != null ? "--bind=${java.nio.file.Paths.get(settings["custom_gottcha2_speDB_b"].toString()).getParent()}:/gottcha2_speDBb_custom" : ""}" }
 
     publishDir(
-        path: "${settings["readsTaxonomyOutDir"]}",
+        path: { settings["readsTaxonomyOutDir"] },
 	mode: 'copy',
 	pattern: "{*.log,log**,report**}"
     )
@@ -66,9 +64,9 @@ process readsTaxonomyConfig {
     label 'rta'
     label 'small'
 
-    containerOptions "--compat --cleanenv \
+    containerOptions { "--compat --cleanenv \
                         --bind=${settings["baseDB"]}:/venv/bin/../../../database \
-                        --bind=${settings["baseDB"]}:/venv/opt/krona/taxonomy"
+                        --bind=${settings["baseDB"]}:/venv/opt/krona/taxonomy" }
 
     input:
     val settings
@@ -93,29 +91,29 @@ process readsTaxonomyConfig {
         bwaScoreCut = (avgLen as float)*0.8
     }
     bwaScoreCut = bwaScoreCut as Integer
-    tools = settings["enabledTools"] != null ? "-tools \'${settings["enabledTools"]}\' " : ""
-    splitTrimMinQ = settings["splitTrimMinQ"] != null ? "-splitrim-minq ${settings["splitTrimMinQ"]} " : ""
+    def tools = settings["enabledTools"] != null ? "-tools \'${settings["enabledTools"]}\' " : ""
+    def splitTrimMinQ = settings["splitTrimMinQ"] != null ? "-splitrim-minq ${settings["splitTrimMinQ"]} " : ""
 
-    base = settings["baseDB"] != null ? "-base-db /database" : ""
+    def base = settings["baseDB"] != null ? "-base-db /database" : ""
 
-    bwa = settings["custom_bwa_db"] != null ? "-bwa-db /bwa_custom/${Paths.get(settings["custom_bwa_db"].toString()).getFileName()} " : ""
-    metaphlan = settings["custom_metaphlan_db"] != null ? "-metaphlan-db /metaphlan_custom/${Paths.get(settings["custom_metaphlan_db"].toString()).getFileName()} " : ""
-    kraken = settings["custom_kraken_db"] != null ? "-kraken-db /kraken_custom/${Paths.get(settings["custom_kraken_db"].toString()).getFileName()} " : ""
-    centrifuge = settings["custom_centrifuge_db"] != null ? "-centrifuge-db /centrifuge_custom/${Paths.get(settings["custom_centrifuge_db"].toString()).getFileName()} " : ""
-    pangia = settings["custom_pangia_db"] != null ? "-pangia-db /pangia_custom/${Paths.get(settings["custom_pangia_db"].toString()).getFileName()} " : ""
-    diamond = settings["custom_diamond_db"] != null ? "-diamond-db /diamond_custom/${Paths.get(settings["custom_diamond_db"].toString()).getFileName()} " : ""
+    def bwa = settings["custom_bwa_db"] != null ? "-bwa-db /bwa_custom/${java.nio.file.Paths.get(settings["custom_bwa_db"].toString()).getFileName()} " : ""
+    def metaphlan = settings["custom_metaphlan_db"] != null ? "-metaphlan-db /metaphlan_custom/${java.nio.file.Paths.get(settings["custom_metaphlan_db"].toString()).getFileName()} " : ""
+    def kraken = settings["custom_kraken_db"] != null ? "-kraken-db /kraken_custom/${java.nio.file.Paths.get(settings["custom_kraken_db"].toString()).getFileName()} " : ""
+    def centrifuge = settings["custom_centrifuge_db"] != null ? "-centrifuge-db /centrifuge_custom/${java.nio.file.Paths.get(settings["custom_centrifuge_db"].toString()).getFileName()} " : ""
+    def pangia = settings["custom_pangia_db"] != null ? "-pangia-db /pangia_custom/${java.nio.file.Paths.get(settings["custom_pangia_db"].toString()).getFileName()} " : ""
+    def diamond = settings["custom_diamond_db"] != null ? "-diamond-db /diamond_custom/${java.nio.file.Paths.get(settings["custom_diamond_db"].toString()).getFileName()} " : ""
 
-    gottcha_speDB_v = settings["custom_gottcha_speDB_v"] != null ? "-gottcha-v-speDB /gottcha_speDBv_custom/${Paths.get(settings["custom_gottcha_speDB_v"].toString()).getFileName()} " : ""
-    gottcha_speDB_b = settings["custom_gottcha_speDB_b"] != null ? "-gottcha-b-speDB /gottcha_speDBb_custom/${Paths.get(settings["custom_gottcha_speDB_b"].toString()).getFileName()} " : ""
-    gottcha_strDB_v = settings["custom_gottcha_strDB_v"] != null ? "-gottcha-v-strDB /gottcha_strDBv_custom/${Paths.get(settings["custom_gottcha_strDB_v"].toString()).getFileName()} " : ""
-    gottcha_strDB_b = settings["custom_gottcha_strDB_b"] != null ? "-gottcha-b-strDB /gottcha_strDBb_custom/${Paths.get(settings["custom_gottcha_strDB_b"].toString()).getFileName()} " : ""
-    gottcha_genDB_v = settings["custom_gottcha_genDB_v"] != null ? "-gottcha-v-genDB /gottcha_genDBv_custom/${Paths.get(settings["custom_gottcha_genDB_v"].toString()).getFileName()} " : ""
-    gottcha_genDB_b = settings["custom_gottcha_genDB_b"] != null ? "-gottcha-b-genDB /gottcha_genDBb_custom/${Paths.get(settings["custom_gottcha_genDB_b"].toString()).getFileName()} " : ""
+    def gottcha_speDB_v = settings["custom_gottcha_speDB_v"] != null ? "-gottcha-v-speDB /gottcha_speDBv_custom/${java.nio.file.Paths.get(settings["custom_gottcha_speDB_v"].toString()).getFileName()} " : ""
+    def gottcha_speDB_b = settings["custom_gottcha_speDB_b"] != null ? "-gottcha-b-speDB /gottcha_speDBb_custom/${java.nio.file.Paths.get(settings["custom_gottcha_speDB_b"].toString()).getFileName()} " : ""
+    def gottcha_strDB_v = settings["custom_gottcha_strDB_v"] != null ? "-gottcha-v-strDB /gottcha_strDBv_custom/${java.nio.file.Paths.get(settings["custom_gottcha_strDB_v"].toString()).getFileName()} " : ""
+    def gottcha_strDB_b = settings["custom_gottcha_strDB_b"] != null ? "-gottcha-b-strDB /gottcha_strDBb_custom/${java.nio.file.Paths.get(settings["custom_gottcha_strDB_b"].toString()).getFileName()} " : ""
+    def gottcha_genDB_v = settings["custom_gottcha_genDB_v"] != null ? "-gottcha-v-genDB /gottcha_genDBv_custom/${java.nio.file.Paths.get(settings["custom_gottcha_genDB_v"].toString()).getFileName()} " : ""
+    def gottcha_genDB_b = settings["custom_gottcha_genDB_b"] != null ? "-gottcha-b-genDB /gottcha_genDBb_custom/${java.nio.file.Paths.get(settings["custom_gottcha_genDB_b"].toString()).getFileName()} " : ""
 
-    gottcha2_speDB_v = settings["custom_gottcha2_speDB_v"] != null ? "-gottcha2-v-speDB /gottcha2_speDBv_custom/${Paths.get(settings["custom_gottcha2_speDB_v"].toString()).getFileName()} " : ""
-    gottcha2_speDB_b = settings["custom_gottcha2_speDB_b"] != null ? "-gottcha2-b-speDB /gottcha2_speDBb_custom/${Paths.get(settings["custom_gottcha2_speDB_b"].toString()).getFileName()} " : ""
+    def gottcha2_speDB_v = settings["custom_gottcha2_speDB_v"] != null ? "-gottcha2-v-speDB /gottcha2_speDBv_custom/${java.nio.file.Paths.get(settings["custom_gottcha2_speDB_v"].toString()).getFileName()} " : ""
+    def gottcha2_speDB_b = settings["custom_gottcha2_speDB_b"] != null ? "-gottcha2-b-speDB /gottcha2_speDBb_custom/${java.nio.file.Paths.get(settings["custom_gottcha2_speDB_b"].toString()).getFileName()} " : ""
 
-    np = (platform != null && platform.contains("NANOPORE")) ? "--nanopore " : ""
+    def np = (platform != null && platform.contains("NANOPORE")) ? "--nanopore " : ""
 
     """
 

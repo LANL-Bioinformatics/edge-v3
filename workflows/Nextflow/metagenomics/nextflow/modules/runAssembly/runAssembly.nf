@@ -6,7 +6,7 @@ process idbaUD {
     label "assembly"
     label "small"
     publishDir (
-    path:"${settings["assemblyOutDir"]}",
+    path: { settings["assemblyOutDir"] },
     mode: 'copy',
     saveAs: {
         filename ->
@@ -36,7 +36,7 @@ process idbaUD {
     path "{contig-*,*contigs.fa,K*/final_contigs.fasta}", emit: intContigs
 
     script:
-    def avg_len = (avg_len as Float).trunc() as Integer
+    def avgLen = (avg_len as Float).trunc() as Integer
     def runFlag = ""
     if(short_paired.name != "NO_FILE" && short_single.name != "NO_FILE2") {
         runFlag = "-r $short_single --read_level_2 $short_paired "
@@ -50,15 +50,15 @@ process idbaUD {
     def longReadsFile = long_reads.name != "NO_FILE3" ? "-l $long_reads" : ""
     def maxK = 121
     def maxK_option = "--maxk $maxK "
-    if (settings["idba"]["maxK"] == null || settings["idba"]["maxK"] > avg_len) {
-        if(avg_len > 0 && avg_len <= 151) {
-            maxK = avg_len - 1
-            maxK_option = "--maxk ${avg_len - 1}"
+    if (settings["idba"]["maxK"] == null || settings["idba"]["maxK"] > avgLen) {
+        if(avgLen > 0 && avgLen <= 151) {
+            maxK = avgLen - 1
+            maxK_option = "--maxk ${avgLen - 1}"
         }
     }
-    minK = settings["idba"]["minK"] != null ? "--mink ${settings["idba"]["minK"]} " : ""
-    step = settings["idba"]["step"] != null ? "--step ${settings["idba"]["step"]} " : ""
-    minLen = settings["minContigSize"] != null ? "--min_contig ${settings["minContigSize"]} " : ""
+    def minK = settings["idba"]["minK"] != null ? "--mink ${settings["idba"]["minK"]} " : ""
+    def step = settings["idba"]["step"] != null ? "--step ${settings["idba"]["step"]} " : ""
+    def minLen = settings["minContigSize"] != null ? "--min_contig ${settings["minContigSize"]} " : ""
 
     """
     idba_ud --pre_correction -o . --num_threads ${task.cpus}\
@@ -130,7 +130,7 @@ process spades {
     label "small"
 
     publishDir (
-    path: "${settings["assemblyOutDir"]}", 
+    path: { settings["assemblyOutDir"] },
     mode: 'copy',
     saveAs: {
         filename ->
@@ -176,26 +176,26 @@ process spades {
 
 
     script:
-    def paired = paired.name != "NO_FILE" ? "--pe1-1 ${paired[0]} --pe1-2 ${paired[1]} " : ""
-    def unpaired = unpaired.name != "NO_FILE2" ? "--s1 $unpaired " : ""
+    def pairedArg = paired.name != "NO_FILE" ? "--pe1-1 ${paired[0]} --pe1-2 ${paired[1]} " : ""
+    def unpairedArg = unpaired.name != "NO_FILE2" ? "--s1 $unpaired " : ""
     def pacbio_file = pacbio.name != "NO_FILE3" ? "--pacbio $pacbio " : ""
     def nanopore_file = nanopore.name != "NO_FILE4" ? "--nanopore $nanopore " : ""
     if(settings["spades"]["algorithm"] == null){
         settings["spades"]["algorithm"] = ""
     }
-    meta_flag = (paired != "" && settings["spades"]["algorithm"].startsWith("meta")) ? "--meta " : ""
-    sc_flag = settings["spades"]["algorithm"].startsWith("MDA") ? "--sc " : ""
-    rna_flag = settings["spades"]["algorithm"].startsWith("rnaSPAdes") ? "--rna " : ""
-    plasmid_flag = settings["spades"]["algorithm"].startsWith("plasmid") ? "--plasmid " : ""
-    bio_flag = settings["spades"]["algorithm"].startsWith("biosynthetic") ? "--bio " : ""
-    corona_flag = settings["spades"]["algorithm"].startsWith("corona") ? "--corona " : ""
-    metaviral_flag = settings["spades"]["algorithm"].startsWith("metaviral") ? "--metaviral " : ""
-    metaplasmid_flag = settings["spades"]["algorithm"].startsWith("metaplasmid") ? "--metaplasmid " : ""
-    rnaviral_flag = settings["spades"]["algorithm"].startsWith("rnaviral") ? "--rnaviral " : ""
+    def meta_flag = (pairedArg != "" && settings["spades"]["algorithm"].startsWith("meta")) ? "--meta " : ""
+    def sc_flag = settings["spades"]["algorithm"].startsWith("MDA") ? "--sc " : ""
+    def rna_flag = settings["spades"]["algorithm"].startsWith("rnaSPAdes") ? "--rna " : ""
+    def plasmid_flag = settings["spades"]["algorithm"].startsWith("plasmid") ? "--plasmid " : ""
+    def bio_flag = settings["spades"]["algorithm"].startsWith("biosynthetic") ? "--bio " : ""
+    def corona_flag = settings["spades"]["algorithm"].startsWith("corona") ? "--corona " : ""
+    def metaviral_flag = settings["spades"]["algorithm"].startsWith("metaviral") ? "--metaviral " : ""
+    def metaplasmid_flag = settings["spades"]["algorithm"].startsWith("metaplasmid") ? "--metaplasmid " : ""
+    def rnaviral_flag = settings["spades"]["algorithm"].startsWith("rnaviral") ? "--rnaviral " : ""
 
     """
     spades.py -o . -t ${task.cpus}\
-    $paired\
+    $pairedArg\
     $meta_flag\
     $sc_flag\
     $rna_flag\
@@ -205,7 +205,7 @@ process spades {
     $metaviral_flag\
     $metaplasmid_flag\
     $rnaviral_flag\
-    $unpaired\
+    $unpairedArg\
     $pacbio_file\
     $nanopore_file\
     """
@@ -217,7 +217,7 @@ process megahit {
     label "small"
 
     publishDir(
-    path: "${settings["assemblyOutDir"]}", 
+    path: { settings["assemblyOutDir"] },
     mode: 'copy',
     saveAs: {
         filename ->
@@ -252,15 +252,15 @@ process megahit {
     path "megahit/{contig-*,*contigs.fa,K*/final_contigs.fasta}", emit: intContigs
 
     script:
-    def paired = paired.name != "NO_FILE" ? "-1 ${paired[0]} -2 ${paired[1]} " : ""
-    def unpaired = unpaired.name != "NO_FILE2" ? "-r $unpaired " : ""
+    def pairedArg = paired.name != "NO_FILE" ? "-1 ${paired[0]} -2 ${paired[1]} " : ""
+    def unpairedArg = unpaired.name != "NO_FILE2" ? "-r $unpaired " : ""
     def megahit_preset = settings["megahit"]["preset"] != null ? "--presets ${settings["megahit"]["preset"]} " : ""
 
     """
     megahit -o ./megahit -t ${task.cpus}\
     $megahit_preset\
-    $paired\
-    $unpaired\
+    $pairedArg\
+    $unpairedArg\
     2>&1
 
     LARGESTKMER=\$(head -n 1 megahit/final.contigs.fa | perl -ne '/^>k(\\d+)\\_/; print \$1;')
@@ -276,7 +276,7 @@ process unicycler {
     label "assembly"
     label "small"
     publishDir (
-        path: "${settings["assemblyOutDir"]}", 
+        path: { settings["assemblyOutDir"] },
         mode: 'copy',
         saveAs: {
         filename ->
@@ -312,8 +312,8 @@ process unicycler {
     //path "{contig-*,*contigs.fa,K*/final_contigs.fasta}", emit: intContigs | not produced by unicycler
 
     script:
-    def paired = paired.name != "NO_FILE" ? "-1 ${paired[0]} -2 ${paired[1]} " : ""
-    def unpaired = unpaired.name != "NO_FILE2" ? "-r $unpaired " : ""
+    def pairedArg = paired.name != "NO_FILE" ? "-1 ${paired[0]} -2 ${paired[1]} " : ""
+    def unpairedArg = unpaired.name != "NO_FILE2" ? "-r $unpaired " : ""
     def filt_lr = longreads.name != "NO_FILE3" ? "-l $longreads " : ""
     def bridge = settings["unicycler"]["bridgingMode"] != "normal" ? "--mode ${settings["unicycler"]["bridgingMode"]} " : "--mode normal"
 
@@ -321,7 +321,7 @@ process unicycler {
     export _JAVA_OPTIONS='-Xmx20G'; export TERM='xterm';
 
     unicycler -t ${task.cpus} -o .\
-    $paired\
+    $pairedArg\
     $filt_lr\
     $bridge 2>&1 1>/dev/null
     """
@@ -358,7 +358,7 @@ process lrasm {
     label "medium"
 
     publishDir (
-        path: "${settings["assemblyOutDir"]}", 
+        path: { settings["assemblyOutDir"] },
         mode: 'copy',
         saveAs: {
         filename ->
@@ -408,7 +408,7 @@ process lrasm {
 
     script:
     def consensus = settings["lrasm"]["numConsensus"] != null ? "-n ${settings["lrasm"]["numConsensus"]} ": ""
-    preset = ""
+    def preset = ""
     if(settings["lrasm"]["preset"] != null) {
         preset = settings["lrasm"]["preset"]
         if(preset.equalsIgnoreCase("pacbio")) {
@@ -429,7 +429,7 @@ process lrasm {
     }
     
     def errorCorrection = (settings["lrasm"]["ec"] != null && settings["lrasm"]["ec"]) ? "-e " : ""
-    algorithm = settings["lrasm"]["algorithm"] != null ? "-a ${settings["lrasm"]["algorithm"]} " : ""
+    def algorithm = settings["lrasm"]["algorithm"] != null ? "-a ${settings["lrasm"]["algorithm"]} " : ""
     algorithm = settings["lrasm"]["algorithm"] == "metaFlye" ? "-a flye" : algorithm
     def minLenOpt = ""
     if (settings["lrasm"]["algorithm"] == "miniasm") {
@@ -457,7 +457,7 @@ process renameFilterFasta {
     label "small"
 
     publishDir(
-        path: "${settings["assemblyOutDir"]}",
+        path: { settings["assemblyOutDir"] },
         mode: 'copy'
     )
     input:
@@ -494,11 +494,11 @@ process bestIncompleteAssembly {
     val x
     path intContigs
 
-    when:
-    x == 'EMPTY'
-
     output:
     path "bestIntContig/*"
+
+    when:
+    x == 'EMPTY'
 
     shell:
     '''
@@ -519,7 +519,7 @@ process assembly_vis {
     label "tiny"
 
     publishDir(
-        path: "${settings["assemblyOutDir"]}",
+        path: { settings["assemblyOutDir"] },
         mode: 'copy'
     )
 

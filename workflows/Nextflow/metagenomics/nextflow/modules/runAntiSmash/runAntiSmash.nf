@@ -3,9 +3,9 @@
 process antismash {
     label 'sma'
     label 'medium'
-    containerOptions "--bind ${settings["database"]}:/venv/database/antiSMASH"
+    containerOptions { "--bind ${settings["database"]}:/venv/database/antiSMASH" }
     publishDir(
-        path: "${settings["smaOutDir"]}",
+        path: { settings["smaOutDir"] },
         mode: 'copy'
     )
 

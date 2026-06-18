@@ -24,7 +24,7 @@ process phageFinder {
     label 'phageFinder'
     label 'small'
     publishDir(
-        path: "${settings["phageFinderOutDir"]}",
+        path: { settings["phageFinderOutDir"] },
         mode: 'copy',
         pattern: "log.txt"
     )
@@ -50,7 +50,7 @@ process summary {
     label 'phageFinder'
     label 'tiny'
     publishDir(
-        path: "${settings["phageFinderOutDir"]}",
+        path: { settings["phageFinderOutDir"] },
         mode: 'copy'
     )
 

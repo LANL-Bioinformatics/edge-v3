@@ -4,7 +4,7 @@ process validationAlignment {
     label 'r2c'
     label 'small'
     publishDir(
-        path: "${settings["assemblyOutDir"]}/readsMappingToContig",
+        path: { "${settings["assemblyOutDir"]}/readsMappingToContig" },
         mode: 'copy'
     )
     input:
@@ -26,8 +26,8 @@ process validationAlignment {
 
     script:
     def outPrefix = "readsToContigs"
-    def paired = paired.name != "NO_FILE" ? "-p \'${paired[0]} ${paired[1]}\' " : ""
-    def unpaired = unpaired.name != "NO_FILE2" ? "-u $unpaired " : ""
+    def pairedArg = paired.name != "NO_FILE" ? "-p \'${paired[0]} ${paired[1]}\' " : ""
+    def unpairedArg = unpaired.name != "NO_FILE2" ? "-u $unpaired " : ""
     def cutoff = settings["assembledContigs"] != "${projectDir}/nf_assets/NO_FILE3" ? "-c 0 " : "-c 0.1 "
     def max_clip = settings["r2gMaxClip"] != null ? "-max_clip ${settings["r2gMaxClip"]} " : ""
 
@@ -46,11 +46,11 @@ process validationAlignment {
     else if(settings["r2c_aligner"] =~ "bwa") {
         def bwa_options = settings["r2c_aligner_options"].replaceAll("-t\\s*\\d+","")
         if (ont_flag != "") {
-            unpaired = unpaired.replaceAll("-u ","-long ")
+            unpairedArg = unpairedArg.replaceAll("-u ","-long ")
             bwa_options += ont_flag
         }
         if (pb_flag != "") {
-            unpaired = unpaired.replaceAll("-u ","-long ")
+            unpairedArg = unpairedArg.replaceAll("-u ","-long ")
             bwa_options += pb_flag
         }
         aligner_options = "-aligner bwa -bwa_options \'$bwa_options\'"
@@ -58,7 +58,7 @@ process validationAlignment {
     else if (settings["r2c_aligner"] =~ "minimap") { 
         def minimap_options = settings["r2c_aligner_options"].replaceAll("-t\\s*\\d+","")
         if(ont_flag != "" || pb_flag != "") {
-            unpaired = unpaired.replaceAll("-u ","-long ")
+            unpairedArg = unpairedArg.replaceAll("-u ","-long ")
         }
         if(pb_flag != "") {
             minimap_options += " -x map-pb "
@@ -71,8 +71,8 @@ process validationAlignment {
     runReadsToContig.pl \
     $cutoff\
     -cpu ${task.cpus}\
-    $paired\
-    $unpaired\
+    $pairedArg\
+    $unpairedArg\
     -d . -pre $outPrefix\
     -ref $contigs \
     $max_clip\
@@ -88,12 +88,12 @@ process makeJSONcoverageTable {
     label 'r2c'
     label 'tiny'
     publishDir(
-        path: "${settings["assemblyOutDir"]}/readsMappingToContig",
+        path: { "${settings["assemblyOutDir"]}/readsMappingToContig" },
         mode: 'copy',
         pattern: "*_coverage.table.json"
     )
     publishDir(
-        path: "${settings["assemblyOutDir"]}",
+        path: { settings["assemblyOutDir"] },
         mode: 'copy',
         pattern: "*stats.{pdf,txt}"
     )
@@ -122,7 +122,7 @@ process extractUnmapped {
     label 'r2c'
     label 'small'
     publishDir(
-        path:"${settings["assemblyOutDir"]}/readsMappingToContig/",
+        path: { "${settings["assemblyOutDir"]}/readsMappingToContig/" },
         mode: 'copy',
         overwrite: true
     )
