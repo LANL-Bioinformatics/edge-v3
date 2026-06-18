@@ -27,7 +27,7 @@ process prokkaAnnotate {
     label 'small'
     containerOptions '--compat --bind \$PWD:/venv/bin/ec_info'
     publishDir(
-        path: "${settings["annotationOutDir"]}",
+        path: { settings["annotationOutDir"] },
         mode: 'copy'
     )
 
@@ -55,22 +55,22 @@ process prokkaAnnotate {
     path "*.hmm.*", optional:true
 
     script:
-    def kingdom = kingdom.trim()
-    def protein = protein.name == "NO_FILE" ? "" : "--protein ${settings["customProtein"]}"
+    def kingdomValue = kingdom.trim()
+    def proteinArg = protein.name == "NO_FILE" ? "" : "--protein ${settings["customProtein"]}"
     def hmmPrep = hmm.name == "NO_FILE2" ? "" : "hmmpress $hmm"
-    hmm = hmm.name == "NO_FILE2" ? "" : "--hmms $hmm"
+    def hmmArg = hmm.name == "NO_FILE2" ? "" : "--hmms $hmm"
     def evalue = settings["evalue"] == null ? "" : "--evalue ${settings["evalue"]}"
     def gcode = settings["gcode"] == null ? "" : "--gcode ${settings["gcode"]}"
     def locustag = settings["projName"] == null ? "" : "--locustag ${settings["projName"]}"
     def prefix = settings["projName"] == null ? "" : "--prefix ${settings["projName"]}"
-    def taxKingdom = kingdom.equalsIgnoreCase("metagenome") ? "--kingdom Bacteria --metagenome" : "--kingdom $kingdom"
+    def taxKingdom = kingdomValue.equalsIgnoreCase("metagenome") ? "--kingdom Bacteria --metagenome" : "--kingdom $kingdomValue"
 
     """
     $hmmPrep
 
     prokka --quiet --force \
-    $protein \
-    $hmm \
+    $proteinArg \
+    $hmmArg \
     $evalue \
     $gcode \
     $locustag \
@@ -90,7 +90,7 @@ process rattAnnotate {
     label 'small'
     containerOptions '--compat --bind \$PWD:/venv/bin/ec_info'
     publishDir(
-        path: "${settings["annotationOutDir"]}",
+        path: { settings["annotationOutDir"] },
         mode: 'copy'
     )
 
@@ -129,7 +129,7 @@ process annPlot {
     label 'tiny'
     containerOptions '--compat --bind \$PWD:/venv/bin/ec_info'
     publishDir(
-        path: "${settings["annotationOutDir"]}",
+        path: { settings["annotationOutDir"] },
         mode: 'copy'
     )
     
@@ -156,11 +156,11 @@ process keggPlots {
     label 'tiny'
     containerOptions '--compat --bind \$PWD:/venv/bin/ec_info'
     publishDir(
-        path: "${settings["annotationOutDir"]}",
+        path: { settings["annotationOutDir"] },
         mode: 'copy'
     )
     publishDir(
-        path: "${settings["keggViewerDir"]}/${settings["projectCode"]}",
+        path: { "${settings["keggViewerDir"]}/${settings["projectCode"]}" },
         pattern: "*.{json,txt,png,xml}",
 	mode: 'copy'
     )

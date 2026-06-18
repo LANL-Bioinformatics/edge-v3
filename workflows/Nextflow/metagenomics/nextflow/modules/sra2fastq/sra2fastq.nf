@@ -13,13 +13,13 @@ process sraDownload {
     label "sra2fastq"
     label "small"
     tag "$accession"
-    publishDir "${settings["sra2fastqOutDir"]}", mode: 'copy'
+    publishDir { settings["sra2fastqOutDir"] }, mode: 'copy'
     containerOptions "--no-home"
 
     //retries download in case of transient failure, then completes any downloads that didn't fail
 
     maxRetries 3
-    errorStrategy { (task.attempt <= maxRetries) ? 'retry' : 'finish' }
+    errorStrategy { (task.attempt <= 3) ? 'retry' : 'finish' }
 
     input: 
 

@@ -21,7 +21,7 @@ process qc {
     label "qc"
     label "small"
     publishDir(
-        path: "${settings["qcOutDir"]}",
+        path: { settings["qcOutDir"] },
         mode: 'copy'
     )
 
@@ -45,7 +45,7 @@ process qc {
 
     script:
     //adjust minLength
-    min = settings["minLen"]
+    def min = settings["minLen"]
     if(settings["minLen"] < 1) {
         min = Math.abs(settings["minLen"] * avgLen.toInteger())
     }
@@ -65,9 +65,9 @@ process qc {
         adapterArg = "--adapter --artifactFile $adapter"
     } 
 
-    filesforhtmlreport = settings["htmlreport"] ? "--debug" : ""
-    polyA = settings["trimPolyA"] ? "--polyA" : ""
-    phiX = settings["filtPhiX"] ? "--phiX" : ""
+    def filesforhtmlreport = settings["htmlreport"] ? "--debug" : ""
+    def polyA = settings["trimPolyA"] ? "--polyA" : ""
+    def phiX = settings["filtPhiX"] ? "--phiX" : ""
 
     def trim = ""
     if(platform != null && (platform.contains("PACBIO") || platform.contains("NANOPORE"))) {
@@ -93,7 +93,7 @@ process nanoplot {
     label "small"
 
     publishDir(
-        path: "${settings["qcOutDir"]}",
+        path: { settings["qcOutDir"] },
         mode: 'copy'
     )
     input:
@@ -119,7 +119,7 @@ process porechop {
     label "qc"
     label "small"
     publishDir(
-        path: "${settings["qcOutDir"]}",
+        path: { settings["qcOutDir"] },
         mode: 'copy'
     )
 
@@ -147,7 +147,7 @@ process jsonQCstats {
     label "tiny"
 
     publishDir(
-        path: "${settings["qcOutDir"]}",
+        path: { settings["qcOutDir"] },
         mode: 'copy'
     )
 

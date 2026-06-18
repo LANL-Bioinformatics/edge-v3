@@ -7,10 +7,10 @@ process antibioticResistanceReads {
     label 'gfa'
     label 'medium'
     
-    containerOptions "--bind=${settings["rgiDB"]}:/bin/RGI"
+    containerOptions { "--bind=${settings["rgiDB"]}:/bin/RGI" }
 
     publishDir(
-        path: "${settings["geneFamilyOutDir"]}/RGI",
+        path: { "${settings["geneFamilyOutDir"]}/RGI" },
         mode: 'copy'
     )
 
@@ -45,10 +45,10 @@ process antibioticResistanceContigs {
     label 'gfa'
     label 'medium'
 
-    containerOptions "--bind=${settings["rgiDB"]}:/bin/RGI"
+    containerOptions { "--bind=${settings["rgiDB"]}:/bin/RGI" }
 
     publishDir(
-        path: "${settings["geneFamilyOutDir"]}/RGI",
+        path: { "${settings["geneFamilyOutDir"]}/RGI" },
         mode: 'copy'
     )
 
@@ -78,7 +78,7 @@ process processRGIcontigResults {
     label 'small'
 
     publishDir(
-        path: "${settings["geneFamilyOutDir"]}/RGI",
+        path: { "${settings["geneFamilyOutDir"]}/RGI" },
         mode: 'copy'
     )
 
@@ -111,7 +111,7 @@ process virulenceFactorReads {
     containerOptions "--bind=\$PWD:/tmp"
 
     publishDir(
-        path: "${settings["geneFamilyOutDir"]}/VF_MetaVF_Toolkit",
+        path: { "${settings["geneFamilyOutDir"]}/VF_MetaVF_Toolkit" },
         mode: 'copy',
         saveAs: {
             f -> if(f.endsWith("VF_info.summary")) {"${settings["projName"]}.VF_info.summary"}
@@ -145,7 +145,7 @@ process virulenceFactorContigs {
     containerOptions "--bind=\$PWD:/tmp"
 
     publishDir(
-        path: "${settings["geneFamilyOutDir"]}/VF_MetaVF_Toolkit",
+        path: { "${settings["geneFamilyOutDir"]}/VF_MetaVF_Toolkit" },
         mode: 'copy',
         saveAs: {
             f -> if(f.endsWith("VF_info.summary")) {"${settings["projName"]}.VF_info.summary"}
@@ -178,10 +178,10 @@ process virulenceFactorPF2 {
     label 'gfa'
     label 'medium'
 
-    containerOptions "--bind=${settings["pf2DB"]}:/bin/PathoFact2 --bind=${settings["genomadDB"]}:/bin/genomad/genomad_db"
+    containerOptions { "--bind=${settings["pf2DB"]}:/bin/PathoFact2 --bind=${settings["genomadDB"]}:/bin/genomad/genomad_db" }
 
     publishDir(
-        path: "${settings["geneFamilyOutDir"]}/VF_PathoFact2",
+        path: { "${settings["geneFamilyOutDir"]}/VF_PathoFact2" },
         mode: 'copy'
     )
 

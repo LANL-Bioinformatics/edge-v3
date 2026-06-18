@@ -2,7 +2,7 @@ process runBinning {
     label 'binning'
     label 'small'
     publishDir(
-        path: "${settings["binningOutDir"]}",
+        path: { settings["binningOutDir"] },
         mode: 'copy'
     )
 
@@ -32,13 +32,11 @@ process runBinning {
 
 process checkM {
     label 'binning'
-    containerOptions "--bind=${settings["checkMdb"]}:/venv/checkM --env \"CHECKM_DATA_PATH=/venv/checkM\""
+    containerOptions { "--bind=${settings["checkMdb"]}:/venv/checkM --env \"CHECKM_DATA_PATH=/venv/checkM\"" }
     input:
     val settings
     path summary
     path binDir
-
-    output:
 
     script:
     """

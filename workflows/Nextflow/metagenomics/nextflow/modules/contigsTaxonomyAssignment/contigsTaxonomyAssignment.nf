@@ -6,10 +6,10 @@
 process contigTaxonomy {
     label 'cta'
     label 'medium'
-    containerOptions "--compat --cleanenv \
-                        --bind=${settings["miccrDB"]}:/venv/database/miccrDB"
+    containerOptions { "--compat --cleanenv \
+                        --bind=${settings["miccrDB"]}:/venv/database/miccrDB" }
     publishDir(
-        path: "${settings["contigsTaxonomyOutDir"]}",
+        path: { settings["contigsTaxonomyOutDir"] },
         mode: 'copy'
     )
 
@@ -36,10 +36,10 @@ process contigTaxonomy {
 process addLineage {
     label 'cta'
     label 'tiny'
-    containerOptions "--compat --cleanenv \
-                        --bind=${settings["miccrDB"]}:/venv/database/miccrDB"
+    containerOptions { "--compat --cleanenv \
+                        --bind=${settings["miccrDB"]}:/venv/database/miccrDB" }
     publishDir(
-        path: "${settings["contigsTaxonomyOutDir"]}",
+        path: { settings["contigsTaxonomyOutDir"] },
         mode: 'copy'
     )
     
@@ -63,7 +63,7 @@ process plotAndTable {
     label 'cta'
     label 'tiny'
     publishDir(
-        path: "${settings["contigsTaxonomyOutDir"]}",
+        path: { settings["contigsTaxonomyOutDir"] },
 	mode: 'copy'
     )
     input:

@@ -10,10 +10,10 @@ include {PHYLOSRA} from '../sra2fastq/sra2fastq.nf'
 process prepareSNPphylogeny {
     debug true
     label 'phyl'
-    containerOptions "--bind=${settings["snpDBbase"]}:/venv/bin/database"
+    containerOptions { "--bind=${settings["snpDBbase"]}:/venv/bin/database" }
 
     publishDir(
-        path: "${settings["phylogenyOutDir"]}",
+        path: { settings["phylogenyOutDir"] },
         mode: 'copy',
         saveAs: {
             filename ->
@@ -56,9 +56,9 @@ process prepareSNPphylogeny {
     def db = settings["snpDBname"] != null ? "-db ${settings["snpDBname"]}" : ""
     def genomeNames = settings["snpGenomes"].size() != 0 ? "-genomesList ${settings["snpGenomes"].join(",")}" : ""
     def genomeFiles = settings["snpGenomesFiles"].size() != 0 ? "-genomesFiles ${settings["snpGenomesFiles"].join(",")}" : ""
-    reference = settings["snpRefGenome"] != null ? "-reference ${settings["snpRefGenome"]}" : ""
+    def reference = settings["snpRefGenome"] != null ? "-reference ${settings["snpRefGenome"]}" : ""
     if(settings["snpRefGenome"] != null && settings["snpRefGenome"].equalsIgnoreCase("random")) {
-        randomOrderGenomes = settings["snpGenomesFiles"].plus(settings["snpGenomes"])
+        def randomOrderGenomes = settings["snpGenomesFiles"].plus(settings["snpGenomes"])
         randomOrderGenomes.shuffle()
         reference = "-reference ${randomOrderGenomes[0]}"
     }
@@ -98,7 +98,7 @@ process prepareXMLphylogeny {
     label 'phyl'
     
     publishDir(
-        path: "${settings["phylogenyOutDir"]}",
+        path: { settings["phylogenyOutDir"] },
         mode: 'copy',
         saveAs: {
             filename ->
@@ -138,7 +138,7 @@ process visualizePhylogenyHTML {
     label 'phyl'
 
     publishDir(
-        path: "${settings["phylogenyOutDir"]}",
+        path: { settings["phylogenyOutDir"] },
         mode: 'copy',
         saveAs: {
             filename ->

@@ -8,7 +8,7 @@ process referenceBasedPipeline {
     label "r2g"
     label "xlarge"
     publishDir(
-        path: "${settings["refBasedOutDir"]}",
+        path: { settings["refBasedOutDir"] },
         mode: 'copy'
     )
 
@@ -140,7 +140,7 @@ process retrieveUnmappedReads {
     label "small"
 
     publishDir(
-        path: "${settings["refBasedOutDir"]}",
+        path: { settings["refBasedOutDir"] },
         mode: 'copy'
     )
 
@@ -174,11 +174,11 @@ process mapUnmapped {
     label "medium"
     
     publishDir(
-        path: "${settings["refBasedOutDir"]}",
+        path: { settings["refBasedOutDir"] },
         mode: 'copy'
     )
 
-    containerOptions "--bind=${settings["refDB"].take(settings["refDB"].lastIndexOf('/'))}:/venv/database "
+    containerOptions { "--bind=${settings["refDB"].take(settings["refDB"].lastIndexOf('/'))}:/venv/database " }
     input:
     val settings
     path unmappedPaired
@@ -189,8 +189,6 @@ process mapUnmapped {
     when:
     !count.contains("Total Unmapped:0")
 
-    output:
-    
     script:
     def ontFlag = (platform != null && platform.contains("NANOPORE")) ?  "-x ont2d -T ${settings["minLen"] != null ? settings["minLen"] : 50} " : ""
     def pbFlag =  (platform != null && platform.contains("PACBIO")) ? "-x pacbio -T ${settings["minLen"] != null ? settings["minLen"] : 50} " : ""
@@ -219,7 +217,7 @@ process contigToGenome {
     label "medium"
 
     publishDir(
-        path: "${settings["refBasedOutDir"]}",
+        path: { settings["refBasedOutDir"] },
         mode: 'copy'
     )
 
@@ -228,13 +226,14 @@ process contigToGenome {
     path reference
     path contigs
 
-    when:
-    !contigs.name.endsWith("NO_FILE3")
-
     output:    
     path "*_query_novel_region_30bpUP.fasta", emit: unusedContig
     path "*.snps", emit: contigSNPindel
     path "*_ref_zero_cov_coord.txt", emit: contigGaps
+
+    when:
+    !contigs.name.endsWith("NO_FILE3")
+
     script:
     """
     nucmer_genome_coverage.pl -d -e 1 \
@@ -250,16 +249,15 @@ process mapContigs {
     label "cta"
     label "medium"
     publishDir(
-        path: "${settings["refBasedOutDir"]}",
+        path: { settings["refBasedOutDir"] },
         mode: 'copy'
     )
 
-    containerOptions "--bind=${settings["contigRefDB"]}:/venv/database "
+    containerOptions { "--bind=${settings["contigRefDB"]}:/venv/database " }
     input:
     val settings
     path contigs
 
-    output:
     script:
     """
     miccr.py -x asm10 -d /venv/database/NCBI-Bacteria-Virus.fna.mmi -t ${task.cpus} -p UnmappedContigs -i $contigs &>log.txt
@@ -274,7 +272,7 @@ process variantCalling {
     label "medium"
 
     publishDir(
-        path: "${settings["refBasedOutDir"]}",
+        path: { settings["refBasedOutDir"] },
         mode: 'copy'
     )
     
@@ -314,7 +312,7 @@ process variantCalling {
 process retrieveNCBIgenomes {
     label 'tiny'
     label 'r2g'
-    containerOptions "--bind=${settings["genomeLocation"]}:/venv/database "
+    containerOptions { "--bind=${settings["genomeLocation"]}:/venv/database " }
 
     input:
     val settings
