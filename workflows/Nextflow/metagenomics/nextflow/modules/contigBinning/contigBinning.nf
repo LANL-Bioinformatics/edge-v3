@@ -33,9 +33,18 @@ process runBinning {
 process checkM {
     label 'binning'
     containerOptions { "--bind=${settings["checkMdb"]}:/venv/checkM --env \"CHECKM_DATA_PATH=/venv/checkM\"" }
+    publishDir(
+        path: { settings["binningOutDir"] },
+        mode: 'copy'
+    )
+
     input:
     val settings
     path binDir
+
+    output:
+    path "CheckM_log.txt"
+    path "${settings["projName"]}_checkM.summary"
 
     script:
     """
