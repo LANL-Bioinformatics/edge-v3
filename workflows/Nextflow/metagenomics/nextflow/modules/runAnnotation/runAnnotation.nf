@@ -64,6 +64,8 @@ process prokkaAnnotate {
     def locustag = settings["projName"] == null ? "" : "--locustag ${settings["projName"]}"
     def prefix = settings["projName"] == null ? "" : "--prefix ${settings["projName"]}"
     def taxKingdom = kingdomValue.equalsIgnoreCase("metagenome") ? "--kingdom Bacteria --metagenome" : "--kingdom $kingdomValue"
+    def projLog = settings["projName"] == null ? "" : "${settings["projName"]}.log"
+    def appendProjLog = projLog == "" || projLog == "Annotation.log" ? "" : "cat ${projLog} >> Annotation.log"
 
     """
     $hmmPrep
@@ -80,7 +82,7 @@ process prokkaAnnotate {
     $taxKingdom \
     $contigs 2>>Annotation.log 
 
-    cat ${settings["projName"]}.log >> Annotation.log
+    $appendProjLog
     """
 }
 
