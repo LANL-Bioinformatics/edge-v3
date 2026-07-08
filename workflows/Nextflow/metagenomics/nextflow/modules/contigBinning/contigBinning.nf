@@ -35,7 +35,6 @@ process checkM {
     containerOptions { "--bind=${settings["checkMdb"]}:/venv/checkM --env \"CHECKM_DATA_PATH=/venv/checkM\"" }
     input:
     val settings
-    path summary
     path binDir
 
     script:
@@ -43,7 +42,7 @@ process checkM {
     checkm lineage_wf --tmpdir . -q --tab_table \
     -e 1e-10 \
     -l 0.7 \
-    -f $summary \
+    -f ${settings["projName"]}_checkM.summary \
     -t ${task.cpus} \
     -x fasta $binDir . 1>CheckM_log.txt 2>&1
     """
@@ -61,7 +60,7 @@ workflow BINNING {
     
     runBinning(settings, contigs, abundances)
     if(settings["doCheckM"]) {
-        checkM(settings, runBinning.out.binSummary, runBinning.out.binDir)
+        checkM(settings, runBinning.out.binDir)
     }
 
 }
