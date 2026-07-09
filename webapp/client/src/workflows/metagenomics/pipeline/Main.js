@@ -495,6 +495,7 @@ const Main = (props) => {
             onoff={true}
             collapseParms={true}
             paramsOn={true}
+            assemblyOn={selectedWorkflows['assembly'].paramsOn}
             disabled={
               selectedWorkflows['taxonomy'] ? selectedWorkflows['taxonomy'].disabled : false
             }

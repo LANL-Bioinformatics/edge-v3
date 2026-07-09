@@ -626,20 +626,26 @@ export const Taxonomy = (props) => {
                 <br></br>
               </>
             )}
-            <li style={{ fontWeight: 'normal' }}>Contig-based Taxonomy Classification</li>
-            <br></br>
-            <Switcher
-              id={'contigTax'}
-              name={'contigTax'}
-              setParams={setSwitcher}
-              text={workflows[workflowName].inputs['contigTax'].text}
-              tooltip={workflows[workflowName].inputs['contigTax'].tooltip}
-              defaultValue={workflows[workflowName].inputs['contigTax']['switcher'].defaultValue}
-              trueText={workflows[workflowName].inputs['contigTax']['switcher'].trueText}
-              falseText={workflows[workflowName].inputs['contigTax']['switcher'].falseText}
-              disableFalse={props.source === 'fasta' ? true : false}
-            />
-            <br></br>
+            {(props.source === 'fasta' || props.assemblyOn) && (
+              <>
+                <li style={{ fontWeight: 'normal' }}>Contig-based Taxonomy Classification</li>
+                <br></br>
+                <Switcher
+                  id={'contigTax'}
+                  name={'contigTax'}
+                  setParams={setSwitcher}
+                  text={workflows[workflowName].inputs['contigTax'].text}
+                  tooltip={workflows[workflowName].inputs['contigTax'].tooltip}
+                  defaultValue={
+                    workflows[workflowName].inputs['contigTax']['switcher'].defaultValue
+                  }
+                  trueText={workflows[workflowName].inputs['contigTax']['switcher'].trueText}
+                  falseText={workflows[workflowName].inputs['contigTax']['switcher'].falseText}
+                  disableFalse={props.source === 'fasta' ? true : false}
+                />
+                <br></br>
+              </>
+            )}
           </ol>
         </CardBody>
       </Collapse>
