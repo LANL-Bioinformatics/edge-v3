@@ -76,6 +76,14 @@ export const Taxonomy = (props) => {
     }
   }, [props.allClosed])
 
+  useEffect(() => {
+    if (props.source !== 'fasta' && !props.assemblyOn) {
+      //set contigTax to false if assembly is off
+      form.inputs['contigTax'].value = false
+      setDoValidation(doValidation + 1)
+    }
+  }, [props.source, props.assemblyOn]) // eslint-disable-line react-hooks/exhaustive-deps
+
   //trigger validation method when input changes
   useEffect(() => {
     // check input errors
