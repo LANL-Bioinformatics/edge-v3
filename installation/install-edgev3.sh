@@ -18,6 +18,8 @@ if [ ! -d  $io_home ]; then
     "sra"
     "db"
     "bulksubmissions"
+    "tmp"
+    "project_error_logs"
   )
 
   for dir in "${dirs[@]}"
