@@ -82,6 +82,12 @@ app.use(
   '/projects',
   express.static(config.IO.PROJECT_BASE_DIR, { dotfiles: 'allow' }),
 )
+if (process.env.PROJECT_ERROR_LOG_DIR_NAME) {
+  app.use(
+    `/${process.env.PROJECT_ERROR_LOG_DIR_NAME}`,
+    express.static(config.IO.PROJECT_ERROR_LOG_DIR, { dotfiles: 'allow' }),
+  )
+}
 app.use(
   '/bulksubmissions',
   express.static(config.IO.BULKSUBMISSION_BASE_DIR, { dotfiles: 'allow' }),

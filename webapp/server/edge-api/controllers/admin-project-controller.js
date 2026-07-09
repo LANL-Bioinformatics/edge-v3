@@ -1,3 +1,4 @@
+const fs = require('fs')
 const Project = require('../models/project')
 const {
   getProject,
@@ -30,8 +31,23 @@ const getOne = async (req, res) => {
         success: false,
       })
     }
+    // get error log if project is failed
+    let errorLog = null
+    if (project.status === 'failed') {
+      if (
+        fs.existsSync(`${config.IO.PROJECT_ERROR_LOG_DIR}/${project.code}.html`)
+      ) {
+        errorLog = `/${process.env.PROJECT_ERROR_LOG_DIR_NAME}/${project.code}.html`
+      } else if (
+        fs.existsSync(`${config.IO.PROJECT_ERROR_LOG_DIR}/${project.code}.log`)
+      ) {
+        errorLog = `/${process.env.PROJECT_ERROR_LOG_DIR_NAME}/${project.code}.log`
+      }
+    }
+
     return res.send({
       project,
+      errorLog,
       message: 'Action successful',
       success: true,
     })
