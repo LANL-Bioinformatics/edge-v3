@@ -9,13 +9,7 @@ const {
   generateWorkflowResult,
   zipProjectOutputs,
 } = require('../workflow/util')
-const {
-  write2log,
-  execCmd,
-  sleep,
-  pidIsRunning,
-  linkCopyFile,
-} = require('./common')
+const { write2log, execCmd, sleep, pidIsRunning } = require('./common')
 const logger = require('./logger')
 const config = require('../config')
 
@@ -154,9 +148,6 @@ const submitWorkflow = async (proj, projectConf, inputsize) => {
 const updateJobStatus = async (job, proj) => {
   // get job status
   const projHome = `${config.IO.PROJECT_BASE_DIR}/${proj.code}`
-  const nextflowlog = fs.existsSync(`${projHome}/nextflow/report.html`)
-    ? `${projHome}/nextflow/report.html`
-    : `${projHome}/nextflow/.nextflow.log`
   const nfWorkDir = config.NEXTFLOW.WORK_DIR
     ? `${config.NEXTFLOW.WORK_DIR}/${proj.code}/work`
     : `${projHome}/nextflow/work`
@@ -172,15 +163,6 @@ const updateJobStatus = async (job, proj) => {
       proj.status = 'failed'
       proj.save()
       write2log(`${projHome}/log.txt`, 'Nextflow job status: failed')
-      if (fs.existsSync(nextflowlog)) {
-        await linkCopyFile(
-          nextflowlog,
-          config.IO.PROJECT_ERROR_LOG_DIR,
-          'link',
-          false,
-          `${proj.code}.${fs.existsSync(`${projHome}/nextflow/report.html`) ? 'html' : 'log'}`,
-        )
-      }
     }
     // command failed
     return
@@ -198,15 +180,6 @@ const updateJobStatus = async (job, proj) => {
     proj.status = 'failed'
     proj.save()
     write2log(`${projHome}/log.txt`, 'Nextflow job status: failed')
-    if (fs.existsSync(nextflowlog)) {
-      await linkCopyFile(
-        nextflowlog,
-        config.IO.PROJECT_ERROR_LOG_DIR,
-        'link',
-        false,
-        `${proj.code}.${fs.existsSync(`${projHome}/nextflow/report.html`) ? 'html' : 'log'}`,
-      )
-    }
     return
   }
 
@@ -245,15 +218,6 @@ const updateJobStatus = async (job, proj) => {
     proj.status = status
     proj.save()
     write2log(`${projHome}/log.txt`, `Nextflow job status: ${newStatus}`)
-    if (newStatus === 'Failed' && fs.existsSync(nextflowlog)) {
-      await linkCopyFile(
-        nextflowlog,
-        config.IO.PROJECT_ERROR_LOG_DIR,
-        'link',
-        false,
-        `${proj.code}.${fs.existsSync(`${projHome}/nextflow/report.html`) ? 'html' : 'log'}`,
-      )
-    }
   }
   // update job even its status unchanged. We need set new updated time for this job.
   if (newStatus === 'Aborted') {

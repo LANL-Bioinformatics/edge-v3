@@ -82,10 +82,10 @@ app.use(
   '/projects',
   express.static(config.IO.PROJECT_BASE_DIR, { dotfiles: 'allow' }),
 )
-if (process.env.PROJECT_ERROR_LOG_DIR_NAME) {
+if (process.env.EXECUTION_REPORTS_API_PATH) {
   app.use(
-    `/${process.env.PROJECT_ERROR_LOG_DIR_NAME}`,
-    express.static(config.IO.PROJECT_ERROR_LOG_DIR, { dotfiles: 'allow' }),
+    `/${process.env.EXECUTION_REPORTS_API_PATH}`,
+    express.static(config.IO.EXECUTION_REPORTS, { dotfiles: 'allow' }),
   )
 }
 app.use(

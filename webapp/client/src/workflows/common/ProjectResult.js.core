@@ -196,18 +196,18 @@ const ProjectResult = (props) => {
               <Button type="button" size="sm" color="primary" onClick={viewLogFile}>
                 View Log
               </Button>
-              {project.errorLog && (
+              {project.report && (
                 <>
                   &nbsp;&nbsp;
                   <Button
                     type="button"
                     size="sm"
                     color="warning"
-                    href={project.errorLog}
+                    href={project.report}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    Workflow Error Report
+                    Execution Report
                   </Button>
                 </>
               )}
