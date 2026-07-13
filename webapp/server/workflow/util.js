@@ -34,6 +34,8 @@ const nextflowConfigs = {
 const workflowList = {
   sra2fastq: {
     outdir: 'output/sra2fastq',
+    report: 'nextflow/report.html',
+    log: 'nextflow/.nextflow.log',
     nextflow_main: process.env.NEXTFLOW_MAIN
       ? `${process.env.NEXTFLOW_MAIN} -profile local`
       : `${config.NEXTFLOW.WORKFLOW_DIR}/sra2fastq/nextflow/main.nf -profile local`,
@@ -62,6 +64,8 @@ const workflowList = {
   },
   binning: {
     outdir: 'output/Binning',
+    report: 'nextflow/report.html',
+    log: 'nextflow/.nextflow.log',
     nextflow_main: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/nextflow/main.nf`,
     config_tmpl: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/templates/workflow_config.tmpl`,
   },
