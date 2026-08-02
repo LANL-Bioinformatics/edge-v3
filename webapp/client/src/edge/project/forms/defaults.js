@@ -123,7 +123,7 @@ export const components = {
       validForm: false,
       errMessage: '',
       paired: true,
-      platform: 'illumina',
+      platform: 'Illumina',
       platform_display: 'Illumina',
       fileInput: [],
       fileInput_display: [],
