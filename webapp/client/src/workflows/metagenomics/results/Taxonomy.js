@@ -41,7 +41,7 @@ export const Taxonomy = (props) => {
   //create columns from data
   const summaryColumns = useMemo(
     () =>
-      summaryData.length
+      summaryData?.length
         ? Object.keys(summaryData[0]).map((columnId) => ({
             header: columnId,
             accessorKey: columnId,
@@ -72,7 +72,7 @@ export const Taxonomy = (props) => {
   //find selected tools option labels for display
   useEffect(() => {
     let options = []
-    const tools = Object.keys(props.result.tools)
+    const tools = Object.keys(props.result.tools || {})
     // get taxonomy classification options without default and filter to only include those with value in tools, then combine them into one array
     const { 'classification-tools-default': defaultOptions, ...taxOptions } =
       taxClassificationOptions
@@ -147,172 +147,92 @@ export const Taxonomy = (props) => {
       />
       <Collapse isOpen={!collapseCard}>
         <CardBody>
-          <Nav tabs>
-            {Object.keys(tabs).map((item, index) => (
-              <NavItem key={item + index}>
-                <NavLink
-                  style={{ cursor: 'pointer' }}
-                  active={activeTab === index}
-                  onClick={() => {
-                    toggleTab(index)
-                  }}
-                >
-                  {item}
-                </NavLink>
-              </NavItem>
-            ))}
-          </Nav>
-          <TabContent activeTab={activeTab}>
-            {Object.keys(tabs).map((item, index) => (
-              <TabPane key={index} tabId={index}>
-                <br></br>
-                {item === 'Summary' ? (
-                  <>
-                    <ButtonGroup className="mr-3" aria-label="First group" size="sm">
-                      <Button
-                        color="outline-primary"
-                        onClick={() => setTaxLevel('species')}
-                        active={taxLevel === 'species'}
-                      >
-                        Species
-                      </Button>
-                      <Button
-                        color="outline-primary"
-                        onClick={() => setTaxLevel('genus')}
-                        active={taxLevel === 'genus'}
-                      >
-                        Genus
-                      </Button>
-                      <Button
-                        color="outline-primary"
-                        onClick={() => setTaxLevel('strain')}
-                        active={taxLevel === 'strain'}
-                      >
-                        Strain
-                      </Button>
-                    </ButtonGroup>
-                    <br></br>
-                    <br></br>
-                    <ThemeProvider theme={theme}>
-                      <MaterialReactTable
-                        columns={summaryColumns}
-                        data={summaryData.filter((row) => row.LEVEL === taxLevel)}
-                        globalFilterFn="includesString" //turn off fuzzy matching and use simple includesString filter function
-                        enableColumnFilters={false} //turn off individual column filters
-                        enableFullScreenToggle={false}
-                        initialState={{
-                          density: 'compact',
-                          columnVisibility: {
-                            DATASET: false,
-                          },
-                          pagination: {
-                            pageSize: 5, // Set initial rows per page to 5
-                            pageIndex: 0, // Start on the first page
-                          },
-                        }}
-                        renderEmptyRowsFallback={() => (
-                          <center>
-                            <br></br>No result to display
-                          </center>
-                        )}
-                      />
-                    </ThemeProvider>
-                    <br></br>
-                    <br></br>
-                    <Row>
-                      <Col xs="12" md="3" lg="3">
-                        <span className="edge-text-bold">{`Heatmap at ${taxLevel} level`}</span>{' '}
-                        <a
-                          href={`${url}${props.result[taxLevel].heatmap}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="edge-link"
-                        >
-                          [full]
-                        </a>
-                        <br></br>
-                        <PdfViewer pdf={`${url}${props.result[taxLevel].heatmap}`} alt="heatmap" />
-                      </Col>
-                      <Col xs="12" md="1" lg="1"></Col>
-                      <Col xs="12" md="8" lg="8">
-                        <span className="edge-text-bold">{`Radar map at ${taxLevel} level`}</span>{' '}
-                        <a
-                          href={`${url}${props.result[taxLevel].radar}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="edge-link"
-                        >
-                          [full]
-                        </a>
-                        <br></br>
-                        <iframe
-                          key={'radar-' + taxLevel}
-                          className="edge-iframe"
-                          src={`${url}${props.result[taxLevel].radar}`}
-                          alt="radar"
-                        />
-                      </Col>
-                    </Row>
-                  </>
-                ) : item === 'Classification Tools' ? (
-                  <>
-                    <MySelect
-                      options={toolOptions}
-                      value={''}
-                      isMulti={true}
-                      placeholder={'Choose tools to display'}
-                      checkbox={true}
-                      closeMenuOnSelect={false}
-                      hideSelectedOptions={false}
-                      onChange={(selected) => {
-                        setToolToDisplay(selected)
+          {!props.result.summary ? (
+            <span className="red-text">
+              No result to display
+              <br></br>
+              <br></br>
+            </span>
+          ) : (
+            // Content for when there are results to display
+            <>
+              <Nav tabs>
+                {Object.keys(tabs).map((item, index) => (
+                  <NavItem key={item + index}>
+                    <NavLink
+                      style={{ cursor: 'pointer' }}
+                      active={activeTab === index}
+                      onClick={() => {
+                        toggleTab(index)
                       }}
-                    />
+                    >
+                      {item}
+                    </NavLink>
+                  </NavItem>
+                ))}
+              </Nav>
+              <TabContent activeTab={activeTab}>
+                {Object.keys(tabs).map((item, index) => (
+                  <TabPane key={index} tabId={index}>
                     <br></br>
-                    {toolToDisplay.map((tool) => (
-                      <div key={tool.value}>
-                        <span className="edge-text-bold">{tool.label}</span>
+                    {item === 'Summary' ? (
+                      <>
+                        <ButtonGroup className="mr-3" aria-label="First group" size="sm">
+                          <Button
+                            color="outline-primary"
+                            onClick={() => setTaxLevel('species')}
+                            active={taxLevel === 'species'}
+                          >
+                            Species
+                          </Button>
+                          <Button
+                            color="outline-primary"
+                            onClick={() => setTaxLevel('genus')}
+                            active={taxLevel === 'genus'}
+                          >
+                            Genus
+                          </Button>
+                          <Button
+                            color="outline-primary"
+                            onClick={() => setTaxLevel('strain')}
+                            active={taxLevel === 'strain'}
+                          >
+                            Strain
+                          </Button>
+                        </ButtonGroup>
                         <br></br>
-                        {props.result.tools[tool.value].table?.length > 0 ? (
-                          <>
-                            <ThemeProvider theme={theme}>
-                              <MaterialReactTable
-                                columns={toolTableColumns[tool.value]}
-                                data={
-                                  props.result.tools[tool.value].table
-                                    ? props.result.tools[tool.value].table
-                                    : []
-                                }
-                                globalFilterFn="includesString" //turn off fuzzy matching and use simple includesString filter function
-                                enableFullScreenToggle={false}
-                                initialState={{
-                                  density: 'compact',
-                                  pagination: {
-                                    pageSize: 5, // Set initial rows per page to 5
-                                    pageIndex: 0, // Start on the first page
-                                  },
-                                }}
-                                renderEmptyRowsFallback={() => (
-                                  <center>
-                                    <br></br>No result to display
-                                  </center>
-                                )}
-                              />
-                            </ThemeProvider>
-                            <br></br>
-                            <br></br>
-                          </>
-                        ) : (
-                          <span className="red-text">
-                            No table data available
-                            <br></br>
-                          </span>
-                        )}
-                        {props.result.tools[tool.value].tree ? (
-                          <>
-                            <span>Tree plot at species level </span>{' '}
+                        <br></br>
+                        <ThemeProvider theme={theme}>
+                          <MaterialReactTable
+                            columns={summaryColumns}
+                            data={summaryData.filter((row) => row.LEVEL === taxLevel)}
+                            globalFilterFn="includesString" //turn off fuzzy matching and use simple includesString filter function
+                            enableColumnFilters={false} //turn off individual column filters
+                            enableFullScreenToggle={false}
+                            initialState={{
+                              density: 'compact',
+                              columnVisibility: {
+                                DATASET: false,
+                              },
+                              pagination: {
+                                pageSize: 5, // Set initial rows per page to 5
+                                pageIndex: 0, // Start on the first page
+                              },
+                            }}
+                            renderEmptyRowsFallback={() => (
+                              <center>
+                                <br></br>No result to display
+                              </center>
+                            )}
+                          />
+                        </ThemeProvider>
+                        <br></br>
+                        <br></br>
+                        <Row>
+                          <Col xs="12" md="3" lg="3">
+                            <span className="edge-text-bold">{`Heatmap at ${taxLevel} level`}</span>{' '}
                             <a
-                              href={`${url}${props.result.tools[tool.value].tree}`}
+                              href={`${url}${props.result[taxLevel].heatmap}`}
                               target="_blank"
                               rel="noreferrer"
                               className="edge-link"
@@ -320,62 +240,156 @@ export const Taxonomy = (props) => {
                               [full]
                             </a>
                             <br></br>
-                            <img
-                              key={`tree-${tool.value}`}
-                              src={`${url}${props.result.tools[tool.value].tree}`}
-                              alt={`${tool.label} tree plot`}
-                              style={{ width: '100%', height: 'auto' }}
+                            <PdfViewer
+                              pdf={`${url}${props.result[taxLevel].heatmap}`}
+                              alt="heatmap"
                             />
-                            <br></br>
-                            <br></br>
-                          </>
-                        ) : (
-                          <span className="red-text">
-                            No tree plot available<br></br>
-                          </span>
-                        )}
-                        {props.result.tools[tool.value].krona ? (
-                          <>
-                            <span>Krona plot at species level </span>{' '}
+                          </Col>
+                          <Col xs="12" md="1" lg="1"></Col>
+                          <Col xs="12" md="8" lg="8">
+                            <span className="edge-text-bold">{`Radar map at ${taxLevel} level`}</span>{' '}
                             <a
-                              href={`${url}${props.result.tools[tool.value].krona}`}
+                              href={`${url}${props.result[taxLevel].radar}`}
                               target="_blank"
                               rel="noreferrer"
                               className="edge-link"
                             >
                               [full]
                             </a>
-                            <br></br>
                             <br></br>
                             <iframe
-                              key={`krona-${tool.value}`}
+                              key={'radar-' + taxLevel}
                               className="edge-iframe"
-                              src={`${url}${props.result.tools[tool.value].krona}`}
-                              alt={`${tool.label} krona plot`}
+                              src={`${url}${props.result[taxLevel].radar}`}
+                              alt="radar"
                             />
+                          </Col>
+                        </Row>
+                      </>
+                    ) : item === 'Classification Tools' ? (
+                      <>
+                        <MySelect
+                          options={toolOptions}
+                          value={''}
+                          isMulti={true}
+                          placeholder={'Choose tools to display'}
+                          checkbox={true}
+                          closeMenuOnSelect={false}
+                          hideSelectedOptions={false}
+                          onChange={(selected) => {
+                            setToolToDisplay(selected)
+                          }}
+                        />
+                        <br></br>
+                        {toolToDisplay.map((tool) => (
+                          <div key={tool.value}>
+                            <span className="edge-text-bold">{tool.label}</span>
                             <br></br>
-                            <br></br>
-                          </>
-                        ) : (
-                          <span className="red-text">
-                            No krona plot available<br></br>
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                  </>
-                ) : (
-                  <span className="red-text">
-                    No available
-                    <br></br>
-                    <br></br>
-                  </span>
-                )}
-              </TabPane>
-            ))}
-          </TabContent>
-          <br></br>
-          <br></br>
+                            {props.result.tools[tool.value].table?.length > 0 ? (
+                              <>
+                                <ThemeProvider theme={theme}>
+                                  <MaterialReactTable
+                                    columns={toolTableColumns[tool.value]}
+                                    data={
+                                      props.result.tools[tool.value].table
+                                        ? props.result.tools[tool.value].table
+                                        : []
+                                    }
+                                    globalFilterFn="includesString" //turn off fuzzy matching and use simple includesString filter function
+                                    enableFullScreenToggle={false}
+                                    initialState={{
+                                      density: 'compact',
+                                      pagination: {
+                                        pageSize: 5, // Set initial rows per page to 5
+                                        pageIndex: 0, // Start on the first page
+                                      },
+                                    }}
+                                    renderEmptyRowsFallback={() => (
+                                      <center>
+                                        <br></br>No result to display
+                                      </center>
+                                    )}
+                                  />
+                                </ThemeProvider>
+                                <br></br>
+                                <br></br>
+                              </>
+                            ) : (
+                              <span className="red-text">
+                                No table data available
+                                <br></br>
+                              </span>
+                            )}
+                            {props.result.tools[tool.value].tree ? (
+                              <>
+                                <span>Tree plot at species level </span>{' '}
+                                <a
+                                  href={`${url}${props.result.tools[tool.value].tree}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="edge-link"
+                                >
+                                  [full]
+                                </a>
+                                <br></br>
+                                <img
+                                  key={`tree-${tool.value}`}
+                                  src={`${url}${props.result.tools[tool.value].tree}`}
+                                  alt={`${tool.label} tree plot`}
+                                  style={{ width: '100%', height: 'auto' }}
+                                />
+                                <br></br>
+                                <br></br>
+                              </>
+                            ) : (
+                              <span className="red-text">
+                                No tree plot available<br></br>
+                              </span>
+                            )}
+                            {props.result.tools[tool.value].krona ? (
+                              <>
+                                <span>Krona plot at species level </span>{' '}
+                                <a
+                                  href={`${url}${props.result.tools[tool.value].krona}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="edge-link"
+                                >
+                                  [full]
+                                </a>
+                                <br></br>
+                                <br></br>
+                                <iframe
+                                  key={`krona-${tool.value}`}
+                                  className="edge-iframe"
+                                  src={`${url}${props.result.tools[tool.value].krona}`}
+                                  alt={`${tool.label} krona plot`}
+                                />
+                                <br></br>
+                                <br></br>
+                              </>
+                            ) : (
+                              <span className="red-text">
+                                No krona plot available<br></br>
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </>
+                    ) : (
+                      <span className="red-text">
+                        No available
+                        <br></br>
+                        <br></br>
+                      </span>
+                    )}
+                  </TabPane>
+                ))}
+              </TabContent>
+              <br></br>
+              <br></br>
+            </>
+          )}
         </CardBody>
       </Collapse>
     </Card>
