@@ -116,7 +116,15 @@ const config = {
   },
   NEXTFLOW: {
     EXECUTOR: process.env.NEXTFLOW_EXECUTOR || 'local',
-    SLURM_SSH: process.env.NEXTFLOW_SLURM_SSH || '',
+    RUNNER: {
+      API_BASE_URL:
+        process.env.NEXTFLOW_RUNNER_API_BASE_URL ||
+        'http://edgev3_nextflow:7001/v1',
+      API_TOKEN: process.env.NEXTFLOW_RUNNER_API_TOKEN || '',
+      API_TOKEN_FILE: process.env.NEXTFLOW_RUNNER_API_TOKEN_FILE || '',
+      API_TIMEOUT_MS:
+        makeIntIfDefined(process.env.NEXTFLOW_RUNNER_API_TIMEOUT_MS) || 10000,
+    },
     // Max allowed number of jobs in nextflow.
     NUM_JOBS_MAX: makeIntIfDefined(process.env.NEXTFLOW_NUM_JOBS_MAX) || 100000,
     // Total size of the input files allowed per job.

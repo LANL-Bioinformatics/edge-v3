@@ -1,4 +1,5 @@
 const fs = require('fs')
+const { randomUUID } = require('crypto')
 const ejs = require('ejs')
 const Papa = require('papaparse')
 const Job = require('../edge-api/models/job')
@@ -9,9 +10,21 @@ const {
   generateWorkflowResult,
   zipProjectOutputs,
 } = require('../workflow/util')
-const { write2log, execCmd, sleep, pidIsRunning } = require('./common')
+const { write2log } = require('./common')
+const { JobRunnerClient } = require('./jobRunnerClient')
+const {
+  getNextflowTaskStatus,
+  getRunnerJobStatus,
+} = require('./nextflowStatus')
 const logger = require('./logger')
 const config = require('../config')
+
+const runnerClient = new JobRunnerClient({
+  baseUrl: config.NEXTFLOW.RUNNER.API_BASE_URL,
+  token: config.NEXTFLOW.RUNNER.API_TOKEN,
+  tokenFile: config.NEXTFLOW.RUNNER.API_TOKEN_FILE,
+  timeoutMs: config.NEXTFLOW.RUNNER.API_TIMEOUT_MS,
+})
 
 const generateInputs = async (projHome, projectConf, proj) => {
   const workflowSettings = workflowList[projectConf.workflow.name]
@@ -43,34 +56,18 @@ const generateInputs = async (projHome, projectConf, proj) => {
   return true
 }
 
-const getJobStatus = statusStr => {
-  // parse output from 'nextflow log <run name> -f name,status
-  const lines = statusStr.split(/\n/)
-  let i = 0
-  const statuses = {}
-  // Use lastest status for retries
-  for (i = 0; i < lines.length; i += 1) {
-    const [name, status] = lines[i].trim().split('\t')
-    // skip empty line
-    if (name) {
-      statuses[name] = status
-    }
+const getHttpStatus = error => error.response && error.response.status
+
+const isPermanentClientError = error => {
+  const status = getHttpStatus(error)
+  return status >= 400 && status < 500 && ![408, 429].includes(status)
+}
+
+const getErrorMessage = error => {
+  if (error.response && error.response.data && error.response.data.error) {
+    return error.response.data.error
   }
-  let completeCnt = 0
-  // eslint-disable-next-line consistent-return
-  Object.keys(statuses).forEach(key => {
-    const status = statuses[key]
-    if (status === 'COMPLETED') {
-      completeCnt += 1
-    }
-    if (status === 'ABORTED') {
-      return 'Aborted'
-    }
-  })
-  if (completeCnt === Object.keys(statuses).length) {
-    return 'Succeeded'
-  }
-  return 'Failed'
+  return error.message || String(error)
 }
 
 const getJobMetadata = async proj => {
@@ -95,224 +92,201 @@ const generateRunStats = async project => {
   )
 }
 
-// submit workflow - launch nextflow run
+const getRunnerInput = (proj, projectConf, jobId) => {
+  const projHome = `${config.IO.PROJECT_BASE_DIR}/${proj.code}`
+  const nfWorkDir = config.NEXTFLOW.WORK_DIR
+    ? `${config.NEXTFLOW.WORK_DIR}/${proj.code}/work`
+    : `${projHome}/nextflow/work`
+  const nfOutDir = `${projHome}/nextflow`
+  const workflowSettings = workflowList[projectConf.workflow.name]
+  const input = {
+    configPath: `${projHome}/nextflow.config`,
+    workflowPath: workflowSettings.nextflow_main,
+    workDir: nfWorkDir,
+    nextflowLogPath: `${nfOutDir}/.nextflow.log`,
+    logPath: `${nfOutDir}/job-runner.log`,
+    donePath: `${nfOutDir}/.job-runner.done`,
+    runName: jobId,
+    executor: config.NEXTFLOW.EXECUTOR,
+  }
+  if (workflowSettings.nextflow_profile) {
+    input.profile = workflowSettings.nextflow_profile
+  }
+  return input
+}
+
+const submitRunnerJob = (job, proj, projectConf) =>
+  runnerClient.submit({
+    jobId: job.id,
+    projectId: proj.code,
+    input: getRunnerInput(proj, projectConf, job.id),
+  })
+
+const applySubmittedStatus = async (job, proj, runnerJob) => {
+  const status = getRunnerJobStatus(runnerJob.status)
+  if (!status) {
+    throw new Error(`Unknown Nextflow runner status '${runnerJob.status}'`)
+  }
+  if (status === 'Running') {
+    job.status = status
+    proj.status = 'running'
+  } else if (status === 'Submitted') {
+    job.status = status
+    proj.status = 'submitted'
+  }
+  // Keep a very fast terminal response pollable by the normal monitor, which
+  // also performs trace validation and result generation.
+  await Promise.all([job.save(), proj.save()])
+}
+
+// Persist a job handle before submission so an interrupted HTTP request can be
+// retried safely with the same idempotency key.
 const submitWorkflow = async (proj, projectConf, inputsize) => {
   const projHome = `${config.IO.PROJECT_BASE_DIR}/${proj.code}`
-  // Run nextflow in work directory
   const nfWorkDir = config.NEXTFLOW.WORK_DIR
     ? `${config.NEXTFLOW.WORK_DIR}/${proj.code}/work`
     : `${projHome}/nextflow/work`
   fs.mkdirSync(nfWorkDir, { recursive: true })
-  // in case nextflow needs permission to write to the directory
   fs.chmodSync(nfWorkDir, '777')
   if (!fs.existsSync(nfWorkDir)) {
     logger.error(`Error creating directory ${nfWorkDir}:`)
     proj.status = 'failed'
-    proj.save()
+    await proj.save()
     return
   }
-  // Output nextflow log, reports to <project home>/nextflow
   const nfOutDir = `${projHome}/nextflow`
   fs.mkdirSync(nfOutDir, { recursive: true })
-  // in case nextflow needs permission to write to the directory
   fs.chmodSync(nfOutDir, '777')
   if (!fs.existsSync(nfOutDir)) {
     logger.error(`Error creating directory ${nfOutDir}:`)
     proj.status = 'failed'
-    proj.save()
+    await proj.save()
     return
   }
-  // submit workflow
-  const runName = `edge-${proj.code}`
-  const cmd = `${config.NEXTFLOW.SLURM_SSH} NXF_CACHE_DIR=${nfWorkDir} NXF_PID_FILE=${nfOutDir}/.nextflow.pid NXF_LOG_FILE=${nfOutDir}/.nextflow.log nextflow -C ${nfOutDir}/../nextflow.config -bg -q run ${workflowList[projectConf.workflow.name].nextflow_main} -name ${runName}`
 
-  // Don't need to wait for the command to complete. It may take long time to finish and cause an error.
-  // The updateJobStatus will catch the error if this command failed.
-  execCmd(cmd)
-  await sleep(2000) // Wait for 2 seconds
+  const jobId = `edge-${randomUUID()}`
   const newJob = new Job({
-    id: runName,
+    id: jobId,
     project: proj.code,
     type: proj.type,
     inputSize: inputsize,
     queue: 'nextflow',
-    status: 'Running',
+    status: 'Submitted',
   })
-  newJob.save().catch(err => {
-    logger.error('falied to save to nextflowjob: ', err)
-  })
-  proj.status = 'running'
-  proj.save()
+  await newJob.save()
+  proj.status = 'submitted'
+  await proj.save()
+
+  try {
+    const runnerJob = await submitRunnerJob(newJob, proj, projectConf)
+    await applySubmittedStatus(newJob, proj, runnerJob)
+  } catch (error) {
+    const message = getErrorMessage(error)
+    write2log(`${projHome}/log.txt`, `Nextflow submission pending: ${message}`)
+    logger.error(`Nextflow runner submission failed: ${message}`)
+    // A definite client error cannot become successful on retry. Timeouts,
+    // rate limits, and server/network failures remain Submitted for recovery.
+    if (isPermanentClientError(error)) {
+      newJob.status = 'Failed'
+      proj.status = 'failed'
+      await Promise.all([newJob.save(), proj.save()])
+    }
+  }
 }
 
 const updateJobStatus = async (job, proj) => {
-  // get job status
   const projHome = `${config.IO.PROJECT_BASE_DIR}/${proj.code}`
-  const nfWorkDir = config.NEXTFLOW.WORK_DIR
-    ? `${config.NEXTFLOW.WORK_DIR}/${proj.code}/work`
-    : `${projHome}/nextflow/work`
-  // Pipeline status. Possible values are: OK, ERR and empty
-  // set env NXF_CACHE_DIR
-  let cmd = `${config.NEXTFLOW.SLURM_SSH} NXF_CACHE_DIR=${nfWorkDir} nextflow log|awk '/${job.id}/ &&(/OK/||/ERR/)'|awk '{split($0,array,/\t/); print array[4]}'`
-  let ret = await execCmd(cmd)
-
-  if (!ret || ret.code !== 0) {
-    if (ret.message.includes('execution history is empty')) {
-      job.status = 'Failed'
-      job.save()
-      proj.status = 'failed'
-      proj.save()
-      write2log(`${projHome}/log.txt`, 'Nextflow job status: failed')
+  let runnerJob
+  try {
+    runnerJob = await runnerClient.get(job.id)
+  } catch (error) {
+    if (getHttpStatus(error) === 404 && job.status === 'Submitted') {
+      const projectConf = JSON.parse(
+        fs.readFileSync(`${projHome}/conf.json`, 'utf8'),
+      )
+      try {
+        runnerJob = await submitRunnerJob(job, proj, projectConf)
+      } catch (submissionError) {
+        if (isPermanentClientError(submissionError)) {
+          const message = getErrorMessage(submissionError)
+          job.status = 'Failed'
+          proj.status = 'failed'
+          write2log(
+            `${projHome}/log.txt`,
+            `Nextflow submission failed: ${message}`,
+          )
+          await Promise.all([job.save(), proj.save()])
+          return
+        }
+        throw submissionError
+      }
+    } else {
+      throw error
     }
-    // command failed
-    return
-  }
-  // if empty, check pid
-  if (ret.message === '') {
-    // workflow is still running, update job updated datetime to move job to the end of job queue
-    job.updated = Date.now()
-    job.save()
-    return
-  }
-  if (ret.message.trim() === 'ERR') {
-    job.status = 'Failed'
-    job.save()
-    proj.status = 'failed'
-    proj.save()
-    write2log(`${projHome}/log.txt`, 'Nextflow job status: failed')
-    return
   }
 
-  // Task status. Possible values are: COMPLETED, FAILED, and ABORTED.
-  cmd = `${config.NEXTFLOW.SLURM_SSH} NXF_CACHE_DIR=${nfWorkDir} nextflow log ${job.id} -f name,status`
-  ret = await execCmd(cmd)
-  if (!ret || ret.code !== 0) {
-    // command failed
-    return
+  let newStatus = getRunnerJobStatus(runnerJob.status)
+  if (!newStatus) {
+    throw new Error(`Unknown Nextflow runner status '${runnerJob.status}'`)
   }
-  // find job status
-  const newStatus = getJobStatus(ret.message)
-  // update project status
-  if (job.status !== newStatus) {
-    let status = null
-    if (newStatus === 'Aborted') {
-      status = 'failed'
+  if (newStatus === 'Succeeded') {
+    newStatus = getNextflowTaskStatus(await getJobMetadata(proj))
+  }
+
+  const statusChanged = job.status !== newStatus
+  const previousProjectStatus = proj.status
+  if (statusChanged) {
+    if (newStatus === 'Submitted') {
+      proj.status = 'submitted'
+    } else if (newStatus === 'Running') {
+      proj.status = 'running'
     } else if (newStatus === 'Succeeded') {
-      // generate result.json
       logger.info('generate workflow result.json')
       try {
         generateWorkflowResult(proj)
-      } catch (e) {
-        job.status = newStatus
-        job.save()
-        // result not as expected
+        await zipProjectOutputs(proj)
+        proj.status = 'complete'
+      } catch (error) {
+        newStatus = 'Failed'
         proj.status = 'failed'
-        proj.save()
-        throw e
+        write2log(`${projHome}/log.txt`, `Result generation failed: ${error}`)
       }
-      await zipProjectOutputs(proj)
-      status = 'complete'
-    } else if (newStatus === 'Failed') {
-      status = 'failed'
+    } else {
+      proj.status = 'failed'
     }
-    proj.status = status
-    proj.save()
-    write2log(`${projHome}/log.txt`, `Nextflow job status: ${newStatus}`)
+    const detail = runnerJob.error ? `: ${runnerJob.error}` : ''
+    write2log(
+      `${projHome}/log.txt`,
+      `Nextflow job status: ${newStatus}${detail}`,
+    )
   }
-  // update job even its status unchanged. We need set new updated time for this job.
-  if (newStatus === 'Aborted') {
-    // delete job
-    Job.deleteOne({ project: proj.code }, err => {
-      if (err) {
-        logger.error(`Failed to delete job from DB ${proj.code}:${err}`)
-      }
-    })
-  } else {
-    job.status = newStatus
-    job.save()
-  }
+  job.status = newStatus
+  // Recover the project-side state if the cron process stopped after storing
+  // the handle but before updating the Project document.
+  if (newStatus === 'Submitted') proj.status = 'submitted'
+  if (newStatus === 'Running') proj.status = 'running'
+  await job.save()
+  if (proj.status !== previousProjectStatus) await proj.save()
 }
 
-const getPid = async proj => {
-  // To stop the running pipeline depends on the executor.
-  // If is local, find pid in .nextflow.pid and kill process and all descendant processes: pkill -TERM -P <pid>
-  // If is slurm, delete slurm job?
-  const pidFile = `${config.IO.PROJECT_BASE_DIR}/${proj.code}/nextflow/.nextflow.pid`
-  if (fs.existsSync(pidFile)) {
-    let all = fs.readFileSync(pidFile, 'utf8')
-    all = all.trim() // final crlf in file
-    const lines = all.split('\n')
-    if (lines[0]) {
-      return parseInt(lines[0], 10)
+const abortJob = async (proj, existingJob) => {
+  const job = existingJob || (await Job.findOne({ project: proj.code }))
+  if (!job) return
+  try {
+    await runnerClient.cancel(job.id)
+    job.status = 'Aborted'
+    await job.save()
+    write2log(
+      `${config.IO.PROJECT_BASE_DIR}/${proj.code}/log.txt`,
+      'Nextflow job aborted.',
+    )
+  } catch (error) {
+    if (getHttpStatus(error) === 404) {
+      job.status = 'Aborted'
+      await job.save()
+      return
     }
-  }
-  return null
-}
-
-const abortJobLocal = async proj => {
-  // To stop the running pipeline depends on the executor.
-  // If is local, find pid in .nextflow.pid and kill process and all descendant processes: pkill -TERM -P <pid>
-  // If is slurm, delete slurm job?
-  const pid = await getPid(proj)
-  if (pid && pidIsRunning(pid)) {
-    const cmd = `pkill -TERM -P ${pid}`
-    // Don't need to wait for the deletion, the process may already complete
-    execCmd(cmd)
-  }
-  // delete job
-  Job.deleteOne({ project: proj.code }, err => {
-    if (err) {
-      logger.error(`Failed to delete job from DB ${proj.code}:${err}`)
-    }
-  })
-}
-
-const abortJobSlurm = async proj => {
-  // To stop the running pipeline depends on the executor.
-  // If is local, find pid in .nextflow.pid and kill process and all descendant processes: pkill -TERM -P <pid>
-
-  const pid = await getPid(proj)
-  if (pid) {
-    const cmd = `${config.NEXTFLOW.SLURM_SSH} kill -9 ${pid}`
-    // Don't need to wait for the deletion, the process may already complete
-    execCmd(cmd)
-  }
-  // If is slurm, delete slurm job?
-  // get slurm jobId from .nextflow.log
-  const logFile = `${config.IO.PROJECT_BASE_DIR}/${proj.code}/nextflow/.nextflow.log`
-  const cmd = `grep 'Task submitter' ${logFile}|grep jobId|sed 's/.*jobId: //g'|sed 's/;.*//g'`
-  const ret = await execCmd(cmd)
-
-  if (!ret || ret.code !== 0) {
-    // command failed
-  }
-  // delet slurm job by id
-  // scancel <jobid>
-  const lines = ret.message.split(/\n/)
-  let i = 0
-  for (i = 0; i < lines.length; i += 1) {
-    const jobId = lines[i].trim()
-    // don't need to wait for the command to complete
-    logger.info(`Aborting slurm job ${jobId} for project ${proj.code}`)
-    if (jobId) {
-      execCmd(`${config.NEXTFLOW.SLURM_SSH} scancel ${jobId}`)
-    }
-  }
-  // delete edge job
-  Job.deleteOne({ project: proj.code }, err => {
-    if (err) {
-      logger.error(`Failed to delete job from DB ${proj.code}:${err}`)
-    }
-  })
-}
-
-const abortJob = async proj => {
-  if (config.NEXTFLOW.EXECUTOR === 'local') {
-    await abortJobLocal(proj)
-  } else if (config.NEXTFLOW.EXECUTOR === 'slurm') {
-    await abortJobSlurm(proj)
-  } else {
-    throw Error(`Unsupported nextflow executor '${config.NEXTFLOW.EXECUTOR}'`)
+    throw error
   }
 }
 

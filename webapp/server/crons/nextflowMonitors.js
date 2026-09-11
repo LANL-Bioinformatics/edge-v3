@@ -88,7 +88,7 @@ const nextflowWorkflowMonitor = async () => {
         `[${now.toLocaleString()}] Submit workflow to nextflow`,
       )
       logger.info('Submit workflow to nextflow')
-      submitWorkflow(proj, projectConf, inputsize)
+      await submitWorkflow(proj, projectConf, inputsize)
       logger.info('Done workflow submission')
     } catch (err) {
       // fail project
@@ -120,17 +120,14 @@ const nextflowJobMonitor = async () => {
     if (proj) {
       if (proj.status === 'delete') {
         // abort job
-        abortJob(proj, job)
+        await abortJob(proj, job)
       } else {
         await updateJobStatus(job, proj)
       }
     } else {
-      // delete from database
-      Job.deleteOne({ project: job.project }, err => {
-        if (err) {
-          logger.error(`Failed to delete job from DB ${job.project}:${err}`)
-        }
-      })
+      // Cancel the remote execution before forgetting its durable handle.
+      await abortJob({ code: job.project }, job)
+      await Job.deleteOne({ project: job.project })
     }
   } catch (err) {
     logger.error(`nextflowJobMonitor failed:${err}`)
