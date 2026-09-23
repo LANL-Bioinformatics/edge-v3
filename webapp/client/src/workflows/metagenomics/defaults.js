@@ -428,7 +428,6 @@ export const workflows = {
           value: 'meta',
           display: 'meta',
           options: [
-            { value: 'meta', label: 'meta' },
             { value: 'meta-sensitive', label: 'meta-sensitive' },
             { value: 'meta-large', label: 'meta-large' },
           ],
