@@ -21,7 +21,7 @@ process readsTaxonomy {
                         ${settings["custom_gottcha_strDB_b"] != null ? "--bind=${java.nio.file.Paths.get(settings["custom_gottcha_strDB_b"].toString()).getParent()}:/gottcha_strDBb_custom" : ""} \
                         ${settings["custom_gottcha_genDB_v"] != null ? "--bind=${java.nio.file.Paths.get(settings["custom_gottcha_genDB_v"].toString()).getParent()}:/gottcha_genDBv_custom" : ""} \
                         ${settings["custom_gottcha_genDB_b"] != null ? "--bind=${java.nio.file.Paths.get(settings["custom_gottcha_genDB_b"].toString()).getParent()}:/gottcha_genDBb_custom" : ""} \
-                        ${settings["custom_gottcha2"] != null ? "--bind=${java.nio.file.Paths.get(settings["custom_gottcha2"].toString()).getParent()}:/gottcha2_custom" : ""} \
+                        ${settings["custom_gottcha2"] != null ? "--bind=${java.nio.file.Paths.get(settings["custom_gottcha2"].toString()).getParent()}:/gottcha2_custom" : ""}" }
 
     publishDir(
         path: { settings["readsTaxonomyOutDir"] },

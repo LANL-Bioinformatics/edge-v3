@@ -22,7 +22,7 @@ GetOptions( \%opt,
             'metaphlan2=s',
             'pangia=s',
             'diamond=s',
-	    	'centrifuge=s',
+            'centrifuge=s',
             'taxfile=s',
             'help|?' 
 );

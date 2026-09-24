@@ -17,10 +17,6 @@ ARGUMENTS:
 
 OPTIONS:
    -t      Number of threads. [default is 4]
-   -a      minimap2 options
-   -q      minQ: minimum quality of any single base [default is 20]
-   -f      fixL: chunk all fragments of reads into smaller fragments of length [default is 30]
-   -m      minL (*** disabled, don't use ***)
    -s      The FULL PATH and prefix of pre-splitrimmed sequences and stats file.
    -h      help
 EOF
@@ -64,18 +60,6 @@ do
             shift 2
             ;;
         -t) THREADS=$2
-            shift 2
-            ;;
-        -a) BWAMETHOD=$2
-            shift 2
-            ;;
-        -q) TRIM_MINQ=$2
-            shift 2
-            ;;
-        -f) TRIM_FIXL=$2
-            shift 2
-            ;;
-        -m) TRIM_MINL=$2
             shift 2
             ;;
         -s) PRE_SPLITRIM=$2
