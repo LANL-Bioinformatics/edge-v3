@@ -21,8 +21,7 @@ process readsTaxonomy {
                         ${settings["custom_gottcha_strDB_b"] != null ? "--bind=${java.nio.file.Paths.get(settings["custom_gottcha_strDB_b"].toString()).getParent()}:/gottcha_strDBb_custom" : ""} \
                         ${settings["custom_gottcha_genDB_v"] != null ? "--bind=${java.nio.file.Paths.get(settings["custom_gottcha_genDB_v"].toString()).getParent()}:/gottcha_genDBv_custom" : ""} \
                         ${settings["custom_gottcha_genDB_b"] != null ? "--bind=${java.nio.file.Paths.get(settings["custom_gottcha_genDB_b"].toString()).getParent()}:/gottcha_genDBb_custom" : ""} \
-                        ${settings["custom_gottcha2_speDB_v"] != null ? "--bind=${java.nio.file.Paths.get(settings["custom_gottcha2_speDB_v"].toString()).getParent()}:/gottcha2_speDBv_custom" : ""} \
-                        ${settings["custom_gottcha2_speDB_b"] != null ? "--bind=${java.nio.file.Paths.get(settings["custom_gottcha2_speDB_b"].toString()).getParent()}:/gottcha2_speDBb_custom" : ""}" }
+                        ${settings["custom_gottcha2"] != null ? "--bind=${java.nio.file.Paths.get(settings["custom_gottcha2"].toString()).getParent()}:/gottcha2_custom" : ""} \
 
     publishDir(
         path: { settings["readsTaxonomyOutDir"] },
@@ -110,8 +109,7 @@ process readsTaxonomyConfig {
     def gottcha_genDB_v = settings["custom_gottcha_genDB_v"] != null ? "-gottcha-v-genDB /gottcha_genDBv_custom/${java.nio.file.Paths.get(settings["custom_gottcha_genDB_v"].toString()).getFileName()} " : ""
     def gottcha_genDB_b = settings["custom_gottcha_genDB_b"] != null ? "-gottcha-b-genDB /gottcha_genDBb_custom/${java.nio.file.Paths.get(settings["custom_gottcha_genDB_b"].toString()).getFileName()} " : ""
 
-    def gottcha2_speDB_v = settings["custom_gottcha2_speDB_v"] != null ? "-gottcha2-v-speDB /gottcha2_speDBv_custom/${java.nio.file.Paths.get(settings["custom_gottcha2_speDB_v"].toString()).getFileName()} " : ""
-    def gottcha2_speDB_b = settings["custom_gottcha2_speDB_b"] != null ? "-gottcha2-b-speDB /gottcha2_speDBb_custom/${java.nio.file.Paths.get(settings["custom_gottcha2_speDB_b"].toString()).getFileName()} " : ""
+    def gottcha2 = settings["custom_gottcha2"] != null ? "-gottcha2-db /gottcha2_custom/${java.nio.file.Paths.get(settings["custom_gottcha2"].toString()).getFileName()} " : ""
 
     def np = (platform != null && platform.contains("NANOPORE")) ? "--nanopore " : ""
 
@@ -139,8 +137,7 @@ process readsTaxonomyConfig {
     $gottcha_strDB_b\
     $gottcha_genDB_v\
     $gottcha_genDB_b\
-    $gottcha2_speDB_v\
-    $gottcha2_speDB_b\
+    $gottcha2\
     $np >microbial_profiling.settings.ini 2>error.log
     """
 
