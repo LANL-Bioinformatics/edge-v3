@@ -27,10 +27,7 @@ my $data;
 my $tools;
 my $filters;
 my %tool_order=(
-	'gottcha2-genDB-v' => 1,
-	'gottcha2-speDB-v' => 2,
-	'gottcha2-strDB-v' => 3,
-	'gottcha2-speDB-b' => 4,
+	'gottcha2'         => 4,
 	'gottcha-genDB-v'  => 5,
 	'gottcha-speDB-v'  => 6,
 	'gottcha-strDB-v'  => 7,
