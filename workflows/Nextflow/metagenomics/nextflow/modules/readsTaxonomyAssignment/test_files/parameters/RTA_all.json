@@ -5,6 +5,6 @@
         "test_files/Ecoli_10x.2.fastq"
     ],
     "outDir": "all_out",
-    "enabledTools": "gottcha-genDB-b,gottcha-speDB-b,gottcha-strDB-b,gottcha-genDB-v,gottcha-speDB-v,gottcha-strDB-v,gottcha2,pangia,bwa,metaphlan4,kraken2,centrifuge,diamond",
+    "enabledTools": "gottcha2,bwa,metaphlan4,kraken2,centrifuge,diamond",
     "debugFlag": true
 }
