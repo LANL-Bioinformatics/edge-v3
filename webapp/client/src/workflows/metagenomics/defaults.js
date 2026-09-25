@@ -13,18 +13,7 @@ export const workflowOptions = [
 ]
 
 export const taxClassificationOptions = {
-  'GOTTCHA-Bacterial-Databases': [
-    { value: 'gottcha-genDB-b', label: 'GOTTCHA Genus (Bacterial DB)' },
-    { value: 'gottcha-speDB-b', label: 'GOTTCHA Species (Bacterial DB)' },
-    { value: 'gottcha-strDB-b', label: 'GOTTCHA Strain (Bacterial DB)' },
-  ],
-  'GOTTCHA-Viral-Databases': [
-    { value: 'gottcha-genDB-v', label: 'GOTTCHA Genus (Viral DB)' },
-    { value: 'gottcha-speDB-v', label: 'GOTTCHA Species (Viral DB)' },
-    { value: 'gottcha-strDB-v', label: 'GOTTCHA Strain (Viral DB)' },
-  ],
-  'GOTTCHA2-BacteriaViruses-Databases': [{ value: 'gottcha2-speDB-b', label: 'GOTTCHA2 Species' }],
-  'PanGIA-Databases': [{ value: 'pangia', label: 'PanGIA NCBI Refseq89' }],
+  GOTTCHA2: [{ value: 'gottcha2', label: 'GOTTCHA2' }],
   'Reads-Mapping': [{ value: 'bwa', label: 'Reads Mapping (BWA against RefSeq)' }],
   'Other-Tools': [
     { value: 'metaphlan4', label: 'MetaPhlAn4' },
@@ -33,10 +22,7 @@ export const taxClassificationOptions = {
     { value: 'diamond', label: 'DIAMOND (Amino acid-based classification)' },
   ],
   'classification-tools-default': [
-    { value: 'gottcha-speDB-b', label: 'GOTTCHA Species (Bacterial DB)' },
-    { value: 'gottcha-speDB-v', label: 'GOTTCHA Species (Viral DB)' },
-    { value: 'gottcha2-speDB-b', label: 'GOTTCHA2 Species' },
-    { value: 'pangia', label: 'PanGIA NCBI Refseq89' },
+    { value: 'gottcha2', label: 'GOTTCHA2' },
     { value: 'metaphlan4', label: 'MetaPhlAn4' },
     { value: 'kraken2', label: 'Kraken2' },
     { value: 'centrifuge', label: 'Centrifuge' },
@@ -1049,20 +1035,8 @@ export const workflows = {
           .join(', '),
         toolGroup: [
           {
-            label: 'GOTTCHA Bacterial Databases',
-            options: taxClassificationOptions['GOTTCHA-Bacterial-Databases'],
-          },
-          {
-            label: 'GOTTCHA Viral Databases',
-            options: taxClassificationOptions['GOTTCHA-Viral-Databases'],
-          },
-          {
-            label: 'GOTTCHA2 BacteriaViruses Databases',
-            options: taxClassificationOptions['GOTTCHA2-BacteriaViruses-Databases'],
-          },
-          {
-            label: 'PanGIA Databases',
-            options: taxClassificationOptions['PanGIA-Databases'],
+            label: 'GOTTCHA2',
+            options: taxClassificationOptions['GOTTCHA2'],
           },
           {
             label: 'Reads Mapping',
@@ -1085,92 +1059,8 @@ export const workflows = {
           step: 1,
         },
       },
-      custom_gottcha_genDB_b: {
-        text: 'CUSTOM GOTTCHA-genDB-b',
-        value: null,
-        display: null,
-        fileInput: {
-          enableInput: true,
-          placeholder: '(Optional) Select a file or enter a file http(s) url',
-          dataSources: ['upload', 'public'],
-          fileTypes: ['fasta', 'fa', 'fna', 'contigs'],
-          viewFile: false,
-          isOptional: true,
-          cleanupInput: true,
-        },
-      },
-      custom_gottcha_speDB_b: {
-        text: 'CUSTOM GOTTCHA-speDB-b',
-        value: null,
-        display: null,
-        fileInput: {
-          enableInput: true,
-          placeholder: '(Optional) Select a file or enter a file http(s) url',
-          dataSources: ['upload', 'public'],
-          fileTypes: ['fasta', 'fa', 'fna', 'contigs'],
-          viewFile: false,
-          isOptional: true,
-          cleanupInput: true,
-        },
-      },
-      custom_gottcha_strDB_b: {
-        text: 'CUSTOM GOTTCHA-strDB-b',
-        value: null,
-        display: null,
-        fileInput: {
-          enableInput: true,
-          placeholder: '(Optional) Select a file or enter a file http(s) url',
-          dataSources: ['upload', 'public'],
-          fileTypes: ['fasta', 'fa', 'fna', 'contigs'],
-          viewFile: false,
-          isOptional: true,
-          cleanupInput: true,
-        },
-      },
-      custom_gottcha_genDB_v: {
-        text: 'CUSTOM GOTTCHA-genDB-v',
-        value: null,
-        display: null,
-        fileInput: {
-          enableInput: true,
-          placeholder: '(Optional) Select a file or enter a file http(s) url',
-          dataSources: ['upload', 'public'],
-          fileTypes: ['fasta', 'fa', 'fna', 'contigs'],
-          viewFile: false,
-          isOptional: true,
-          cleanupInput: true,
-        },
-      },
-      custom_gottcha_speDB_v: {
-        text: 'CUSTOM GOTTCHA-speDB-v',
-        value: null,
-        display: null,
-        fileInput: {
-          enableInput: true,
-          placeholder: '(Optional) Select a file or enter a file http(s) url',
-          dataSources: ['upload', 'public'],
-          fileTypes: ['fasta', 'fa', 'fna', 'contigs'],
-          viewFile: false,
-          isOptional: true,
-          cleanupInput: true,
-        },
-      },
-      custom_gottcha_strDB_v: {
-        text: 'CUSTOM GOTTCHA-strDB-v',
-        value: null,
-        display: null,
-        fileInput: {
-          enableInput: true,
-          placeholder: '(Optional) Select a file or enter a file http(s) url',
-          dataSources: ['upload', 'public'],
-          fileTypes: ['fasta', 'fa', 'fna', 'contigs'],
-          viewFile: false,
-          isOptional: true,
-          cleanupInput: true,
-        },
-      },
-      custom_gottcha2_speDB_b: {
-        text: 'CUSTOM GOTTCHA2-speDB-b',
+      custom_gottcha2: {
+        text: 'CUSTOM GOTTCHA2',
         value: null,
         display: null,
         fileInput: {
@@ -1225,20 +1115,6 @@ export const workflows = {
           cleanupInput: true,
         },
       },
-      custom_pangia_db: {
-        text: 'CUSTOM Pangia DB',
-        value: null,
-        display: null,
-        fileInput: {
-          enableInput: true,
-          placeholder: '(Optional) Select a file or enter a file http(s) url',
-          dataSources: ['upload', 'public'],
-          fileTypes: ['fasta', 'fa', 'fna', 'contigs'],
-          viewFile: false,
-          isOptional: true,
-          cleanupInput: true,
-        },
-      },
       custom_diamond_db: {
         text: 'CUSTOM Diamond DB',
         value: null,
@@ -1275,38 +1151,13 @@ export const workflows = {
           isValid: true,
           error: 'Classification Tools error: at least 1 tool required',
         },
-        custom_gottcha_genDB_b: {
+        custom_gottcha2: {
           isValid: true,
-          error: 'CUSTOM GOTTCHA-genDB-b error. Invalid url',
-        },
-        custom_gottcha_speDB_b: {
-          isValid: true,
-          error: 'CUSTOM GOTTCHA-speDB-b error. Invalid url',
-        },
-        custom_gottcha_strDB_b: {
-          isValid: true,
-          error: 'CUSTOM GOTTCHA-strDB-b error. Invalid url',
-        },
-        custom_gottcha_genDB_v: {
-          isValid: true,
-          error: 'CUSTOM GOTTCHA-genDB-v error. Invalid url',
-        },
-        custom_gottcha_speDB_v: {
-          isValid: true,
-          error: 'CUSTOM GOTTCHA-speDB-v error. Invalid url',
-        },
-        custom_gottcha_strDB_v: {
-          isValid: true,
-          error: 'CUSTOM GOTTCHA-strDB-v error. Invalid url',
-        },
-        custom_gottcha2_speDB_b: {
-          isValid: true,
-          error: 'CUSTOM GOTTCHA2-speDB-b error. Invalid url',
+          error: 'CUSTOM GOTTCHA2 error. Invalid url',
         },
         custom_bwa_db: { isValid: true, error: 'CUSTOM BWA DB error. Invalid url' },
         custom_metaphlan_db: { isValid: true, error: 'CUSTOM Metaphlan DB error. Invalid url' },
         custom_kraken_db: { isValid: true, error: 'CUSTOM Kraken DB error. Invalid url' },
-        custom_pangia_db: { isValid: true, error: 'CUSTOM Pangia DB error. Invalid url' },
         custom_diamond_db: { isValid: true, error: 'CUSTOM Diamond DB error. Invalid url' },
         custom_centrifuge_db: { isValid: true, error: 'CUSTOM Centrifuge DB error. Invalid url' },
       },
