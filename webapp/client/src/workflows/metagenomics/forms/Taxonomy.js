@@ -98,26 +98,8 @@ export const Taxonomy = (props) => {
     if (errors === '') {
       //files for server to caculate total input size
       let inputFiles = []
-      if (form.readInputs['custom_gottcha_genDB_b'].value) {
-        inputFiles.push(form.readInputs['custom_gottcha_genDB_b'].value)
-      }
-      if (form.readInputs['custom_gottcha_speDB_b'].value) {
-        inputFiles.push(form.readInputs['custom_gottcha_speDB_b'].value)
-      }
-      if (form.readInputs['custom_gottcha_strDB_b'].value) {
-        inputFiles.push(form.readInputs['custom_gottcha_strDB_b'].value)
-      }
-      if (form.readInputs['custom_gottcha_genDB_v'].value) {
-        inputFiles.push(form.readInputs['custom_gottcha_genDB_v'].value)
-      }
-      if (form.readInputs['custom_gottcha_speDB_v'].value) {
-        inputFiles.push(form.readInputs['custom_gottcha_speDB_v'].value)
-      }
-      if (form.readInputs['custom_gottcha_strDB_v'].value) {
-        inputFiles.push(form.readInputs['custom_gottcha_strDB_v'].value)
-      }
-      if (form.readInputs['custom_gottcha2_speDB_b'].value) {
-        inputFiles.push(form.readInputs['custom_gottcha2_speDB_b'].value)
+      if (form.readInputs['custom_gottcha2'].value) {
+        inputFiles.push(form.readInputs['custom_gottcha2'].value)
       }
       if (form.readInputs['custom_bwa_db'].value) {
         inputFiles.push(form.readInputs['custom_bwa_db'].value)
@@ -127,9 +109,6 @@ export const Taxonomy = (props) => {
       }
       if (form.readInputs['custom_kraken_db'].value) {
         inputFiles.push(form.readInputs['custom_kraken_db'].value)
-      }
-      if (form.readInputs['custom_pangia_db'].value) {
-        inputFiles.push(form.readInputs['custom_pangia_db'].value)
       }
       if (form.readInputs['custom_diamond_db'].value) {
         inputFiles.push(form.readInputs['custom_diamond_db'].value)
@@ -195,254 +174,31 @@ export const Taxonomy = (props) => {
                 />
                 <br></br>
                 <FileInput
-                  name={'custom_gottcha_genDB_b'}
+                  name={'custom_gottcha2'}
                   setParams={setFileInput}
                   isValidFileInput={isValidFileInput}
-                  text={workflows[workflowName].readInputs['custom_gottcha_genDB_b'].text}
-                  tooltip={workflows[workflowName].readInputs['custom_gottcha_genDB_b'].tooltip}
+                  text={workflows[workflowName].readInputs['custom_gottcha2'].text}
+                  tooltip={workflows[workflowName].readInputs['custom_gottcha2'].tooltip}
                   enableInput={
-                    workflows[workflowName].readInputs['custom_gottcha_genDB_b']['fileInput']
-                      .enableInput
+                    workflows[workflowName].readInputs['custom_gottcha2']['fileInput'].enableInput
                   }
                   placeholder={
-                    workflows[workflowName].readInputs['custom_gottcha_genDB_b']['fileInput']
-                      .placeholder
+                    workflows[workflowName].readInputs['custom_gottcha2']['fileInput'].placeholder
                   }
                   dataSources={
-                    workflows[workflowName].readInputs['custom_gottcha_genDB_b']['fileInput']
-                      .dataSources
+                    workflows[workflowName].readInputs['custom_gottcha2']['fileInput'].dataSources
                   }
                   fileTypes={
-                    workflows[workflowName].readInputs['custom_gottcha_genDB_b']['fileInput']
-                      .fileTypes
+                    workflows[workflowName].readInputs['custom_gottcha2']['fileInput'].fileTypes
                   }
                   viewFile={
-                    workflows[workflowName].readInputs['custom_gottcha_genDB_b']['fileInput']
-                      .viewFile
+                    workflows[workflowName].readInputs['custom_gottcha2']['fileInput'].viewFile
                   }
                   isOptional={
-                    workflows[workflowName].readInputs['custom_gottcha_genDB_b']['fileInput']
-                      .isOptional
+                    workflows[workflowName].readInputs['custom_gottcha2']['fileInput'].isOptional
                   }
                   cleanupInput={
-                    workflows[workflowName].readInputs['custom_gottcha_genDB_b']['fileInput']
-                      .cleanupInput
-                  }
-                />
-                <br></br>
-                <FileInput
-                  name={'custom_gottcha_speDB_b'}
-                  setParams={setFileInput}
-                  isValidFileInput={isValidFileInput}
-                  text={workflows[workflowName].readInputs['custom_gottcha_speDB_b'].text}
-                  tooltip={workflows[workflowName].readInputs['custom_gottcha_speDB_b'].tooltip}
-                  enableInput={
-                    workflows[workflowName].readInputs['custom_gottcha_speDB_b']['fileInput']
-                      .enableInput
-                  }
-                  placeholder={
-                    workflows[workflowName].readInputs['custom_gottcha_speDB_b']['fileInput']
-                      .placeholder
-                  }
-                  dataSources={
-                    workflows[workflowName].readInputs['custom_gottcha_speDB_b']['fileInput']
-                      .dataSources
-                  }
-                  fileTypes={
-                    workflows[workflowName].readInputs['custom_gottcha_speDB_b']['fileInput']
-                      .fileTypes
-                  }
-                  viewFile={
-                    workflows[workflowName].readInputs['custom_gottcha_speDB_b']['fileInput']
-                      .viewFile
-                  }
-                  isOptional={
-                    workflows[workflowName].readInputs['custom_gottcha_speDB_b']['fileInput']
-                      .isOptional
-                  }
-                  cleanupInput={
-                    workflows[workflowName].readInputs['custom_gottcha_speDB_b']['fileInput']
-                      .cleanupInput
-                  }
-                />
-                <br></br>
-                <FileInput
-                  name={'custom_gottcha_strDB_b'}
-                  setParams={setFileInput}
-                  isValidFileInput={isValidFileInput}
-                  text={workflows[workflowName].readInputs['custom_gottcha_strDB_b'].text}
-                  tooltip={workflows[workflowName].readInputs['custom_gottcha_strDB_b'].tooltip}
-                  enableInput={
-                    workflows[workflowName].readInputs['custom_gottcha_strDB_b']['fileInput']
-                      .enableInput
-                  }
-                  placeholder={
-                    workflows[workflowName].readInputs['custom_gottcha_strDB_b']['fileInput']
-                      .placeholder
-                  }
-                  dataSources={
-                    workflows[workflowName].readInputs['custom_gottcha_strDB_b']['fileInput']
-                      .dataSources
-                  }
-                  fileTypes={
-                    workflows[workflowName].readInputs['custom_gottcha_strDB_b']['fileInput']
-                      .fileTypes
-                  }
-                  viewFile={
-                    workflows[workflowName].readInputs['custom_gottcha_strDB_b']['fileInput']
-                      .viewFile
-                  }
-                  isOptional={
-                    workflows[workflowName].readInputs['custom_gottcha_strDB_b']['fileInput']
-                      .isOptional
-                  }
-                  cleanupInput={
-                    workflows[workflowName].readInputs['custom_gottcha_strDB_b']['fileInput']
-                      .cleanupInput
-                  }
-                />
-                <br></br>
-                <FileInput
-                  name={'custom_gottcha_genDB_v'}
-                  setParams={setFileInput}
-                  isValidFileInput={isValidFileInput}
-                  text={workflows[workflowName].readInputs['custom_gottcha_genDB_v'].text}
-                  tooltip={workflows[workflowName].readInputs['custom_gottcha_genDB_v'].tooltip}
-                  enableInput={
-                    workflows[workflowName].readInputs['custom_gottcha_genDB_v']['fileInput']
-                      .enableInput
-                  }
-                  placeholder={
-                    workflows[workflowName].readInputs['custom_gottcha_genDB_v']['fileInput']
-                      .placeholder
-                  }
-                  dataSources={
-                    workflows[workflowName].readInputs['custom_gottcha_genDB_v']['fileInput']
-                      .dataSources
-                  }
-                  fileTypes={
-                    workflows[workflowName].readInputs['custom_gottcha_genDB_v']['fileInput']
-                      .fileTypes
-                  }
-                  viewFile={
-                    workflows[workflowName].readInputs['custom_gottcha_genDB_v']['fileInput']
-                      .viewFile
-                  }
-                  isOptional={
-                    workflows[workflowName].readInputs['custom_gottcha_genDB_v']['fileInput']
-                      .isOptional
-                  }
-                  cleanupInput={
-                    workflows[workflowName].readInputs['custom_gottcha_genDB_v']['fileInput']
-                      .cleanupInput
-                  }
-                />
-                <br></br>
-                <FileInput
-                  name={'custom_gottcha_speDB_v'}
-                  setParams={setFileInput}
-                  isValidFileInput={isValidFileInput}
-                  text={workflows[workflowName].readInputs['custom_gottcha_speDB_v'].text}
-                  tooltip={workflows[workflowName].readInputs['custom_gottcha_speDB_v'].tooltip}
-                  enableInput={
-                    workflows[workflowName].readInputs['custom_gottcha_speDB_v']['fileInput']
-                      .enableInput
-                  }
-                  placeholder={
-                    workflows[workflowName].readInputs['custom_gottcha_speDB_v']['fileInput']
-                      .placeholder
-                  }
-                  dataSources={
-                    workflows[workflowName].readInputs['custom_gottcha_speDB_v']['fileInput']
-                      .dataSources
-                  }
-                  fileTypes={
-                    workflows[workflowName].readInputs['custom_gottcha_speDB_v']['fileInput']
-                      .fileTypes
-                  }
-                  viewFile={
-                    workflows[workflowName].readInputs['custom_gottcha_speDB_v']['fileInput']
-                      .viewFile
-                  }
-                  isOptional={
-                    workflows[workflowName].readInputs['custom_gottcha_speDB_v']['fileInput']
-                      .isOptional
-                  }
-                  cleanupInput={
-                    workflows[workflowName].readInputs['custom_gottcha_speDB_v']['fileInput']
-                      .cleanupInput
-                  }
-                />
-                <br></br>
-                <FileInput
-                  name={'custom_gottcha_strDB_v'}
-                  setParams={setFileInput}
-                  isValidFileInput={isValidFileInput}
-                  text={workflows[workflowName].readInputs['custom_gottcha_strDB_v'].text}
-                  tooltip={workflows[workflowName].readInputs['custom_gottcha_strDB_v'].tooltip}
-                  enableInput={
-                    workflows[workflowName].readInputs['custom_gottcha_strDB_v']['fileInput']
-                      .enableInput
-                  }
-                  placeholder={
-                    workflows[workflowName].readInputs['custom_gottcha_strDB_v']['fileInput']
-                      .placeholder
-                  }
-                  dataSources={
-                    workflows[workflowName].readInputs['custom_gottcha_strDB_v']['fileInput']
-                      .dataSources
-                  }
-                  fileTypes={
-                    workflows[workflowName].readInputs['custom_gottcha_strDB_v']['fileInput']
-                      .fileTypes
-                  }
-                  viewFile={
-                    workflows[workflowName].readInputs['custom_gottcha_strDB_v']['fileInput']
-                      .viewFile
-                  }
-                  isOptional={
-                    workflows[workflowName].readInputs['custom_gottcha_strDB_v']['fileInput']
-                      .isOptional
-                  }
-                  cleanupInput={
-                    workflows[workflowName].readInputs['custom_gottcha_strDB_v']['fileInput']
-                      .cleanupInput
-                  }
-                />
-                <br></br>
-                <FileInput
-                  name={'custom_gottcha2_speDB_b'}
-                  setParams={setFileInput}
-                  isValidFileInput={isValidFileInput}
-                  text={workflows[workflowName].readInputs['custom_gottcha2_speDB_b'].text}
-                  tooltip={workflows[workflowName].readInputs['custom_gottcha2_speDB_b'].tooltip}
-                  enableInput={
-                    workflows[workflowName].readInputs['custom_gottcha2_speDB_b']['fileInput']
-                      .enableInput
-                  }
-                  placeholder={
-                    workflows[workflowName].readInputs['custom_gottcha2_speDB_b']['fileInput']
-                      .placeholder
-                  }
-                  dataSources={
-                    workflows[workflowName].readInputs['custom_gottcha2_speDB_b']['fileInput']
-                      .dataSources
-                  }
-                  fileTypes={
-                    workflows[workflowName].readInputs['custom_gottcha2_speDB_b']['fileInput']
-                      .fileTypes
-                  }
-                  viewFile={
-                    workflows[workflowName].readInputs['custom_gottcha2_speDB_b']['fileInput']
-                      .viewFile
-                  }
-                  isOptional={
-                    workflows[workflowName].readInputs['custom_gottcha2_speDB_b']['fileInput']
-                      .isOptional
-                  }
-                  cleanupInput={
-                    workflows[workflowName].readInputs['custom_gottcha2_speDB_b']['fileInput']
-                      .cleanupInput
+                    workflows[workflowName].readInputs['custom_gottcha2']['fileInput'].cleanupInput
                   }
                 />
                 <br></br>
@@ -535,35 +291,6 @@ export const Taxonomy = (props) => {
                   }
                   cleanupInput={
                     workflows[workflowName].readInputs['custom_kraken_db']['fileInput'].cleanupInput
-                  }
-                />
-                <br></br>
-                <FileInput
-                  name={'custom_pangia_db'}
-                  setParams={setFileInput}
-                  isValidFileInput={isValidFileInput}
-                  text={workflows[workflowName].readInputs['custom_pangia_db'].text}
-                  tooltip={workflows[workflowName].readInputs['custom_pangia_db'].tooltip}
-                  enableInput={
-                    workflows[workflowName].readInputs['custom_pangia_db']['fileInput'].enableInput
-                  }
-                  placeholder={
-                    workflows[workflowName].readInputs['custom_pangia_db']['fileInput'].placeholder
-                  }
-                  dataSources={
-                    workflows[workflowName].readInputs['custom_pangia_db']['fileInput'].dataSources
-                  }
-                  fileTypes={
-                    workflows[workflowName].readInputs['custom_pangia_db']['fileInput'].fileTypes
-                  }
-                  viewFile={
-                    workflows[workflowName].readInputs['custom_pangia_db']['fileInput'].viewFile
-                  }
-                  isOptional={
-                    workflows[workflowName].readInputs['custom_pangia_db']['fileInput'].isOptional
-                  }
-                  cleanupInput={
-                    workflows[workflowName].readInputs['custom_pangia_db']['fileInput'].cleanupInput
                   }
                 />
                 <br></br>
