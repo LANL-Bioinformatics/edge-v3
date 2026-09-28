@@ -113,14 +113,40 @@ process readsTaxonomyConfig {
 
     def np = (platform != null && platform.contains("NANOPORE")) ? "--nanopore " : ""
 
+    def forceTaxonomyUpdate = settings["forceTaxonomyUpdate"] ? "1" : ""
+
     """
+    # Krona's taxonomy directory is bind-mounted to the shared reference
+    # database (settings.baseDB), so these tables persist between runs.
+    # updateTaxonomy.sh builds taxonomy.tab from taxdump.tar.gz, and
+    # updateAccessions.sh (== updateTaxonomy.sh --accessions) builds
+    # all.accession2taxid.sorted, which is tens of GB and takes hours.
+    # Only build them when they are missing, unless an update is forced.
+    KRONA_TAX_DIR=/venv/opt/krona/taxonomy
+    FORCE_TAX_UPDATE="${forceTaxonomyUpdate}"
 
-    mkdir -p /venv/opt/krona/taxonomy
-    touch /venv/opt/krona/taxonomy/taxdump.tar.gz
-    chmod 777 /venv/opt/krona/taxonomy/taxdump.tar.gz
-    updateTaxonomy.sh
+    mkdir -p "\$KRONA_TAX_DIR"
 
-    updateAccessions.sh 
+    if [ -s "\$KRONA_TAX_DIR/taxonomy.tab" ] && [ -z "\$FORCE_TAX_UPDATE" ]; then
+        echo "Krona taxonomy table found at \$KRONA_TAX_DIR/taxonomy.tab; skipping updateTaxonomy.sh" 1>&2
+    else
+        echo "Building Krona taxonomy table in \$KRONA_TAX_DIR" 1>&2
+        # Seed an empty archive so the taxonomy.make rules have a target to
+        # work from when no source files are present yet.
+        if [ ! -s "\$KRONA_TAX_DIR/taxdump.tar.gz" ]; then
+            touch "\$KRONA_TAX_DIR/taxdump.tar.gz"
+            chmod 777 "\$KRONA_TAX_DIR/taxdump.tar.gz"
+        fi
+        updateTaxonomy.sh
+    fi
+
+    if [ -s "\$KRONA_TAX_DIR/all.accession2taxid.sorted" ] && [ -z "\$FORCE_TAX_UPDATE" ]; then
+        echo "Krona accession table found at \$KRONA_TAX_DIR/all.accession2taxid.sorted; skipping updateAccessions.sh" 1>&2
+    else
+        echo "Building Krona accession table in \$KRONA_TAX_DIR (this can take a long time)" 1>&2
+        updateAccessions.sh
+    fi
+
     
     microbial_profiling_configure.pl \
     $tools -bwaScoreCut $bwaScoreCut\
