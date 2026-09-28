@@ -25,12 +25,7 @@ GetOptions(\%opt,
            "gottcha-b-strDB=s",
            "gottcha-v-genDB=s",
            "gottcha-b-genDB=s",
-           "gottcha2-v-genDB=s",
-           "gottcha2-b-speDB=s",
-           "gottcha2-v-speDB=s",
-           "gottcha2-e-invDB=s",
-           "gottcha2-e-ptzDB=s",
-           "gottcha2-e-ptgDB=s",
+           "gottcha2-db=s",
            "pangia-db=s",
            "diamond-db=s",
            "centrifuge-db=s",
@@ -54,12 +49,7 @@ $opt{"gottcha-v-strDB"} ||= "$opt{'base-db'}/GOTTCHA/GOTTCHA_VIRUSES_c5900_k24_u
 $opt{"gottcha-b-strDB"} ||= "$opt{'base-db'}/GOTTCHA/GOTTCHA_BACTERIA_c4937_k24_u30_xHUMAN3x.strain";
 $opt{"gottcha-v-genDB"} ||= "$opt{'base-db'}/GOTTCHA/GOTTCHA_VIRUSES_c5900_k24_u30_xHUMAN3x.genus";
 $opt{"gottcha-b-genDB"} ||= "$opt{'base-db'}/GOTTCHA/GOTTCHA_BACTERIA_c4937_k24_u30_xHUMAN3x.genus";
-$opt{"gottcha2-v-genDB"} ||= "$opt{'base-db'}/GOTTCHA2/RefSeq-Release89.Virus.genus.fna.gz";
-$opt{"gottcha2-b-speDB"} ||= "$opt{'base-db'}/GOTTCHA2/RefSeq-r90.cg.BacteriaArchaeaViruses.species.fna";
-$opt{"gottcha2-v-speDB"} ||= "$opt{'base-db'}/GOTTCHA2/RefSeq-Release90.cg.Viruses.species.fna";
-$opt{"gottcha2-e-plnDB"} ||= "$opt{'base-db'}/GOTTCHA2/RefSeq-Release89.Plant.species.fna.gz";
-$opt{"gottcha2-e-fugDB"} ||= "$opt{'base-db'}/GOTTCHA2/RefSeq-Release89.Fungi.species.fna.gz";
-$opt{"gottcha2-e-ptzDB"} ||= "$opt{'base-db'}/GOTTCHA2/RefSeq-Release89.Protozoa.species.fna.gz";
+$opt{"gottcha2-db"} ||= "$opt{'base-db'}/GOTTCHA2/gottcha_db.species.fna";
 $opt{"diamond-db"} ||= "$opt{'base-db'}/diamond/RefSeq_Release83.nr_protein_withRefSeq_viral_102317.protein.faa.dmnd";
 $opt{"centrifuge-db"} ||= "$opt{'base-db'}/Centrifuge/hpv.1.cf";
 
@@ -141,12 +131,7 @@ $0 [template.tmpl] [tools] > microbial_profiling_configure.settings.ini
     -gottcha-b-strDB    $opt{'base-db'}/GOTTCHA/GOTTCHA_BACTERIA_c4937_k24_u30_xHUMAN3x.strain
     -gottcha-v-genDB    $opt{'base-db'}/GOTTCHA/GOTTCHA_VIRUSES_c5900_k24_u30_xHUMAN3x.genus
     -gottcha-b-genDB    $opt{'base-db'}/GOTTCHA/GOTTCHA_BACTERIA_c4937_k24_u30_xHUMAN3x.genus
-    -gottcha2-v-genDB   $opt{'base-db'}/GOTTCHA2/RefSeq-Release89.Virus.genus.fna.gz
-    -gottcha2-b-speDB   $opt{'base-db'}/GOTTCHA2/RefSeq-r90.cg.BacteriaViruses.species.fna
-    -gottcha2-v-speDB   $opt{'base-db'}/GOTTCHA2/RefSeq-Release89.Virus.species.fna.gz
-    -gottcha2-e-plnDB   $opt{'base-db'}/GOTTCHA2/RefSeq-Release89.Plant.species.fna.gz
-    -gottcha2-e-ptzDB   $opt{'base-db'}/GOTTCHA2/RefSeq-Release89.Protozoa.species.fna.gz
-    -gottcha2-e-fugDB   $opt{'base-db'}/GOTTCHA2/RefSeq-Release89.Fungi.species.fna.gz
+    -gottcha2-db        $opt{'base-db'}/GOTTCHA2/gottcha_db.species.fna
     -diamond-db         $opt{'base-db'}/diamond/RefSeq_Release83.nr_protein_withRefSeq_viral_102317.protein.faa.dmnd
     --nanopore          
 
