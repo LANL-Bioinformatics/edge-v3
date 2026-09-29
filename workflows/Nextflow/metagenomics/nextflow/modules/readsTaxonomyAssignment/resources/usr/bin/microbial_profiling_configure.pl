@@ -82,7 +82,7 @@ foreach my $db ( keys %opt) {
 if ($opt{nanopore}){
 	$opt{"gottcha-opts"} = "-a \'-x ont2d\'";
 	# gottcha2 doesn't expose aligner options.
-	$opt{"gottcha2-opts"} = " \'--nanopore\' ";
+	$opt{"gottcha2-opts"} = "-a \'--nanopore\' ";
 	$opt{"bwa-opts"}="-a \'-x ont2d\'";
 	$opt{"pangia-opts"}= "-sb -se --nanopore ";
 }
