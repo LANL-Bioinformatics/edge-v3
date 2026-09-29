@@ -63,16 +63,36 @@ mkdir -p $OUTPATH
 echo "[BEGIN]"
 
 set -x;
-time kraken2 --threads $THREADS --db $REFDB $OPTIONS --output $OUTPATH/$PREFIX.classification.csv --report $OUTPATH/$PREFIX.report.csv $FASTQ
+kraken2 --threads $THREADS --db $REFDB $OPTIONS --output $OUTPATH/$PREFIX.classification.csv --report $OUTPATH/$PREFIX.report.tsv $FASTQ
 #time kraken-report --db $REFDB $OUTPATH/$PREFIX.classification.csv > $OUTPATH/$PREFIX.report.csv
 set +e;
 
 #generate out.list
-convert_krakenRep2list.pl < $OUTPATH/$PREFIX.report.csv > $OUTPATH/$PREFIX.out.list
-convert_krakenRep2tabTree.pl < $OUTPATH/$PREFIX.report.csv > $OUTPATH/$PREFIX.out.tab_tree
+awk -F'\t' 'BEGIN {
+      OFS="\t"
+
+      name["D"]="domain";  rank["D"]=1
+      name["P"]="phylum";  rank["P"]=2
+      name["C"]="class";   rank["C"]=3
+      name["O"]="order";   rank["O"]=4
+      name["F"]="family";  rank["F"]=5
+      name["G"]="genus";   rank["G"]=6
+      name["S"]="species"; rank["S"]=7
+      name["S1"]="strain"; rank["S1"]=8
+   }
+
+   $4 in name {
+      taxa=$6
+      sub(/^[[:space:]]+/, "", taxa)
+      print name[$4], taxa, $2, $3, $5, rank[$4]
+   }' $OUTPATH/$PREFIX.report.tsv \
+   | sort -t$'\t' -k6,6n -k3,3nr \
+   | cut -f1-5 } > $OUTPATH/$PREFIX.out.list
+
+convert_krakenRep2tabTree.pl < $OUTPATH/$PREFIX.report.tsv > $OUTPATH/$PREFIX.out.tab_tree
 
 # Make Krona plot
-ktImportText  $OUTPATH/$PREFIX.out.tab_tree -o $OUTPATH/$PREFIX.krona.html
+ktImportTaxonomy -m 3 -t 5 -o $OUTPATH/$PREFIX.krona.html $OUTPATH/$PREFIX.report.tsv
 
 # This is old 101817. See above for current Krona plot creation (consistent with the method used for other tools).
 #generate krona plot
