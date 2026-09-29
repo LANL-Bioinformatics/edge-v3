@@ -68,6 +68,8 @@ kraken2 --threads $THREADS --db $REFDB $OPTIONS --output $OUTPATH/$PREFIX.classi
 set +e;
 
 #generate out.list
+printf "LEVEL\tTAXA\tROLLUP\tASSIGNED\tTAXID\n" > $OUTPATH/$PREFIX.out.list
+
 awk -F'\t' 'BEGIN {
       OFS="\t"
 
@@ -87,7 +89,7 @@ awk -F'\t' 'BEGIN {
       print name[$4], taxa, $2, $3, $5, rank[$4]
    }' $OUTPATH/$PREFIX.report.tsv \
    | sort -t$'\t' -k6,6n -k3,3nr \
-   | cut -f1-5 } > $OUTPATH/$PREFIX.out.list
+   | cut -f1-5 >> $OUTPATH/$PREFIX.out.list
 
 convert_krakenRep2tabTree.pl < $OUTPATH/$PREFIX.report.tsv > $OUTPATH/$PREFIX.out.tab_tree
 
