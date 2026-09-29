@@ -1021,7 +1021,7 @@ export const workflows = {
       enabledTools: {
         text: 'Classification Tools',
         tooltip:
-          'EDGE uses multiple tools for taxonomy classification including GOTTCHA (bacterial & viral databases), ' +
+          'EDGE uses multiple tools for taxonomy classification including GOTTCHA2, ' +
           'MetaPhlAn4, Kraken and reads mapping to NCBI RefSeq using BWA. Each tool has its own database and you can find the taxonomy information ' +
           'table <a href="https://lanl-bioinformatics.github.io/EDGE/docs/taxonomyDBtable.html" target="_blank" rel="noopener noreferrer"><span style="color:yellow;">[here]</span></a>',
         defaultSelections: taxClassificationOptions['classification-tools-default'],
