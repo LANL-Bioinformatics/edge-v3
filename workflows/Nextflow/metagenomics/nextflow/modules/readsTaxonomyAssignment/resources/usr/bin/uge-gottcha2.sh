@@ -14,7 +14,6 @@ ARGUMENTS:
    -p      Output prefix
    -l      Level [genus|species|strain]
    -d      Database
-   -a      Additional options to pass to gottcha2 fast-profile
 
 OPTIONS:
    -t      Number of threads. [default is 4]
@@ -44,7 +43,7 @@ OTHER_OPTIONS=()
 # untouched in OTHER_OPTIONS.
 while [[ $# -gt 0 ]]
 do
-    case "$1" in
+     case "$1" in
         -i) FASTQ=$2
             shift 2
             ;;
@@ -66,13 +65,13 @@ do
         -s) PRE_SPLITRIM=$2
             shift 2
             ;;
-        -a) OTHER_OPTIONS=$2
-            shift 2
-            ;;
         -h) usage
             exit
             ;;
-    esac
+        *) OTHER_OPTIONS+=("$1")
+           shift
+           ;;
+     esac
 done
 
 ## path
@@ -83,7 +82,7 @@ mkdir -p $OUTPATH
 
 set -xe;
 
-gottcha2 fast-profile -r $RELABD_COL -i $FASTQ -t $THREADS --outdir $OUTPATH -p $PREFIX --database $DB ${OTHER_OPTIONS}
+gottcha2 fast-profile -r $RELABD_COL -i $FASTQ -t $THREADS --outdir $OUTPATH -p $PREFIX --database $DB "${OTHER_OPTIONS[@]}"
 
 awk -F\\t '{if($NF=="" || $NF=="NOTE"){print $_}}' $OUTPATH/$PREFIX.full.tsv | cut -f -10 > $OUTPATH/$PREFIX.summary.tsv
 awk -F\\t '{if(NR==1){out=$1"\t"$2"\tROLLUP\tASSIGNED"; { for(i=3;i<=NF;i++){out=out"\t"$i}}; print out;}}' $OUTPATH/$PREFIX.summary.tsv > $OUTPATH/$PREFIX.out.list
