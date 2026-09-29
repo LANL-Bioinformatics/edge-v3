@@ -33,7 +33,7 @@ export const workflowList = {
   taxonomy: {
     label: 'Taxonomy Classification',
     category: 'metagenomics',
-    info: 'Multiple tools (Gottcha, PanGiA, Kraken2, Centrifuge, Metaphlan etc.) are used and the results are summarized in heat map and radar plots. Individual tool results are also presented with taxonomy dendrograms and Krona plots. Contig classification occurs by assigning taxonomies to all possible portions of contigs. For each contig, the longest and best match (using minimap2 ) is kept for any region within the contig and the region covered is assigned to the taxonomy of the hit. The next best match to a region of the contig not covered by prior hits is then assigned to that taxonomy. The contig results can be viewed by length of assembly coverage per taxa or by number of contigs per taxa.',
+    info: 'Multiple tools (Gottcha2, Kraken2, Centrifuge, Metaphlan etc.) are used and the results are summarized in heat map and radar plots. Individual tool results are also presented with taxonomy dendrograms and Krona plots. Contig classification occurs by assigning taxonomies to all possible portions of contigs. For each contig, the longest and best match (using minimap2 ) is kept for any region within the contig and the region covered is assigned to the taxonomy of the hit. The next best match to a region of the contig not covered by prior hits is then assigned to that taxonomy. The contig results can be viewed by length of assembly coverage per taxa or by number of contigs per taxa.',
   },
   phylogeny: {
     label: 'Phylogeny Analysis',
