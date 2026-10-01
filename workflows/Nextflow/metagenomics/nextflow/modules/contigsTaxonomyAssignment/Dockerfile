@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 FROM continuumio/miniconda3:v25.11.1 AS build
-ENV version=1.12.1
+ENV version=1.12.2
 
 ENV container=docker
 
@@ -14,7 +14,7 @@ RUN conda init bash \
     && conda activate contigsTaxonomyAssignment 
 
 RUN conda install -n contigsTaxonomyAssignment python=3.5 r-base=4.3.1 
-RUN conda install -n contigsTaxonomyAssignment -c bioconda minimap2=2.24 pandas=0.23.4 perl-json=4.10
+RUN conda install -n contigsTaxonomyAssignment -c bioconda minimap2=2.31 pandas=0.23.4 perl-json=4.10
 RUN conda install -c conda-forge conda-pack=0.8.1
 #use latest miccr (v0.0.3) with Chienchi's fix for tokenizing alignment file
 #pin to SHA 686e245d7934c28565db948262b477eb7d3ed1b9
