@@ -7,19 +7,6 @@ const config = require('../config')
 const workflowConfig = require('./config')
 
 const cromwellWorkflows = []
-const nextflowWorkflows = [
-  'sra2fastq',
-  'runFaQCs',
-  'assembly',
-  'annotation',
-  'binning',
-  'antiSmash',
-  'taxonomy',
-  'phylogeny',
-  'refBased',
-  'geneFamily',
-  'metagenomics',
-]
 const nextflowConfigs = {
   executor_config: {
     slurm: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/configs/slurm.config`,
@@ -36,9 +23,10 @@ const workflowList = {
     outdir: 'output/sra2fastq',
     report: 'nextflow/report.html',
     log: 'nextflow/.nextflow.log',
-    nextflow_main: process.env.NEXTFLOW_MAIN
-      ? `${process.env.NEXTFLOW_MAIN} -profile local`
-      : `${config.NEXTFLOW.WORKFLOW_DIR}/sra2fastq/nextflow/main.nf -profile local`,
+    nextflow_main:
+      process.env.NEXTFLOW_MAIN ||
+      `${config.NEXTFLOW.WORKFLOW_DIR}/sra2fastq/nextflow/main.nf`,
+    nextflow_profile: 'local',
     config_tmpl: `${config.NEXTFLOW.WORKFLOW_DIR}/sra2fastq/workflow_config.tmpl`,
   },
   runFaQCs: {
@@ -112,6 +100,21 @@ const workflowList = {
     config_tmpl: `${config.NEXTFLOW.WORKFLOW_DIR}/metagenomics/templates/pipeline_config.tmpl`,
   },
 }
+
+// A workflow is a nextflow workflow if it declares an entrypoint. Derived rather
+// than hardcoded so adding a workflow cannot silently omit it from the monitor.
+// Deliberately not keyed on `runner`: that would drop these workflows whenever
+// nextflow runs in direct mode.
+const nextflowWorkflows = Object.keys(workflowList).filter(workflow =>
+  Boolean(workflowList[workflow].nextflow_main),
+)
+
+// Everything else is driven by the local monitor, in either pid or runner mode.
+const localWorkflows = Object.keys(workflowList).filter(
+  workflow =>
+    !workflowList[workflow].nextflow_main &&
+    !cromwellWorkflows.includes(workflow),
+)
 
 // eslint-disable-next-line no-unused-vars
 const generateNextflowWorkflowParams = async (projHome, projectConf, proj) => {
@@ -503,7 +506,9 @@ const generateWorkflowResult = proj => {
 const checkFlagFile = (proj, jobQueue) => {
   const projHome = `${config.IO.PROJECT_BASE_DIR}/${proj.code}`
   const outDir = `${projHome}/${workflowList[proj.type].outdir}`
-  if (jobQueue === 'local') {
+  // Both execution modes touch a .done flag when the command completes; the
+  // runner does so via input.donePath.
+  if (jobQueue === 'local' || jobQueue === 'runner') {
     const flagFile = `${projHome}/.done`
     if (!fs.existsSync(flagFile)) {
       return false
@@ -586,13 +591,42 @@ const zipProjectOutputs = async proj => {
   return null
 }
 
+/**
+ * Builds the tool-specific `input` for a non-nextflow job-runner submission.
+ *
+ * Extension point called by edge-core's utils/runner.js. EDGE v3 runs every
+ * workflow through nextflow, so there is nothing to add here.
+ *
+ * @param proj {object} The project document
+ * @param projectConf {object} The parsed project conf.json
+ * @param jobId {string} The job handle
+ * @return {object} Additional submission input
+ */
+// eslint-disable-next-line no-unused-vars
+const generateRunnerInput = (proj, projectConf, jobId) => ({})
+
+/**
+ * Returns environment overrides for a workflow spawned in pid mode.
+ *
+ * Extension point called by edge-core's local monitor. EDGE v3 has no
+ * pid-mode workflows, so the server environment is inherited unchanged.
+ *
+ * @param proj {object} The project document
+ * @return {object|undefined} Environment overrides, or undefined
+ */
+// eslint-disable-next-line no-unused-vars
+const getWorkflowEnvironment = proj => undefined
+
 module.exports = {
   cromwellWorkflows,
+  localWorkflows,
   nextflowWorkflows,
   nextflowConfigs,
   workflowList,
   generateNextflowWorkflowParams,
+  generateRunnerInput,
   generateWorkflowResult,
+  getWorkflowEnvironment,
   checkFlagFile,
   getWorkflowCommand,
   validateBulkSubmissionInput,

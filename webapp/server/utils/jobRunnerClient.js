@@ -12,6 +12,7 @@ const config = require('../config')
  * @param file {string|undefined} Path to a file holding the secret
  * @return {string} The secret, or an empty string when neither is set
  */
+
 const readSecret = (value, file) => {
   if (value && value.trim()) {
     return value.trim()
@@ -44,6 +45,7 @@ class JobRunnerClient {
       throw new Error('JobRunnerClient requires a baseUrl')
     }
     this.baseUrl = baseUrl.replace(/\/+$/, '')
+
     this.token = readSecret(token, tokenFile)
     this.timeoutMs = timeoutMs
     this.httpClient = httpClient
@@ -56,6 +58,7 @@ class JobRunnerClient {
    * @param extra {object} Additional headers to merge in
    * @return {object} The headers
    */
+
   headers(extra = {}) {
     const headers = { ...extra }
     if (this.token) {

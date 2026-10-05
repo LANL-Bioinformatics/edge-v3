@@ -244,6 +244,7 @@ const config = {
     // Name of the job-runner service that executes nextflow workflows. Exists
     // because deployments register the service under different names.
     RUNNER_NAME: process.env.NEXTFLOW_RUNNER_NAME || 'nextflow',
+
     // Max allowed number of jobs in nextflow.
     NUM_JOBS_MAX: makeIntIfDefined(process.env.NEXTFLOW_NUM_JOBS_MAX) || 100000,
     // Total size of the input files allowed per job.
