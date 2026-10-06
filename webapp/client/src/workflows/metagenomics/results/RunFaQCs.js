@@ -54,14 +54,16 @@ export const RunFaQCs = (props) => {
               >
                 [Detailed QC Report]
               </a>
-              <div key={'readsQC-summary'}>
-                <embed
-                  key={'readsQC-summary-report'}
-                  src={`${url}${props.result.summaryPlots}`}
-                  className="edge-iframe"
-                  title={'qc summary'}
-                />
-              </div>
+              {props.result.summaryPlots && (
+                <div key={'readsQC-summary'}>
+                  <embed
+                    key={'readsQC-summary-report'}
+                    src={`${url}${props.result.summaryPlots}`}
+                    className="edge-iframe"
+                    title={'qc summary'}
+                  />
+                </div>
+              )}
               <br></br>
               <br></br>
             </>

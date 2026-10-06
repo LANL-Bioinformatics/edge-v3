@@ -188,7 +188,9 @@ workflow FAQCS {
     qc(settings, platform, paired, unpaired, adapterFileCheck.out, adapter_ch, avgLen)
 
     //make JSON file from QC stats
-    jsonQCstats(settings, qc.out.qcStats, qc.out.qaStats)
+    //qaStats is not produced for long reads (illumina_fastq_QC.pl --trim_only),
+    //so fall back to an empty list to make sure jsonQCstats still runs
+    jsonQCstats(settings, qc.out.qcStats, qc.out.qaStats.ifEmpty([]))
 
     //run porechop and nanoplot if fastq source is nanopore
     porechop(settings, platform, qc.out.unpairedQC, qc.out.log)

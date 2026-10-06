@@ -116,8 +116,8 @@ def create_qc_plot(json_dict, criteria_labels, output_html):
     ), row=1, col=1)
 
     # Bar 2: Filters
-    discard_keys = ["lenFilteredReads", "nFilteredReads", "lcFilteredReads", "qualTrimmedReads"]
-    x_vals = [criteria_labels[k] for k in discard_keys]
+    discard_keys = [k for k in ["lenFilteredReads", "nFilteredReads", "lcFilteredReads", "qualTrimmedReads"] if k in json_dict]
+    x_vals = [criteria_labels.get(k, k) for k in discard_keys]
     y_vals = [int(json_dict[k]) for k in discard_keys]
     hover_texts = [f'{int(float(json_dict.get(k.replace("Reads", "Bases"), 0)))} bases' for k in discard_keys]
 
@@ -295,24 +295,27 @@ def main():
         print(f"[✓] Quality score histogram written to {args.qhist_out}")
     
     # Merge into final report
+    def exists(path):
+        return bool(path) and os.path.isfile(path)
+
     sections = [("QC Summary Plots", args.html_out)]
-    if os.path.isfile(args.hist_out):
+    if exists(args.hist_out):
         sections.append(("Length Histogram", args.hist_out))
-    if os.path.isfile(args.gc1_out) and os.path.isfile(args.gc2_out):
+    if exists(args.gc1_out) and exists(args.gc2_out):
         sections.append(("GC Content - Input", args.gc1_out))
         sections.append(("GC Content - Trimmed", args.gc2_out))
-    if os.path.isfile(args.atcg_out):
+    if exists(args.atcg_out):
         sections.append(("ATCG Composition", args.atcg_out))
-    if os.path.isfile(args.N_composition_out):
+    if exists(args.N_composition_out):
         sections.append(("N Composition", args.N_composition_out))
-    if os.path.isfile(args.qual_out):
+    if exists(args.qual_out):
         sections.append(("Average Quality Histogram", args.qual_out))
-    if os.path.isfile(args.boxplot_out):
+    if exists(args.boxplot_out):
         sections.append(("Quality Boxplot", args.boxplot_out))
-    if os.path.isfile(args.q3d_input) and os.path.isfile(args.q3d_trim):
+    if exists(args.q3d_input) and exists(args.q3d_trim):
         sections.append(("Quality 3D Plots - Input", args.q3d_input))
         sections.append(("Quality 3D Plots - Trimmed", args.q3d_trim))
-    if os.path.isfile(args.qhist_out):
+    if exists(args.qhist_out):
         sections.append(("Quality Score Histogram", args.qhist_out))
 
     merge_html_plots(sections, args.final_out)
