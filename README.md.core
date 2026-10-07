@@ -334,10 +334,10 @@ changing a mode does not orphan work already in flight.
 ```env
 # Per-runner base URL; <NAME> matches the runner a workflow declares
 NEXTFLOW_RUNNER_URL=http://nextflow-runner:7001/v1
-BIOAI_RUNNER_URL=http://bioai-cli:7001
+BIOAI_RUNNER_URL=http://bioai-cli:7002/v1
 
 # Or register several at once
-RUNNER_SERVICES=nextflow=http://nextflow-runner:7001/v1,bioai=http://bioai-cli:7001
+RUNNER_SERVICES=nextflow=http://nextflow-runner:7001/v1,bioai=http://bioai-cli:7002/v1
 
 # Shared bearer token; the file form keeps it out of the environment
 RUNNER_API_TOKEN_FILE=/run/secrets/runner_api_token
