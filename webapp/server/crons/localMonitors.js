@@ -162,6 +162,10 @@ const submitRunnerWorkflow = async proj => {
     }
     // Transient failures leave the job Submitted for the monitor to retry.
     logger.error(`Runner submission failed for ${proj.code}: ${message}`)
+    common.write2log(
+       `${config.IO.PROJECT_BASE_DIR}/${proj.code}/log.txt`,
+       `Runner submission to '${job.runner}' failed: ${message}`,
+    )
   }
   await Promise.all([job.save(), proj.save()])
 }
