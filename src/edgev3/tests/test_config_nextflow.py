@@ -56,7 +56,7 @@ def conf_json(tmp_path: Path):
     conf = {
         "rawReads": {"inputFiles": ["file1.fastq", "file2.fastq"], 'paired': False},
         "pipeline": [
-            {"name": "runFaQCs", "input": {}},
+            {"name": "runFaQCs", "input": {"trimQual": 20, "trim5end": 0, "trim3end": 0}},
             {"name": "taxonomy", "input": {"enabledTools": ["tool1", "tool2"]}},
         ]
     }
@@ -67,7 +67,33 @@ def conf_json(tmp_path: Path):
 @pytest.fixture
 def template_file(tmp_path: Path):
     f = tmp_path / "template.txt"
-    f.write_text("{{ project }} {{ sraOutdir }} {{ taxonomyOutdir }}")
+    c1 = """
+{{ project }}\n {{ sraOutdir }}\n {{ taxonomyOutdir }}\n
+        """
+    c = """
+workDir="{{ nextflowOutDir }}/work"
+params {
+    //which modules are run
+    modules {
+        sra2fastq = {% if source is defined and source == 'sra' %}true{% else %}false{% endif %}
+        faqcs = {% if runFaQCs is defined %}{{ runFaQCs }}{% else %}false{% endif %}
+        hostRemoval = false
+        }
+    outputLocations {
+        //everything in its separate output for the moment
+        sra2fastqOutDir =  "{{ sraOutdir }}"
+        processProvidedContigsOutDir = "{{ contigsOutdir }}"
+        }
+    shared {
+        inputFastq = {% if inputFastq is defined %}{{ inputFastq | tojson }}{% else %}[]{% endif %}
+        inputFastq2 = {% if inputFastq2 is defined %}{{ inputFastq2 | tojson }}{% else %}[]{% endif %}
+        }
+    faqcs {
+        trimQual = {% if trimQual is defined %}{{ trimQual }}{% else %}20{% endif %}
+        trim5end = {% if trim5end is defined %}{{ trim5end }}{% else %}0{% endif %}
+        }
+    """
+    f.write_text(c)
     return f
 
 def test_get_workflow_list(utils_js_content: Any):
@@ -94,10 +120,10 @@ def test_create_workflow_params_dict(utils_js_file: Any):
     assert result["report"] == "reportOutdir"
 
 def test_create_output_directory_dict(utils_js_file: Any, tmp_project_dir: Any):
-    os.chdir('/Users/mflynn/Devel/edge-v3/workflows/Nextflow/scripts')
+    # os.chdir('/Users/mflynn/Devel/edge-v3/workflows/Nextflow/scripts')
     project_code = "test"
     result = config_nextflow.create_output_directory_dict(
-        tmp_project_dir, project_code
+        tmp_project_dir, project_code, 'fastq'
     )
     assert "sraOutdir" in result.keys()
     assert "taxonomyOutdir" in result.keys()
@@ -119,7 +145,7 @@ def test_get_module_run_input_dict():
             {"name": "taxonomy"},
         ]
     }
-    result = config_nextflow.get_module_run_input_dict(conf_dict)
+    result = config_nextflow.get_module_run_input_dict(conf_dict, 'fastq')
     assert result == {"sra2fastq": True, "taxonomy": True}
 
 def test_create_render_dict(tmp_path: Path):
@@ -127,6 +153,9 @@ def test_create_render_dict(tmp_path: Path):
         "rawReads": {"inputFiles": ["f1", "f2"], "paired": False},
         "pipeline": [
             {"name": "taxonomy", "input": {"enabledTools": ["kraken", "kaiju"]}},
+            {"name": "runFaQCs", "input": {"trimQual": 7,
+        "trim5end": 0,
+        "trim3end": 0}},
         ],
        
     }
@@ -138,7 +167,7 @@ def test_create_render_dict(tmp_path: Path):
     project_name = "proj"
     render_dict = config_nextflow.create_render_dict(
         conf_dict, output_template_dict, module_run_input_dict,
-        nextflowOutDir, refdata_dir, opaver_web_dir, project_name, 'abc_123', 'Illumina'
+        nextflowOutDir, refdata_dir, opaver_web_dir, project_name, 'abc_123', 'Illumina', 'fastq'
     )
     assert render_dict["inputFastq"] == ["f1", "f2"]
     assert render_dict["refdata"] == refdata_dir
@@ -149,13 +178,15 @@ def test_create_render_dict(tmp_path: Path):
     assert render_dict["taxonomy"] == "true"
     assert render_dict["nextflowOutDir"] == nextflowOutDir / "abc_123"
     assert render_dict["enabledTools"] == "kraken,kaiju"
+    assert render_dict["trimQual"] == 7
+    assert render_dict["trim5end"] == 0
 
 @patch("config_nextflow.random.choices")
 @patch("config_nextflow.get_sequencing_platform")
 def test_render_nextflow_config(mock_get_sequencing_platform, mock_random_choices, tmp_path: Path, utils_js_file: Any, conf_json: Any, template_file: Any):
     mock_random_choices.return_value = "AWLSpqke"
     mock_get_sequencing_platform.return_value = ("fastq", "Illumina")
-    os.chdir('/Users/mflynn/Devel/edge-v3/workflows/Nextflow/scripts') 
+    # os.chdir('/Users/mflynn/Devel/edge-v3/workflows/Nextflow/scripts') 
     output_dir = tmp_path
     output_dir.mkdir(parents=True, exist_ok=True)
     projects_dir = tmp_path / "projects"
@@ -176,6 +207,8 @@ def test_render_nextflow_config(mock_get_sequencing_platform, mock_random_choice
     
     assert nextflow_config_path.exists()
     content = nextflow_config_path.read_text()
+    with open('/Users/mflynn/Devel/dap-edge-v3/src/edgev3/tests/content.txt', 'w') as f:
+        f.write(content)
     assert "MyProject" in content
     assert "sra2fastq" in content or "Taxonomy" in content
 
@@ -256,7 +289,11 @@ def test_set_long_reads_options():
                      'paired': False,
                      'inputFiles': ['/home/user/edge-v3/io/upload/files/8YujqDBVLeq2z5xu.fastq.gz']
                      },
-        'pipeline': [{'name': 'runFaQCs', 'input': {}},
+        'pipeline': [{'name': 'runFaQCs', 'input': 
+                      {
+                          "trimQual": 20,
+                          "trim5end": 0
+                      }},
                      {'name': 'taxonomy', 'input': {'enabledTools': ['kraken', 'kaiju']}},
                      {'name': 'assembly', 'input': {'assembler': 'IDBA_UD',
                                                     'minContigSize': 200,
@@ -275,19 +312,23 @@ def test_set_long_reads_options():
     faqcs = [p for p in result['pipeline'] if p['name'] == 'runFaQCs'][0]
     assert assembler['input']['assembler'] == 'LRASM'
     assert faqcs['input']['trimQual'] == 7
+    assert faqcs['input']['trim5end'] == 0
 
 @patch("config_nextflow.random.choices")
 def test_get_sample_name(mock_random_choices):
     mock_random_choices.return_value = "AWLSpqke"
-    input_files = ["Ecoli_10x.1.fastq", "8YujqDBVLeq2z5xu.fastq.gz", "Ecoli_10x.2.fastq.gz"]
-    result = config_nextflow.get_sample_name(Path(input_files[0]), paired=True)
+    input_files = ["Ecoli_10x.1.fastq", "8YujqDBVLeq2z5xu.fastq.gz", "Ecoli_10x.2.fastq.gz", "Ecoli_10x.a.2.fastq.gz"]
+    result = config_nextflow.get_sample_name(Path(input_files[0]))
     assert result == "Ecoli_10x_AWLSpqke"
 
-    result = config_nextflow.get_sample_name(Path(input_files[1]), paired=True)
+    result = config_nextflow.get_sample_name(Path(input_files[1]))
     assert result == "8YujqDBVLeq2z5xu_AWLSpqke"
 
-    result = config_nextflow.get_sample_name(Path(input_files[2]), paired=True)
+    result = config_nextflow.get_sample_name(Path(input_files[2]))
     assert result == "Ecoli_10x_AWLSpqke"
+
+    result = config_nextflow.get_sample_name(Path(input_files[3]))
+    assert result == "Ecoli_10x.a_AWLSpqke"
 
 @patch("config_nextflow.render_nextflow_config")
 def DO_NOT_test_main(tmp_path: Path):

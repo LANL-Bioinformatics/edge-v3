@@ -1,0 +1,79 @@
+[[pipeline]]
+name = "runFaQCs"               # name of pipeline
+
+[pipeline.input]
+trimQual = 20                   # Targets # as quality level (default 20) for trimming (set to 7 if seqPlatform is longreads)
+trim5end = 0                    # Cut # bp from 5 end before quality trimming/filtering
+trim3end = 0                    # Cut # bp from 3 end before quality trimming/filtering
+trimAdapter = false             # Trim reads with illumina adapter/primers (default: false)
+trimRate = 0.2                  # Trim Adapter mismatch ratio
+trimPolyA = false               # Trim polyA
+artifactFile = ""               # Additional artifact (adapters/primers/contaminations) reference file in fasta format
+minLen = 50                     # Trimmed read should have to be at least this minimum length (default:50, range: 0 - 1000)
+avgQual = 0                     # Average quality cutoff (default:0, no filtering)
+numN = 2                        # "N" Base Cutoff
+filtLC = 0.85                   # Low complexity filter ratio, Maximum fraction of mono-/di-nucleotide sequence  (default: 0.85)
+filtPhiX = false                # Filter phiX reads
+
+[[pipeline]]
+name = "assembly"
+
+[pipeline.input]
+assembler = "IDBA_UD"           # IDBA_UD performs well on isolates as well as metagenomes but it may not work well on very large 
+                                # genomes; SPAdes performs well on isolates as well as single cell data but it may not work on larger genomes, 
+                                # and it takes more computational resource. PacBio CLR and Oxford Nanopore reads are used for gap closure and repeat resolution.; 
+                                # MEGAHIT is an ultra-fast single-node solution for large and complex metagenomics assembly via succinct de Bruijn graph which achieves low memory assembly.; 
+                                # Unicycler is an assembly pipeline for bacterial genomes. It can assemble Illumina-only read sets where it functions as a SPAdes-optimise.
+                                # For the best possible assemblies, give it both Illumina reads and long reads, and it will conduct a hybrid assembly.; 
+                                # LRASM is designed for long noise reads such as reads from Nanopore and it assemble fastq/fasta formatted reads using miniasm/wtdbg2/flye and use racon to perform consensus.
+                                # *If the seqPlatform is longreads, the assembler will be automatically set to LRASM*
+minContigSize = 200             # Trimmed read should have to be at least this minimum length (default:200, range: 0 - 1000)
+aligner = "bwa"                 # After assembly, the reads will use the aligner mapped to assembled contigs for validation.
+aligner_options = ""            # aligners can accept additional options see web pages below for more information
+                                # http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#usage, http://bio-bwa.sourceforge.net/bwa.shtml#3, https://lh3.github.io/minimap2/minimap2.html
+extractUnmapped = false         # Extract Unmapped/Unassembled Reads
+idba_minK = 31                  # Minimum Kmer Length
+idba_maxK = 121                 # Maximum Kmer Length
+idba_step = 20                  # Step Size
+
+[[pipeline]]
+name = "aimbots"
+
+[pipeline.input]                
+"Blast Database(s)" =           # Add one or more BLAST databases to serach against
+[
+    { Database = "nr",          # Choose from 16S_ribosomal_RNA, 18S_fungal_sequences, CDD, core_nt, ITS_RefSeq_Fungi, Linker, nr, nr_cluster_seq, nt, patnt, ref_euk_re_renomes, ref_prok_rep_genomes, ref_viroids_rep_genomes
+    "Blast Method" = "blastx",  # Blast search type to call. Choose from:
+                                # blastn, blastx, blastp, megablast, rpsblast, rpstblastn, tblastn, tblastx
+    "Number of Matches" = 1,    # Number of matches blastn will return per query loc
+    "Second Pass Database" =    # This will re-search the un-annotated regions of a given seq/db pair.
+    "uniprot", Evalue = "1e-5", # Automatically it will be 0 for short blast and 1e-5 for other searches.
+    "Minimum Identity" = "",    # What identity would you like to be the minimum against the subject sequence?
+    "Minimum % Coverage" = ""   # Coverage percentage requirement for blast output. Calculates query coverage over subject length, taking into account gaps and multiple hits with one query/subject.
+    },
+]
+
+[pipeline.input."Global Blast Options"]
+"Rpstblastn Matches" = 500.         # Number of matches rpstblastn will return per query location
+"Gap Extend Cost" = ""              # Cost to extend a gap. This default is a function of reward/penalty value. If unset, the default depends on BLAST search type: blastn=2,blastp=1 See BLAST manual appendix “BLASTN reward/penalty values.
+"Gap Open Cost" = ""                # Cost to open a gap. If unset, the default depends on BLAST search type: blastn=5,blastp=11 See BLAST manual appendix “BLASTN reward/penalty values”.
+"TAXID Options" = "None"            # Taxid can be used to filter results.
+"Species Taxid" = ""                # Species level taxid to limit scope of search
+"Species Taxid Exclude" = ""        # Species level taxid to exclude from search
+"Species Taxid File" = ""           # Path to text file with taxids to limit scope of search
+"Species Taxid Exclude File" = ""   # Path to text file with taxids to exclude from search
+
+[pipeline.input."Report Options"]
+"Create Blast Report" = "No"        # Creates PDF is set to True. This will create an online-blast type output for viewing the coverage of hits. It requires the pycairo dependency. It is made per sequence tested.
+"Create Summary Report" = "Yes".    # This will create an R PDF that summarizes all sequences tested. It will summarize genus/species found, bitscores, identity
+"Subjects of Interest" = ""         # For the R PDF, you can include a text file that indicates words that should be pulled because of a specific interest. Each item should be separated by a new line. It will search the subject titles found. This will create a graph in the R PDF.
+"PDF Identity % Value Range 1/5" = "100-95"
+"PDF Range 1/5 Color" = "#10AD32"
+"PDF Identity % Value Range 2/5" = "94.99-90"
+"PDF Range 2/5 Color" = "#F781D7"
+"PDF Identity % Value Range 3/5" = "89.99-85"
+"PDF Range 3/5 Color" = "#2731F5"
+"PDF Identity % Value Range 4/5" = "84.99-80"
+"PDF Range 4/5 Color" = "#000000"
+"PDF Identity % Value Range 5/5" = "79.99-0"
+"PDF Range 5/5 Color" = "#FF0000"

@@ -17,6 +17,7 @@ params {
         snpTree = {% if phylogeny is defined %}{{ phylogeny }}{% else %}false{% endif %}
         readsGeneFamilyAnalysis = {% if readsGeneFamily is defined %}{{ readsGeneFamily }}{% else %}false{% endif %}
         contigsGeneFamilyAnalysis = {% if contigsGeneFamily is defined %}{{ contigsGeneFamily }}{% else %}false{% endif %} //contig-based requires annotation output as well (GFF,FAA).
+        aimbots = {% if aimbots is defined %}{{ aimbots }}{% else %}false{% endif %}
     }
 
     outputLocations {
@@ -36,6 +37,7 @@ params {
         phylogenyOutDir = "{{ phylogenyOutdir }}"
         geneFamilyOutDir = "{{ geneFamilyOutdir }}"
         reportOutDir = "{{ reportOutdir }}"
+        aimbotsOutDir = "{{ aimbotsOutdir }}"
     }
 
     shared {
@@ -44,7 +46,7 @@ params {
         pairedFile = {% if paired is defined %}{{ paired }}{% else %}false{% endif %}
         inputContigs = {% if inputFasta is defined %}"{{ inputFasta }}"{% else %}"${projectDir}/nf_assets/NO_FILE3"{% endif %}
         assembledContigs = "${projectDir}/nf_assets/NO_FILE3" //contigs provided to bypass assembly
-        projName = "{{ project }}"
+        projName = {% if project is defined %}"{{ project }}"{% else %}"None"{% endif %}
         fastqSource = {% if seqPlatform is defined %}"{{ seqPlatform }}"{% else %}null{% endif %}
     }
 
@@ -249,12 +251,146 @@ params {
         genomadDB = "{{ refdata }}/genomad_db-v1.6"
         pf2Config = "${projectDir}/modules/geneFamilyAnalysis/resources/usr/bin/EDGE_PF2_Config.yaml"
     }
+    aimbots {
+    
+        aimbotsDir = "/panfs/biopan03/bio-aimbots/aimbots/aimbots_6.0" //path to AIMBOTS installation. include versioning folder (e.g. .../aimbots_5.0)
+        
+        //overall options
+    
+        num_matches= {% if num_matches is defined %}{{ num_matches }}{% else %}null{% endif %} //integer: Number of alignments to keep. Specify to increase from default (1)
+        evalue= {% if evalue is defined %}{{ evalue }}{% else %}null{% endif %} //float: evalue for searches. Default if unspecified is 1e-5
+        cdd_num_matches = {% if CDD_num_matches is defined %}{{ CDD_num_matches }}{% else %}null{% endif %} //integer //integer: Number of alignments to keep for rpsblast/rpstblastn searches. Specify to increase from default (1)
+
+        //advanced BLAST options
+        //check AIMBOTS readme for valid combos of gap extend and open.
+        gap_extend= {% if gap_extend is defined %}{{ gap_extend }}{% else %}null{% endif %} //integer
+        gap_open= {% if gap_open is defined %}{{ gap_open }}{% else %}null{% endif %} //integer
+        //word_size= {% if word_size is defined %}{{ word_size }}{% else %}null{% endif %} //integer
+        word_size = null //use default behavior for now
+        //matrix= {% if matrix is defined and matrix %}"{{ matrix }}"{% else %}null{% endif %} //string
+        matrix = null //use default behavior for now
+  
+        //only one of these four 
+        //single taxid
+        taxid= {% if taxid is defined and taxid %}"{{ taxid }}"{% else %}null{% endif %} //string
+        negative_taxid= {% if negative_taxid is defined and negative_taxid %}"{{ negative_taxid }}"{% else %}null{% endif %} //string
+        //filepath
+        taxidlist_path= {% if taxidlist_path is defined and taxidlist_path %}"{{ taxidlist_path }}"{% else %}null{% endif %} //string
+        negative_taxidlist_path= {% if negative_taxidlist_path is defined and negative_taxidlist_path %}"{{ negative_taxidlist_path }}"{% else %}null{% endif %} //string
+
+        // True/False
+        make_pdf= {% if make_pdf is defined %}{{ make_pdf }}{% else %}null{% endif %}
+        switch_to_short=  {% if switch_to_short is defined %}{{ switch_to_short }}{% else %}null{% endif %}
+        R=  {% if R is defined %}{{ R }}{% else %}null{% endif %}
+
+        //absolute file paths
+        agent_list= {% if agent_list is defined and agent_list %}"{{ agent_list }}"{% else %}null{% endif %} //string
+        biomistral= {% if biomistral is defined and biomistral %}"{{ biomistral }}"{% else %}null{% endif %} //string
+    
+        
+        //All non-null db/blast type pairings run on all sequences in input.
+        //evalue and num_matches override global options above
+        //coverage sets a coverage requirement for the specific pairing
+
+        db1= {% if db1 is defined and db1 %}"{{ db1 }}"{% else %}null{% endif %} //string: path to database
+        blast_type1= {% if blast_type1 is defined and blast_type1 %}"{{ blast_type1 }}"{% else %}null{% endif %} //string: one of blastn, blastx, rpstblastn, ig_blast, tblastn, tblastx, rpsblast, blastp, megablast, linker, tag, plasmid
+        second_pass1 = {% if second_pass1 is defined and second_pass1 %}"{{ second_pass1 }}"{% else %}null{% endif %} //string: path to second pass database
+        num_matches1= {% if num_matches1 is defined %}{{ num_matches1 }}{% else %}null{% endif %} //integer
+        evalue1=  {% if evalue1 is defined %}{{ evalue1 }}{% else %}null{% endif %}   //float
+        identity1=  {% if identity1 is defined %}{{ identity1 }}{% else %}null{% endif %} //integer: percent identity
+        coverage1=  {% if coverage1 is defined %}{{ coverage1 }}{% else %}null{% endif %} //float
+
+        db2 =  {% if db2 is defined and db2 %}"{{ db2 }}"{% else %}null{% endif %}
+        blast_type2=  {% if blast_type2 is defined and blast_type2 %}"{{ blast_type2 }}"{% else %}null{% endif %}
+        second_pass2= {% if second_pass2 is defined and second_pass2 %}"{{ second_pass2 }}"{% else %}null{% endif %}
+        num_matches2=  {% if num_matches2 is defined %}{{ num_matches2 }}{% else %}null{% endif %}
+        evalue2=  {% if evalue2 is defined %}{{ evalue2 }}{% else %}null{% endif %}
+        identity2=  {% if identity2 is defined %}{{ identity2 }}{% else %}null{% endif %}
+        coverage2=  {% if coverage2 is defined %}{{ coverage2 }}{% else %}null{% endif %}
+
+        db3=  {% if db3 is defined and db3 %}"{{ db3 }}"{% else %}null{% endif %}
+        blast_type3=  {% if blast_type3 is defined and blast_type3 %}"{{ blast_type3 }}"{% else %}null{% endif %}
+        second_pass3 = {% if second_pass3 is defined and second_pass3 %}"{{ second_pass3 }}"{% else %}null{% endif %}
+        num_matches3=  {% if num_matches3 is defined %}{{ num_matches3 }}{% else %}null{% endif %}
+        evalue3=  {% if evalue3 is defined %}{{ evalue3 }}{% else %}null{% endif %}
+        identity3=  {% if identity3 is defined %}{{ identity3 }}{% else %}null{% endif %}
+        coverage3=  {% if coverage3 is defined %}{{ coverage3 }}{% else %}null{% endif %}
+    
+        db4=  {% if db4 is defined and db4 %}"{{ db4 }}"{% else %}null{% endif %}
+        blast_type4=  {% if blast_type4 is defined and blast_type4 %}"{{ blast_type4 }}"{% else %}null{% endif %}
+        second_pass4 = {% if second_pass4 is defined and second_pass4 %}"{{ second_pass4 }}"{% else %}null{% endif %}
+        num_matches4=  {% if num_matches4 is defined %}{{ num_matches4 }}{% else %}null{% endif %}
+        evalue4=  {% if evalue4 is defined %}{{ evalue4 }}{% else %}null{% endif %}
+        identity4=  {% if identity4 is defined %}{{ identity4 }}{% else %}null{% endif %}
+        coverage4=  {% if coverage4 is defined %}{{ coverage4 }}{% else %}null{% endif %}
+        
+        db5=  {% if db5 is defined and db5 %}"{{ db5 }}"{% else %}null{% endif %}
+        blast_type5=  {% if blast_type5 is defined and blast_type5 %}"{{ blast_type5 }}"{% else %}null{% endif %}
+        second_pass5 = {% if second_pass5 is defined and second_pass5 %}"{{ second_pass5 }}"{% else %}null{% endif %}
+        num_matches5=  {% if num_matches5 is defined %}{{ num_matches5 }}{% else %}null{% endif %}
+        evalue5=  {% if evalue5 is defined %}{{ evalue5 }}{% else %}null{% endif %}
+        identity5=  {% if identity5 is defined %}{{ identity5 }}{% else %}null{% endif %}
+        coverage5=  {% if coverage5 is defined %}{{ coverage5 }}{% else %}null{% endif %}
+        
+        db6=  {% if db6 is defined and db6 %}"{{ db6 }}"{% else %}null{% endif %}
+        blast_type6=  {% if blast_type6 is defined and blast_type6 %}"{{ blast_type6 }}"{% else %}null{% endif %}
+        second_pass6 = {% if second_pass6 is defined and second_pass6 %}"{{ second_pass6 }}"{% else %}null{% endif %} 
+        num_matches6=  {% if num_matches6 is defined %}{{ num_matches6 }}{% else %}null{% endif %}
+        evalue6=  {% if evalue6 is defined %}{{ evalue6 }}{% else %}null{% endif %}
+        identity6=  {% if identity6 is defined %}{{ identity6 }}{% else %}null{% endif %}
+        coverage6=  {% if coverage6 is defined %}{{ coverage6 }}{% else %}null{% endif %}
+    
+        db7=  {% if db7 is defined and db7 %}"{{ db7 }}"{% else %}null{% endif %}
+        blast_type7=  {% if blast_type7 is defined and blast_type7 %}"{{ blast_type7 }}"{% else %}null{% endif %}
+        second_pass7 = {% if second_pass7 is defined and second_pass7 %}"{{ second_pass7 }}"{% else %}null{% endif %}
+        num_matches7=  {% if num_matches7 is defined %}{{ num_matches7 }}{% else %}null{% endif %}
+        evalue7=  {% if evalue7 is defined %}{{ evalue7 }}{% else %}null{% endif %}
+        identity7=  {% if identity7 is defined %}{{ identity7 }}{% else %}null{% endif %}
+        coverage7=  {% if coverage7 is defined %}{{ coverage7 }}{% else %}null{% endif %}
+        
+        db8=  {% if db8 is defined and db8 %}"{{ db8 }}"{% else %}null{% endif %}
+        blast_type8=  {% if blast_type8 is defined and blast_type8 %}"{{ blast_type8 }}"{% else %}null{% endif %}
+        second_pass8 = {% if second_pass8 is defined and second_pass8 %}"{{ second_pass8 }}"{% else %}null{% endif %}
+        num_matches8=  {% if num_matches8 is defined %}{{ num_matches8 }}{% else %}null{% endif %}
+        evalue8=  {% if evalue8 is defined %}{{ evalue8 }}{% else %}null{% endif %}
+        identity8=  {% if identity8 is defined %}{{ identity8 }}{% else %}null{% endif %}
+        coverage8=  {% if coverage8 is defined %}{{ coverage8 }}{% else %}null{% endif %}
+
+        db9=  {% if db9 is defined and db9 %}"{{ db9 }}"{% else %}null{% endif %}
+        blast_type9=  {% if blast_type9 is defined and blast_type9 %}"{{ blast_type9 }}"{% else %}null{% endif %}
+        second_pass9 = {% if second_pass9 is defined and second_pass9 %}"{{ second_pass9 }}"{% else %}null{% endif %} 
+        num_matches9=  {% if num_matches9 is defined %}{{ num_matches9 }}{% else %}null{% endif %}
+        evalue9=  {% if evalue9 is defined %}{{ evalue9 }}{% else %}null{% endif %}
+        identity9=  {% if identity9 is defined %}{{ identity9 }}{% else %}null{% endif %}
+        coverage9=  {% if coverage9 is defined %}{{ coverage9 }}{% else %}null{% endif %}
+   
+        db10=  {% if db10 is defined and db10 %}"{{ db10 }}"{% else %}null{% endif %}
+        blast_type10=  {% if blast_type10 is defined and blast_type10 %}"{{ blast_type10 }}"{% else %}null{% endif %}
+        second_pass10 = {% if second_pass10 is defined and second_pass10 %}"{{ second_pass10 }}"{% else %}null{% endif %}
+        num_matches10=  {% if num_matches10 is defined %}{{ num_matches10 }}{% else %}null{% endif %}
+        evalue10=  {% if evalue10 is defined %}{{ evalue10 }}{% else %}null{% endif %}
+        identity10=  {% if identity10 is defined %}{{ identity10 }}{% else %}null{% endif %}
+        coverage10=  {% if coverage10 is defined %}{{ coverage10 }}{% else %}null{% endif %}
+
+
+        //custom identity intervals and colors for output summaries
+        interval1= {% if interval1 is defined and interval1 %}"{{ interval1 }}"{% else %}null{% endif %} //string. expects float range from high to low (e.g., 100-95.2)
+        interval2= {% if interval2 is defined and interval2 %}"{{ interval2 }}"{% else %}null{% endif %}
+        interval3= {% if interval3 is defined and interval3 %}"{{ interval3 }}"{% else %}null{% endif %}
+        interval4= {% if interval4 is defined and interval4 %}"{{ interval4 }}"{% else %}null{% endif %}
+        interval5= {% if interval5 is defined and interval5 %}"{{ interval5 }}"{% else %}null{% endif %}
+        interval1_color= {% if interval1_color is defined and interval1_color %}"{{ interval1_color }}"{% else %}null{% endif %} //string. expects hex code (e.g. #000000)
+        interval2_color=  {% if interval2_color is defined and interval2_color %}"{{ interval2_color }}"{% else %}null{% endif %}
+        interval3_color=  {% if interval3_color is defined and interval3_color %}"{{ interval3_color }}"{% else %}null{% endif %}
+        interval4_color=  {% if interval4_color is defined and interval4_color %}"{{ interval4_color }}"{% else %}null{% endif %}
+        interval5_color=  {% if interval5_color is defined and interval5_color %}"{{ interval5_color }}"{% else %}null{% endif %}
+    }   
 }
 
 //container settings
 apptainer {
     enabled = true
-    cacheDir = "{{ nextflowOutDir }}.apptainer"
+    cacheDir = "{{ cacheDir }}"
     pullTimeout = "1 hour"
     runOptions = "--compat"
 }
@@ -279,7 +415,7 @@ process {
         container = 'ghcr.io/lanl-bioinformatics/edge_count_fastq:0.3.1'
     }
     withLabel: 'qc'{
-        container= 'ghcr.io/lanl-bioinformatics/edge_run_faqcs:1.6.2'
+        container= 'ghcr.io/lanl-bioinformatics/edge_run_faqcs:1.6.5'
     }
     withLabel: 'hostRemoval' {
         container= 'ghcr.io/lanl-bioinformatics/edge_host_removal:1.7.5'
@@ -291,7 +427,7 @@ process {
         container = 'ghcr.io/lanl-bioinformatics/edge_run_r2c:1.7.0'
     }
     withLabel: 'r2g' {
-        container = 'ghcr.io/lanl-bioinformatics/edge_ref_based:0.18.1'
+        container = 'ghcr.io/lanl-bioinformatics/edge_ref_based:0.19.0'
     }
     withLabel: 'rta' {
         container = 'ghcr.io/lanl-bioinformatics/edge_reads_taxonomy:1.15.1'
@@ -299,8 +435,7 @@ process {
     withLabel: 'cta' {
         container = 'ghcr.io/lanl-bioinformatics/edge_contigs_taxonomy:1.12.1'
     }
-
- withLabel: 'annotation' {
+    withLabel: 'annotation' {
         container = 'ghcr.io/lanl-bioinformatics/edge_annotation:0.6.1'
     }
     withLabel: 'phageFinder' {
@@ -320,6 +455,9 @@ process {
     }
     withLabel: 'vf' {
         container = 'apwat/mvf:0.3'
+    }
+    withLabel: 'aimbots' {
+        container = "apwat/aimbots_dependencies:1.0"
     }
     withLabel: 'report' {
         container = 'ghcr.io/lanl-bioinformatics/edge_report:0.5.1'
@@ -345,5 +483,42 @@ trace {
     overwrite = true
 }
 
-//sets executor to slurm
-executor.name = "local"
+//sets executor to slurm for LANL yellow network Canopus cluster
+executor.name = "slurm"
+//controls job names
+executor.jobName = {"$task.process"}
+executor.queueSize=5
+process {
+    //options to provide for all processes submitted as cluster jobs (e.g. "--account xx")
+    clusterOptions = "-A edgeuser --partition=fast,tb"
+    //resource requirements for processes
+    withLabel: "tiny" {
+        cpus = {2 * task.attempt}
+        memory = {4.GB * task.attempt}
+    }
+    withLabel: "small" {
+        cpus = {4 * task.attempt}
+        memory = {8.GB * task.attempt}
+    }
+    withLabel: "medium" {
+        cpus = {8 * task.attempt}
+        memory = {16.GB * task.attempt}
+        maxRetries = 2
+    }
+    withLabel: "large" {
+        cpus = {8 * task.attempt}
+        memory = {32.GB * task.attempt}
+        maxRetries=2
+    }
+    withLabel: "xlarge" {
+        cpus = {8 * task.attempt}
+        memory = {64.GB * task.attempt}
+        maxRetries=2
+    }
+    time = {48.hours}
+    //if not labeled, uses the below settings
+    cpus = {4 * task.attempt}
+    memory = {8.GB * task.attempt}
+    errorStrategy='retry'
+    maxRetries = 3
+}

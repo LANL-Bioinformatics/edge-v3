@@ -1,0 +1,11 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "EDGEv3"
+version = "1.0.0"
+
+[pytest]
+addopts = ["--import-mode=importlib"]
+pythonpath = ["src"]

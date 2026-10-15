@@ -9,7 +9,32 @@
 # ------------------------------------------------------------
 
 set -euo pipefail
+# ---- Parse Command-Line Arguments -------------------------------------
+CONFIG_FILE=""
 
+usage() {
+    echo "Usage: $0 [-f CONFIG_FILE]"
+    echo "  -f, --config-file   Path to a file defining PROJECTS_DIR, NEXTFLOW_OUT_DIR,"
+    echo "                      REFDATA_DIR, APPTAINER_CACHEDIR, and optionally SAVE_ENV."
+    echo "                      If omitted, the script will prompt interactively."
+    exit 1
+}
+
+while [[$# -gt 0 ]]; do
+    case "$1" in
+        -f|--config-file)
+            CONFIG_FILE="$2"
+            shift 2
+            ;;
+        -h|--help)
+            usage
+            ;;
+        *)
+            echo "Unknown option: $1"
+            usage
+            ;;
+    esac
+done
 # ---- Helper Functions -------------------------------------------------
 LOG_FILE="edgev3_install.log"
 log() {
@@ -146,14 +171,15 @@ sudo alternatives --set python3 "$TARGET_BINARY"
 # 4. Verify the change
 log "INFO" "Success! New default version details:"
 python3 --version
-
+sudo mkdir -p /opt/edgev3/
+sudo chown -R $USER:$USER /opt/edgev3/
 log "INFO" "Installing Python packages"
 sudo dnf install python3.12-pip -y
-python3 -m venv edgev3_env
-source edgev3_env/bin/activate
+python3 -m venv /opt/edgev3/.venv
+source /opt/edgev3/.venv/bin/activate
 pip install jinja2 
 cat  <<EOF >> ~/.bash_profile
-source ~/edge-v3/workflows/Nextflow/edgev3_env/bin/activate
+source /opt/edgev3/.venv/bin/activate
 EOF
 # prompt user for file paths and store as environment variables
 
@@ -161,31 +187,62 @@ log "INFO" "=== File Path Configuration ==="
 
 # Prompt for path to root of projects directory
 
-read -p "Enter path to projects directory: " PROJECTS_DIR
-export PROJECTS_DIR
+log "INFO" "=== File Path Configuration ==="
 
+if [[ -n "$CONFIG_FILE" ]]; then
+    if [[ -f "$CONFIG_FILE" ]]; then
+        log "INFO" "Using configuration file:$CONFIG_FILE"
+        # shellcheck disable=SC1090
+        source "$CONFIG_FILE"
 
-# Prompt for path to directory for Nextflow intermediate files
+        # Validate required variables were set by the config file
+        REQUIRED_VARS=(PROJECTS_DIR NEXTFLOW_OUT_DIR REFDATA_DIR APPTAINER_CACHEDIR)
+        MISSING=0
+        for var in "${REQUIRED_VARS[@]}"; do
+            if [[ -z "${!var:-}" ]]; then
+                log "ERROR" "Missing required variable '$var' in config file: $CONFIG_FILE"
+                MISSING=1
+            fi
+        done
+        if [[ "$MISSING" -eq 1 ]]; then
+            log "ERROR" "Config file is missing required values. Exiting."
+            exit 1
+        fi
 
-read -p "Enter path to directory for Nextflow intermediate files: " NEXTFLOW_OUT_DIR
-export NEXTFLOW_OUT_DIR
+        export PROJECTS_DIR NEXTFLOW_OUT_DIR REFDATA_DIR APPTAINER_CACHEDIR
+    else
+        log "ERROR" "Config file not found: $CONFIG_FILE"
+        exit 1
+    fi
+else
+    log "INFO" "No config file supplied. Falling back to interactive prompts."
 
+    # Prompt for path to root of projects directory
+    read -p "Enter path to projects directory: " PROJECTS_DIR
+    export PROJECTS_DIR
 
-# Prompt for path to reference data
-read -p "Enter path to reference data: " REFDATA_DIR
-export REFDATA_DIR
+    # Prompt for path to directory for Nextflow intermediate files
+    read -p "Enter path to directory for Nextflow intermediate files: " NEXTFLOW_OUT_DIR
+    export NEXTFLOW_OUT_DIR
 
+    # Prompt for path to reference data
+    read -p "Enter path to reference data: " REFDATA_DIR
+    export REFDATA_DIR
 
-# Prompt for path to OPAVER web directory
-export OPAVER_WEB_DIR="$HOME/edge-v3/io/opaver_web"
+    # Prompt for path to apptainer image cache directory
+    read -p "Enter path to apptainer cache: " APPTAINER_CACHEDIR
+    export APPTAINER_CACHEDIR
+fi
 
 # Prompt for path to template file used to render Nextflow config file
-export TEMPLATE_FILE="$HOME/edge-v3/workflows/Nextflow/metagenomics/nextflow/scripts/nextflow_config.tmpl"
+export TEMPLATE_FILE="$HOME/dap-edge-v3/src/edgev3/nextflow_config.tmpl"
 log "INFO" "=== Environment Variables Set ==="
 log "INFO" "PROJECTS_DIR: $PROJECTS_DIR"
 log "INFO" "NEXTFLOW_OUT_DIR: $NEXTFLOW_OUT_DIR"
 log "INFO" "REFDATA_DIR: $REFDATA_DIR"
 log "INFO" "OPAVER_WEB_DIR: $OPAVER_WEB_DIR"
+log "INFO" "APPTAINER_CACHEDIR: $APPTAINER_CACHEDIR"
+log "INFO" "APPTAINER_TMPDIR: $APPTAINER_TMPDIR"
 log "INFO" "TEMPLATE_FILE: $TEMPLATE_FILE"
 
 # Optional: Validate that files exist
@@ -207,22 +264,28 @@ fi
 
 # Optional: Save to a file for persistence
 log "INFO" "=== Save Environment Variables ==="
-read -p "Save these variables to .bash_profile? (y/n): " SAVE_ENV
-
+if [[ -n "$CONFIG_FILE" ]]; then
+    # Use SAVE_ENV from config file if provided; default to 'y' if unset
+    SAVE_ENV="${SAVE_ENV:-y}"
+    log "INFO" "SAVE_ENV from config file (or default):$SAVE_ENV"
+else
+    read -p "Save these variables to /etc/profile.d/edgev3.sh? (y/n): " SAVE_ENV
+fi
+export DAP_EDGE="$HOME"
 if [[ $SAVE_ENV == "y" || $SAVE_ENV == "Y" ]]; then
-    cat  <<EOF >> ~/.bash_profile
+    sudo -E bash -c 'cat << EOF > /etc/profile.d/edgev3.sh
 export NXF_SYNTAX_PARSER=v1
 export PROJECTS_DIR="$PROJECTS_DIR"
 export NEXTFLOW_OUT_DIR="$NEXTFLOW_OUT_DIR"
-export APPTAINER_CACHEDIR="$NEXTFLOW_OUT_DIR/apptainer_cache"
-export APPTAINER_TMPDIR="$NEXTFLOW_OUT_DIR/apptainer_tmp"
+export APPTAINER_CACHEDIR="$APPTAINER_CACHEDIR"
+export APPTAINER_TMPDIR="$APPTAINER_CACHEDIR/tmp"
 export REFDATA_DIR="$REFDATA_DIR"
 export OPAVER_WEB_DIR="$OPAVER_WEB_DIR"
 export TEMPLATE_FILE="$TEMPLATE_FILE"
-alias run_edge='python $HOME/edge-v3/workflows/Nextflow/metagenomics/nextflow/scripts/run_edge.py'
-EOF
-    log "INFO" "Variables saved to .bash_profile"
-    log "INFO" "Source it later with: source ~/.bash_profile"
+alias run_edge="python $DAP_EDGE/dap-edge-v3/src/edgev3/run_edge.py"
+EOF'
+    log "INFO" "Variables saved to /etc/profile.d/edgev3.sh"
+    log "INFO" "Source it later with: source /etc/profile.d/edgev3.sh"
 fi
-source ~/.bash_profile
+source /etc/profile.d/edgev3.sh
 exit 0
