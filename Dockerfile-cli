@@ -1,0 +1,60 @@
+# ------------------------------------------------------------
+# Base image: Rocky Linux 9 (dnf, appstream Java/Python packages,
+# EPEL + Apptainer availability match install_edgev3.sh requirements)
+# ------------------------------------------------------------
+FROM rockylinux:9
+
+LABEL maintainer="mflynn@lanl.gov"
+LABEL description="EDGEv3 build with Nextflow, Apptainer, Java, and Python venv"
+
+# ---- Base environment required by install_edgev3.sh (set -u safe) ----
+ENV HOME=/root
+ENV USER=root
+ENV LANG=en_US.UTF-8
+ENV DEBIAN_FRONTEND=noninteractive
+
+# sudo is required because the script calls `sudo` even though we run as root
+RUN dnf install -y sudo which tar gzip findutils && dnf clean all
+
+WORKDIR /opt/build
+
+# ---- Copy install assets ----
+COPY src/edgev3/install_edgev3.sh /opt/build/install_edgev3.sh
+COPY requirements.txt /opt/build/requirements.txt
+
+RUN chmod +x /opt/build/install_edgev3.sh
+
+# ------------------------------------------------------------
+# Run the install script non-interactively.
+# The script prompts (in order) for:
+#   1) PROJECTS_DIR
+#   2) NEXTFLOW_OUT_DIR
+#   3) REFDATA_DIR
+#   4) APPTAINER_CACHEDIR
+#   5) Save env vars to /etc/profile.d/edgev3.sh? (y/n)
+#
+# EDIT THESE VALUES to match your deployment layout.
+# NOTE: we must answer "y" to the last prompt, because the script
+# unconditionally does `source /etc/profile.d/edgev3.sh` at the end,
+# which will fail (set -e) if that file was never created.
+# ------------------------------------------------------------
+RUN /opt/build/install_edgev3.sh -f edge.conf
+
+# ------------------------------------------------------------
+# Python virtual environment created by the install script lives at
+# /opt/edgev3/.venv — activate it and install the project's
+# requirements.txt dependencies on top of it.
+# ------------------------------------------------------------
+ENV VIRTUAL_ENV=/opt/edgev3/.venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+RUN "$VIRTUAL_ENV/bin/pip" install --no-cache-dir --upgrade pip && \
+    "$VIRTUAL_ENV/bin/pip" install --no-cache-dir -r /opt/build/requirements.txt
+
+# ---- Make the EDGEv3 environment variables available at runtime ----
+RUN echo "source /etc/profile.d/edgev3.sh" >> /etc/bash.bashrc && \
+    echo "source $VIRTUAL_ENV/bin/activate" >> /etc/bash.bashrc
+
+WORKDIR /opt/edgev3
+
+ENTRYPOINT ["/bin/bash", "-l"]
