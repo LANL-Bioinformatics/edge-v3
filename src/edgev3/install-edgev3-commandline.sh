@@ -153,24 +153,41 @@ if [ "$CURRENT_MAJOR" -lt "$REQUIRED_MAJOR" ] || ([ "$CURRENT_MAJOR" -eq "$REQUI
 else
     log "INFO" "Your Python version is up to date or newer."
 fi
-log "INFO" "Configuring alternatives for python3..."
+log "INFO" "Configuring Python 3.12..."
+
 TARGET_VERSION="3.12"
 TARGET_BINARY="/usr/bin/python${TARGET_VERSION}"
 
-# 1. Register the original system python3 if not already registered (usually priority 1)
-if [ -f /usr/bin/"$CURRENT_VERSION" ]; then
-    sudo alternatives --install /usr/bin/python3 python3 /usr/bin/"$CURRENT_VERSION" 1
+# Actually install python3.12 if it isn't already present
+if [[ ! -x "$TARGET_BINARY" ]]; then
+    log "INFO" "python${TARGET_VERSION} not found. Installing via dnf..."
+    sudo dnf install -y "python${TARGET_VERSION}"
 fi
 
-# 2. Register the new target version with a higher priority (e.g., 10)
+# Confirm installation succeeded before proceeding
+if [[ ! -x "$TARGET_BINARY" ]]; then
+    log "ERROR" "Failed to install $TARGET_BINARY. Please install Python 3.12 manually and re-run."
+    exit 1
+fi
+
+# 1. Register the original system python3 if not already registered (priority 1)
+if command -v python3 &>/dev/null; then
+    OLD_PYTHON_PATH="$(command -v python3)"
+    if [[ -x "$OLD_PYTHON_PATH" && "$OLD_PYTHON_PATH" != "$TARGET_BINARY" ]]; then
+        sudo alternatives --install /usr/bin/python3 python3 "$OLD_PYTHON_PATH" 1 || true
+    fi
+fi
+
+# 2. Register the new target version with higher priority
 sudo alternatives --install /usr/bin/python3 python3 "$TARGET_BINARY" 10
 
-# 3. Explicitly set the target version as the default provider for python3
+# 3. Set the target version as default
 sudo alternatives --set python3 "$TARGET_BINARY"
 
-# 4. Verify the change
+# 4. Verify
 log "INFO" "Success! New default version details:"
 python3 --version
+
 sudo mkdir -p /opt/edgev3/
 sudo chown -R $USER:$USER /opt/edgev3/
 log "INFO" "Installing Python packages"
