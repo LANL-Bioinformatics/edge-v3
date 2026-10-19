@@ -11,12 +11,15 @@
 set -euo pipefail
 # ---- Parse Command-Line Arguments -------------------------------------
 CONFIG_FILE=""
+SKIP_APPTAINER=0
 
 usage() {
-    echo "Usage: $0 [-f CONFIG_FILE]"
+    echo "Usage: $0 [-f CONFIG_FILE] [-d|--docker]"
     echo "  -f, --config-file   Path to a file defining PROJECTS_DIR, NEXTFLOW_OUT_DIR,"
     echo "                      REFDATA_DIR, APPTAINER_CACHEDIR, and optionally SAVE_ENV."
     echo "                      If omitted, the script will prompt interactively."
+    echo "  -d, --docker        Skip Apptainer installation (use when running in a"
+    echo "                      Docker-based environment instead)."
     exit 1
 }
 
@@ -26,11 +29,15 @@ while [[ $# -gt 0 ]]; do
             CONFIG_FILE="$2"
             shift 2
             ;;
+        -d|--docker)
+            SKIP_APPTAINER=1
+            shift
+            ;;
         -h|--help)
             usage
             ;;
         *)
-            echo "Unknown option: $1"
+            echo "Unknown option:$1"
             usage
             ;;
     esac
@@ -117,9 +124,13 @@ rm -rf "$TMP_DIR"
 
 log "INFO" "Installation complete. Test with: nextflow -version"
 
-log "INFO" "Installing Apptainer..."
-sudo dnf install -y epel-release
-sudo dnf install -y apptainer
+if [[ "$SKIP_APPTAINER" -eq 1 ]]; then
+    log "INFO" "--docker flag supplied. Skipping Apptainer installation."
+else
+    log "INFO" "Installing Apptainer..."
+    sudo dnf install -y epel-release
+    sudo dnf install -y apptainer
+fi
 
 #!/bin/bash
 
@@ -146,7 +157,7 @@ if [ "$CURRENT_MAJOR" -lt "$REQUIRED_MAJOR" ] || ([ "$CURRENT_MAJOR" -eq "$REQUI
     # 3. Check for and install newer Python versions via DNF
     log "INFO" "Checking available Python package updates via dnf..."
     # Enable EPEL or CRB if looking for non-standard or newer module streams
-    sudo dnf check-update python3
+    sudo dnf check-update python3 || true
 
     log "INFO" "To install or switch to newer module streams (e.g., python3.11 or python3.12), run:"
     log "INFO" "sudo dnf module install python3.11"
@@ -161,6 +172,8 @@ TARGET_BINARY="/usr/bin/python${TARGET_VERSION}"
 # Actually install python3.12 if it isn't already present
 if [[ ! -x "$TARGET_BINARY" ]]; then
     log "INFO" "python${TARGET_VERSION} not found. Installing via dnf..."
+    # Enable CRB repository to access Python 3.12
+    sudo dnf config-manager --set-enabled crb || true
     sudo dnf install -y "python${TARGET_VERSION}"
 fi
 
@@ -213,7 +226,10 @@ if [[ -n "$CONFIG_FILE" ]]; then
         source "$CONFIG_FILE"
 
         # Validate required variables were set by the config file
-        REQUIRED_VARS=(PROJECTS_DIR NEXTFLOW_OUT_DIR REFDATA_DIR APPTAINER_CACHEDIR)
+        REQUIRED_VARS=(PROJECTS_DIR NEXTFLOW_OUT_DIR REFDATA_DIR TEMPLATE_FILE)
+        if [[ "$SKIP_APPTAINER" -eq 0 ]]; then
+            REQUIRED_VARS+=(APPTAINER_CACHEDIR)
+        fi
         MISSING=0
         for var in "${REQUIRED_VARS[@]}"; do
             if [[ -z "${!var:-}" ]]; then
@@ -226,7 +242,8 @@ if [[ -n "$CONFIG_FILE" ]]; then
             exit 1
         fi
 
-        export PROJECTS_DIR NEXTFLOW_OUT_DIR REFDATA_DIR APPTAINER_CACHEDIR
+        export PROJECTS_DIR NEXTFLOW_OUT_DIR REFDATA_DIR
+        [[ -n "${APPTAINER_CACHEDIR:-}" ]] && export APPTAINER_CACHEDIR
     else
         log "ERROR" "Config file not found: $CONFIG_FILE"
         exit 1
@@ -249,23 +266,31 @@ else
     # Prompt for path to apptainer image cache directory
     read -p "Enter path to apptainer cache: " APPTAINER_CACHEDIR
     export APPTAINER_CACHEDIR
+
+    # Prompt for path to template file used to render Nextflow config file
+    read -p "Enter path to Nextflow template file (nextflow_config.tmpl): " TEMPLATE_FILE
+    export TEMPLATE_FILE
 fi
 
-# Prompt for path to template file used to render Nextflow config file
-export TEMPLATE_FILE="$HOME/dap-edge-v3/src/edgev3/nextflow_config.tmpl"
+
 log "INFO" "=== Environment Variables Set ==="
 log "INFO" "PROJECTS_DIR: $PROJECTS_DIR"
 log "INFO" "NEXTFLOW_OUT_DIR: $NEXTFLOW_OUT_DIR"
 log "INFO" "REFDATA_DIR: $REFDATA_DIR"
-log "INFO" "OPAVER_WEB_DIR: $OPAVER_WEB_DIR"
-log "INFO" "APPTAINER_CACHEDIR: $APPTAINER_CACHEDIR"
-log "INFO" "APPTAINER_TMPDIR: $APPTAINER_TMPDIR"
+if [[ "$SKIP_APPTAINER" -eq 0 ]]; then
+    log "INFO" "APPTAINER_CACHEDIR: $APPTAINER_CACHEDIR"
+    log "INFO" "APPTAINER_TMPDIR: ${APPTAINER_TMPDIR:-$APPTAINER_CACHEDIR/tmp}"
+fi
 log "INFO" "TEMPLATE_FILE: $TEMPLATE_FILE"
 
 # Optional: Validate that files exist
 log "INFO" "=== Validating Paths ==="
-for var in PROJECTS_DIR NEXTFLOW_OUT_DIR REFDATA_DIR OPAVER_WEB_DIR; do
-    path="${!var}"
+for var in PROJECTS_DIR NEXTFLOW_OUT_DIR REFDATA_DIR; do
+    path="${!var:-}"
+    if [[ -z "$path" ]]; then
+        log "INFO" "✗ ${var}: Not set (skipping validation)"
+        continue
+    fi
     if [ -d "$path" ]; then
         log "INFO" "✓ ${var}: Directory exists"
     else
@@ -294,10 +319,11 @@ if [[ $SAVE_ENV == "y" || $SAVE_ENV == "Y" ]]; then
 export NXF_SYNTAX_PARSER=v1
 export PROJECTS_DIR="$PROJECTS_DIR"
 export NEXTFLOW_OUT_DIR="$NEXTFLOW_OUT_DIR"
-export APPTAINER_CACHEDIR="$APPTAINER_CACHEDIR"
-export APPTAINER_TMPDIR="$APPTAINER_CACHEDIR/tmp"
+if [[ "$SKIP_APPTAINER" -eq 0 ]]; then
+    export APPTAINER_CACHEDIR="$APPTAINER_CACHEDIR"
+    export APPTAINER_TMPDIR="$APPTAINER_CACHEDIR/tmp"
+fi
 export REFDATA_DIR="$REFDATA_DIR"
-export OPAVER_WEB_DIR="$OPAVER_WEB_DIR"
 export TEMPLATE_FILE="$TEMPLATE_FILE"
 alias run_edge="python $DAP_EDGE/dap-edge-v3/src/edgev3/run_edge.py"
 EOF'
