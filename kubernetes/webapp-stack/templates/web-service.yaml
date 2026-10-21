@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "webapp-stack.fullname" . }}-web
+spec:
+  selector:
+    app: {{ include "webapp-stack.name" . }}-web
+  ports:
+    - port: {{ .Values.webApp.server.config.APP_SERVER_PORT }}
+      targetPort: {{ .Values.webApp.server.config.APP_SERVER_PORT }}
+  type: ClusterIP

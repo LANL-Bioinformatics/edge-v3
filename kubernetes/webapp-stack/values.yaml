@@ -1,0 +1,92 @@
+webApp:
+  image: mcflynn617/edgev3-api:0.0.1
+  replicaCount: 2
+  client:
+    config:
+      LOG_LEVEL: info
+      API_TIMEOUT: "30000"
+      VITE_ORCID_AUTH_ENABLED: true
+      VITE_ORCID_CLIENT_ID: "APP-CTM81LRCLW9QLGB9"
+      VITE_FILEUPLOAD_ENABLED: true
+      VITE_FILEUPLOAD_FOLDER_ENABLED: true
+      VITE_SRADATA_ENABLED: true
+      VITE_NAME: "EDGEv3"
+      VITE_USER_AUTH_ENABLED: false
+      VITE_EMAIL_NOTIFICATION_ENABLED: false
+      VITE_SUPPORT_ENABLED: false
+      VITE_SUPPORT_EMAIL: "edge@lanl.gov"
+      VITE_BULK_SUBMISSIONS_ENABLED: false
+    runtimeInjection: true   # set true only if verified in Step 1
+  server:
+    existingEnvSecret: "webapp-server-env"
+    config:
+      LOG_LEVEL: info
+      API_TIMEOUT: "30000"
+      APP_SERVER_PORT: "5000"
+      CRON_SERVER_PORT: "5555"
+      APP_UI_BASE_URL: "https://k8s.edgebioinformatics.org"
+      DATABASE_HOST: "webapp-stack-webapp-stack-mongodb"
+      DB_NAME: "edge-v3"
+      DATABASE_USERNAME: "root"
+      DATABASE_PASSWORD: "changeme-please"
+      SEND_PROJECT_STATUS_EMAILS: "false"
+      PROJECT_STATUS_SUBJECT: "Your EDGE project status"
+      EMAIL_MAILGUN_API_KEY: "__POPULATE_ME_IF_ENABLING_EMAIL__"
+      EMAIL_MAILGUN_DOMAIN: "__POPULATE_ME_IF_ENABLING_EMAIL__"
+      FILEUPLOAD_ALLOWED_EXTENSIONS: fastq|fq|faa|fa|fasta|fna|contigs|fastq.gz|fq.gz|fa.gz|fasta.gz|fna.gz|contigs.gz|fa.bz2|fasta.bz2|contigs.bz2|fna.bz2|fa.xz|fasta.xz|contigs.xz|fna.xz|gbk|gbff|gff|genbank|gb|xlsx|txt|bed|config|tsv|csv|raw|d|bam|sam
+    secrets:
+      JWT_SECRET: "0693be9c6d6d2a0bc82cd9670e3a625853b7e81baf5df674abaf222e02e5751f"  # ⚠️ override in production via --set or a secrets manager
+      NODE_ENV: production
+  env:
+    - name: NODE_ENV
+      value: "production"
+    - name: MONGO_URI
+      value: "mongodb://$(MONGO_ROOT_USER):$(MONGO_ROOT_PASSWORD)@webapp-stack-mongodb:27017/edge-v3?authSource=admin"
+  buildResources:        # new - for init container only
+    requests:
+      cpu: 250m
+      memory: 1Gi
+    limits:
+      cpu: "1"
+      memory: 4Gi
+  resources:              # existing - main container, unchanged
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: "1"
+      memory: 2Gi
+# --- Existing PVC to mount for app-generated data ---
+  persistence:
+    existingClaim: "mcb180107-k8s-pv"     # <-- name of your pre-created PVC
+    mountPath: "/mnt/k8s"
+
+nginx:
+  image:
+    repository: nginx
+    tag: "1.25-alpine"
+  replicaCount: 1
+  service:
+    type: LoadBalancer   # change to ClusterIP/NodePort as needed
+    port: 80
+
+mongodb:
+  image:
+    repository: mongo
+    tag: "6.0"
+  replicaCount: 1
+  auth:
+    rootUsername: root
+    rootPassword: "changeme-please"
+    database: edge-v3
+  persistence:
+    enabled: true
+    size: 8Gi
+    storageClassName: ""   # use cluster default if blank
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi

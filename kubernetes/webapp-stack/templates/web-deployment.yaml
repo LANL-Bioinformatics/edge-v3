@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "webapp-stack.fullname" . }}-web
+  labels:
+    app: {{ include "webapp-stack.name" . }}-web
+spec:
+  replicas: {{ .Values.webApp.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "webapp-stack.name" . }}-web
+  template:
+    metadata:
+      labels:
+        app: {{ include "webapp-stack.name" . }}-web
+    spec:
+      initContainers:
+        - name: gen-client-config
+          image: "{{ .Values.webApp.image }}"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              mkdir -p /config/client /config/server
+              cat <<EOF > /config/client/.env
+              {{- range $k,$v := .Values.webApp.client.config }}
+              {{ $k }}={{$v }}
+              {{- end }}
+              EOF
+              cat <<EOF > /config/server/.env
+              {{- range $k,$v := .Values.webApp.server.config }}
+              {{ $k }}={{$v }}
+              {{- end }}
+              {{- range $k,$v := .Values.webApp.server.secrets }}
+              {{ $k }}={{$v }}
+              {{- end }}
+              DATABASE_HOST={{ include "webapp-stack.fullname" . }}-mongodb
+              DATABASE_USERNAME=$MONGO_ROOT_USER
+              DATABASE_PASSWORD=$MONGO_ROOT_PASSWORD
+              DATABASE_NAME=edge-v3              
+              EOF
+              ln -sf /config/client/.env /edgev3/webapp/client/.env
+              ln -sf /config/server/.env /edgev3/webapp/server/.env
+              cd /edgev3/webapp/client/ && npm run build
+          env:
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=1536"
+            - name: MONGO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "webapp-stack.fullname" . }}-mongodb-secret
+                  key: username
+            - name: MONGO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "webapp-stack.fullname" . }}-mongodb-secret
+                  key: password
+          resources:
+            {{- toYaml .Values.webApp.buildResources | nindent 12 }}
+          volumeMounts:
+            - name: client-config
+              mountPath: /config/client
+            - name: server-config
+              mountPath: /config/server
+      containers:
+        - name: web
+          image: "{{ .Values.webApp.image }}"
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              ln -sf /config/client/.env /edgev3/webapp/client/.env
+              ln -sf /config/server/.env /edgev3/webapp/server/.env
+              pm2-runtime start pm2.config.js
+          ports:
+            - containerPort: {{ .Values.webApp.server.config.APP_SERVER_PORT }}
+          env:
+            - name: MONGO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "webapp-stack.fullname" . }}-mongodb-secret
+                  key: username
+            - name: MONGO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "webapp-stack.fullname" . }}-mongodb-secret
+                  key: password
+            {{- range .Values.webApp.env }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.webApp.resources | nindent 12 }}
+          volumeMounts:
+            - name: app-data
+              mountPath: {{ .Values.webApp.persistence.mountPath }}
+            - name: client-config
+              mountPath: /config/client
+            - name: server-config
+              mountPath: /config/server
+      volumes:
+        - name: app-data
+          persistentVolumeClaim:
+            claimName: {{ .Values.webApp.persistence.existingClaim }}
+        - name: client-config
+          emptyDir: {}
+        - name: server-config
+          emptyDir: {}

@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "edge-api.fullname" . }}-fastapi
+  labels:
+    {{- include "edge-api.labels" . | nindent 4 }}
+    app.kubernetes.io/component: fastapi
+spec:
+  {{- if not .Values.fastapi.autoscaling.enabled }}
+  replicas: {{ .Values.fastapi.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "edge-api.labels" . | nindent 6 }}
+      app.kubernetes.io/component: fastapi
+  template:
+    metadata:
+      labels:
+        {{- include "edge-api.labels" . | nindent 8 }}
+        app.kubernetes.io/component: fastapi
+    spec:
+      serviceAccountName: {{ include "edge-api.fullname" . }}-fastapi
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: fastapi
+          image: "{{ .Values.fastapi.image.repository }}:{{ .Values.fastapi.image.tag }}"
+          imagePullPolicy: {{ .Values.fastapi.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.fastapi.service.targetPort }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "edge-api.fullname" . }}-config
+            {{- if .Values.secret.data }}
+            - secretRef:
+                name: {{ include "edge-api.fullname" . }}-secret
+            {{- end }}
+          env:
+            {{- toYaml .Values.fastapi.env | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.fastapi.livenessProbe.path }}
+              port: {{ .Values.fastapi.service.targetPort }}
+            initialDelaySeconds: {{ .Values.fastapi.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.fastapi.livenessProbe.periodSeconds }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.fastapi.readinessProbe.path }}
+              port: {{ .Values.fastapi.service.targetPort }}
+            initialDelaySeconds: {{ .Values.fastapi.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.fastapi.readinessProbe.periodSeconds }}
+          resources:
+            {{- toYaml .Values.fastapi.resources | nindent 12 }}

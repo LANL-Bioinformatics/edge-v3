@@ -1,0 +1,87 @@
+nameOverride: ""
+fullnameOverride: ""
+
+fastapi:
+  replicaCount: 2
+  image:
+    repository: mcflynn617/edgev3-api
+    tag: 0.0.1
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8000
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 6
+    targetCPUUtilizationPercentage: 70
+  env:
+    - name: ENVIRONMENT
+      value: "production"
+  livenessProbe:
+    path: /health
+    initialDelaySeconds: 10
+    periodSeconds: 15
+  readinessProbe:
+    path: /health
+    initialDelaySeconds: 5
+    periodSeconds: 10
+
+nextflow:
+  namespace: default
+  image:
+    repository: mcflynn617/edgev3-api
+    tag: 0.0.1
+    pullPolicy: Always
+  serviceAccountName: ""
+  existingClaim: mcb180107-k8s-pv
+  mountPath: /mnt/k8s
+  rbac:
+    create: true
+  pipeline:
+    repoOrScript: "my-org/my-pipeline"
+    revision: "main"
+    profile: "k8s"
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  backoffLimit: 1
+  ttlSecondsAfterFinished: 3600
+  
+configMap:
+  data:
+    APP_ENV: "production"
+    LOG_LEVEL: "info"
+    NEXTFLOW_NAMESPACE: "default"
+    NEXTFLOW_SERVICE_ACCOUNT: "nextflow-sa"
+    NEXTFLOW_PVC_NAME: "mcb180107-k8s-pv"
+    NEXTFLOW_MOUNT_PATH: "/mnt/k8s"
+    NEXTFLOW_PROFILE: "k8s"
+
+secret:
+  data: {}
+  # Example (values must be base64-encoded, or use --set-file / external secrets):
+  # DATABASE_URL: cG9zdGdyZXM6Ly91c2VyOnBhc3NAaG9zdC9kYg==
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations: {}
+  host: edge-api.example.com
+  tls:
+    enabled: false
+    secretName: edge-api-tls
+
+imagePullSecrets: []

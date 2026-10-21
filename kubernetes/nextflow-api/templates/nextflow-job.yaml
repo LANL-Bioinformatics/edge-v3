@@ -1,0 +1,54 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "edge-api.fullname" . }}-nextflow-run
+  labels:
+    {{- include "edge-api.labels" . | nindent 4 }}
+    app.kubernetes.io/component: nextflow
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: {{ .Values.nextflow.backoffLimit }}
+  ttlSecondsAfterFinished: {{ .Values.nextflow.ttlSecondsAfterFinished }}
+  template:
+    metadata:
+      labels:
+        {{- include "edge-api.labels" . | nindent 8 }}
+        app.kubernetes.io/component: nextflow
+    spec:
+      serviceAccountName: {{ .Values.nextflow.serviceAccountName }}
+      restartPolicy: Never
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: nextflow-launcher
+          image: "{{ .Values.nextflow.image.repository }}:{{ .Values.nextflow.image.tag }}"
+          imagePullPolicy: {{ .Values.nextflow.image.pullPolicy }}
+          command: ["nextflow"]
+          args:
+            - "run"
+            - "{{ .Values.nextflow.pipeline.repoOrScript }}"
+            - "-r"
+            - "{{ .Values.nextflow.pipeline.revision }}"
+            - "-profile"
+            - "{{ .Values.nextflow.pipeline.profile }}"
+            {{- range .Values.nextflow.pipeline.extraArgs }}
+            - "{{ . }}"
+            {{- end }}
+          env:
+            - name: NXF_WORK
+              value: "{{ .Values.nextflow.mountPath }}/work"
+            - name: NXF_HOME
+              value: "{{ .Values.nextflow.mountPath }}/.nextflow"
+          volumeMounts:
+            - name: shared-storage
+              mountPath: {{ .Values.nextflow.mountPath }}
+          resources:
+            {{- toYaml .Values.nextflow.resources | nindent 12 }}
+      volumes:
+        - name: shared-storage
+          persistentVolumeClaim:
+            claimName: {{ .Values.nextflow.existingClaim }}

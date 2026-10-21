@@ -1,0 +1,10 @@
+Your release "{{ .Release.Name }}" has been deployed.
+
+FastAPI service: {{ include "edge-api.fullname" . }}-fastapi
+{{- if .Values.ingress.enabled }}
+Accessible at: http://{{ .Values.ingress.host }}
+{{- else }}
+Run `kubectl port-forward svc/{{ include "edge-api.fullname" . }}-fastapi 8000:{{ .Values.fastapi.service.port }}` to access locally.
+{{- end }}
+
+Nextflow deployment: {{ include "edge-api.fullname" . }}-nextflow

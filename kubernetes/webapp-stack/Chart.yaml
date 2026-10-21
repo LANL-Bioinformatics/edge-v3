@@ -1,0 +1,6 @@
+apiVersion: v2
+name: webapp-stack
+description: React/Node.js web app with Nginx reverse proxy and MongoDB
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

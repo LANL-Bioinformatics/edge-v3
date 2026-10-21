@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mcb180107-k8s-pv
+spec:
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 100Gi
+  csi:
+    driver: cephfs.csi.ceph.com
+
+    volumeHandle: mcb180107-k8s-pv
+
+    nodeStageSecretRef:
+      name: csi-cephfs-secret
+      namespace: ceph-csi-cephfs
+    nodePublishSecretRef:
+      name: csi-cephfs-secret
+      namespace: ceph-csi-cephfs
+
+    volumeAttributes:
+      monitors: 149.165.158.38:6789,149.165.158.22:6789,149.165.158.54:6789,149.165.158.70:6789,149.165.158.86:6789 
+      rootPath: /volumes/_nogroup/e09b11c8-92cc-4b21-9cdf-12e13ef0e499/4fbbf3eb-fd78-4372-8ef6-ff4fe90b381a
+      provisionVolume: "false"

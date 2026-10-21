@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mcb180107-k8s-pv
+spec:
+  accessModes:
+   - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
+  volumeName:  mcb180107-k8s-pv # must match PV name above
+  storageClassName: ""

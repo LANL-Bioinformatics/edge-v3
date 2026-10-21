@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "webapp-stack.fullname" . }}-mongodb
+spec:
+  serviceName: {{ include "webapp-stack.fullname" . }}-mongodb
+  replicas: {{ .Values.mongodb.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "webapp-stack.name" . }}-mongodb
+  template:
+    metadata:
+      labels:
+        app: {{ include "webapp-stack.name" . }}-mongodb
+    spec:
+      containers:
+        - name: mongodb
+          image: "{{ .Values.mongodb.image.repository }}:{{ .Values.mongodb.image.tag }}"
+          ports:
+            - containerPort: 27017
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "webapp-stack.fullname" . }}-mongodb-secret
+                  key: username
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "webapp-stack.fullname" . }}-mongodb-secret
+                  key: password
+            - name: MONGO_INITDB_DATABASE
+              value: {{ .Values.mongodb.auth.database }}
+          resources:
+            {{- toYaml .Values.mongodb.resources | nindent 12 }}
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db
+  {{- if .Values.mongodb.persistence.enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        {{- if .Values.mongodb.persistence.storageClassName }}
+        storageClassName: {{ .Values.mongodb.persistence.storageClassName }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.mongodb.persistence.size }}
+  {{- end }}

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "webapp-stack.fullname" . }}-nginx
+spec:
+  selector:
+    app: {{ include "webapp-stack.name" . }}-nginx
+  ports:
+    - port: {{ .Values.nginx.service.port }}
+      targetPort: 80
+  type: {{ .Values.nginx.service.type }}

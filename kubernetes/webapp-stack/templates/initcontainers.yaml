@@ -1,0 +1,29 @@
+      initContainers:
+        - name: gen-client-config
+          image: busybox:1.36
+          command:
+            - /bin/sh
+            -c
+            - | 
+            cd /edgev3/webapp/client/; npm run build;   
+            pm2 resurrect; pm2 reload all --update-env && tail -f /dev/null
+          volumeMounts:
+            - name: client-config
+              mountPath: /edgev3/webapp/client/.env   # exact path index.html expects
+            - name: server-config
+              mountPath: /edgev3/webapp/server/.env   # exact path server.js expects
+      containers:
+        - name: web
+          image: "{{ .Values.webApp.image.repository }}:{{ .Values.webApp.image.tag }}"
+          volumeMounts:
+            - name: client-config
+              mountPath: /edgev3/webapp/client/.env   # exact path index.html expects
+              subPath: .env
+            - name: server-config
+              mountPath: /edgev3/webapp/server/.env   # exact path server.js expects
+              subPath: .env
+      volumes:
+        - name: client-config
+          emptyDir: {}
+        - name: server-config
+          emptyDir: {}
