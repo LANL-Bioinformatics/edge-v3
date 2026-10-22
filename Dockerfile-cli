@@ -23,6 +23,9 @@ COPY src/edgev3/install-edgev3-commandline.sh /opt/build/install-edgev3-commandl
 COPY src/edgev3/edge-commandline-paths.conf /opt/build/edge-commandline-paths.conf
 COPY requirements.txt /opt/build/requirements.txt
 COPY src/edgev3/ /app/src/edgev3
+COPY workflows/Nextflow /app/workflows/Nextflow
+COPY webapp/server/workflow/util.js /app/webapp/server/workflow/util.js
+RUN mkdir /app/.github
 RUN chmod +x /opt/build/install-edgev3-commandline.sh
 
 # ------------------------------------------------------------
