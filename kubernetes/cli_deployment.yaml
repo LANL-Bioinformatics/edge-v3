@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcflynn-edge-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: edge-cli
+  template:
+    metadata:
+      labels:
+        app: edge-cli
+    spec:
+      containers:
+      - name: edge-cli-container
+        # Use the EXACT image name and tag you saw in 'k3s crictl images'
+        image: mcflynn617/edgev3-cli:0.2.0 
+        
+        # This stops K3s from trying to pull from Docker Hub
+        imagePullPolicy: Always 
+        command: ["/bin/sh"]
+        args: ["-c", "while true; do sleep 30; done"]
