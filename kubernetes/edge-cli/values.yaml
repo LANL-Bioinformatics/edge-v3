@@ -1,0 +1,16 @@
+edgeCli:
+  replicaCount: 1
+  image:
+    repository: mcflynn617/edgev3-cli
+    tag: "0.2.0"
+    pullPolicy: IfNotPresent
+  command: ["/bin/sh"]
+  args: ["-c", "while true; do sleep 30; done"]
+  env: []
+  resources:
+    requests:
+      cpu: 100m
+      memory: 64Mi
+    limits:
+      cpu: 250m
+      memory: 128Mi

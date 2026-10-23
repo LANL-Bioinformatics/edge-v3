@@ -11,4 +11,17 @@
     "files.autoSave": "onFocusChange", // optional but recommended
     "vs-code-prettier-eslint.prettierLast": false, // set as "true" to run 'prettier' last not first
     "files.eol": "\n",
+    "python.testing.pytestArgs": [
+        "."
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "[json]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "python.analysis.extraPaths": [
+        "./workflows/Nextflow/scripts",
+        "./workflows/Nextflow"
+    ],
+    "python-envs.pythonProjects": [],
   }

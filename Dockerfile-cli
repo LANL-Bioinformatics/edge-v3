@@ -1,0 +1,76 @@
+# ------------------------------------------------------------
+# Base image: Rocky Linux 9 (dnf, appstream Java/Python packages,
+# EPEL + Apptainer availability match install_edgev3.sh requirements)
+# ------------------------------------------------------------
+FROM rockylinux:9
+
+LABEL maintainer="mflynn@lanl.gov"
+LABEL description="EDGEv3 build with Nextflow, Apptainer, Java, and Python venv"
+
+# ---- Base environment required by install_edgev3.sh (set -u safe) ----
+ENV HOME=/root
+ENV USER=root
+ENV LANG=en_US.UTF-8
+ENV DEBIAN_FRONTEND=noninteractive
+
+# sudo is required because the script calls `sudo` even though we run as root
+RUN dnf install -y sudo which tar gzip findutils && dnf clean all
+
+WORKDIR /opt/build
+
+# ---- Copy install assets ----
+COPY src/edgev3/install-edgev3-commandline.sh /opt/build/install-edgev3-commandline.sh
+COPY src/edgev3/edge-commandline-paths.conf /opt/build/edge-commandline-paths.conf
+COPY requirements.txt /opt/build/requirements.txt
+COPY src/edgev3/ /app/src/edgev3
+COPY workflows/Nextflow /app/workflows/Nextflow
+COPY webapp/server/workflow/util.js /app/webapp/server/workflow/util.js
+RUN mkdir /app/.github
+RUN chmod +x /opt/build/install-edgev3-commandline.sh
+
+# ------------------------------------------------------------
+# Run the install script non-interactively.
+# The script prompts (in order) for:
+#   1) PROJECTS_DIR
+#   2) NEXTFLOW_OUT_DIR
+#   3) REFDATA_DIR
+#   4) Save env vars to /etc/profile.d/edgev3.sh? (y/n)
+#
+# EDIT THESE VALUES to match your deployment layout.
+# NOTE: we must answer "y" to the last prompt, because the script
+# unconditionally does `source /etc/profile.d/edgev3.sh` at the end,
+# which will fail (set -e) if that file was never created.
+# ------------------------------------------------------------
+RUN /opt/build/install-edgev3-commandline.sh -f /opt/build/edge-commandline-paths.conf --docker
+
+# ------------------------------------------------------------
+# Python virtual environment created by the install script lives at
+# /opt/edgev3/.venv — activate it and install the project's
+# requirements.txt dependencies on top of it.
+# ------------------------------------------------------------
+ENV VIRTUAL_ENV=/opt/edgev3/.venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+RUN "$VIRTUAL_ENV/bin/pip" install --no-cache-dir --upgrade pip && \
+    "$VIRTUAL_ENV/bin/pip" install --no-cache-dir -r /opt/build/requirements.txt
+
+# ---- Make the EDGEv3 environment variables available at runtime ----
+ENV PROJECTS_DIR=/opt/edgev3/projects \
+    NEXTFLOW_OUT_DIR=/opt/edgev3/nextflow_intermediates \
+    REFDATA_DIR=/opt/edgev3/refdata \
+    APPTAINER_CACHEDIR=/opt/edgev3/apptainer_cache \
+    APPTAINER_TMPDIR=/opt/edgev3/apptainer_cache/tmp \
+    NXF_SYNTAX_PARSER=v1
+
+RUN cat <<'EOF' > /usr/local/bin/run_edge
+#!/usr/bin/env bash
+cd /app
+exec python -m src.edgev3.run_edge "$@"
+EOF
+RUN chmod +x /usr/local/bin/run_edge
+
+ENV PYTHONPATH=/app
+WORKDIR /app
+
+ENTRYPOINT ["/bin/sh"]
+CMD ["-i"]
