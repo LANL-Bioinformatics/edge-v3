@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "myapp.fullname" . }}-edge-cli
+  labels:
+    {{- include "myapp.labels" . | nindent 4 }}
+    app.kubernetes.io/component: edge-cli
+spec:
+  replicas: {{ .Values.edgeCli.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "myapp.labels" . | nindent 6 }}
+      app.kubernetes.io/component: edge-cli
+  template:
+    metadata:
+      labels:
+        {{- include "myapp.labels" . | nindent 8 }}
+        app.kubernetes.io/component: edge-cli
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: edge-cli-container
+          image: "{{ .Values.edgeCli.image.repository }}:{{ .Values.edgeCli.image.tag }}"
+          imagePullPolicy: {{ .Values.edgeCli.image.pullPolicy }}
+          command: {{ .Values.edgeCli.command | toJson }}
+          args: {{ .Values.edgeCli.args | toJson }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "myapp.fullname" . }}-config
+            {{- if .Values.secret.data }}
+            - secretRef:
+                name: {{ include "myapp.fullname" . }}-secret
+            {{- end }}
+          env:
+            - name: FASTAPI_BASE_URL
+              value: "http://{{ include "myapp.fullname" . }}-fastapi:{{ .Values.fastapi.service.port }}"
+            {{- toYaml .Values.edgeCli.env | nindent 12 }}
+          resources:
+            {{- toYaml .Values.edgeCli.resources | nindent 12 }}
